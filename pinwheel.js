@@ -16,12 +16,30 @@ const Triangle = (a, b, c) => ({
             Triangle(a.add(v), b.add(v), c.add(v)),
 
     draw(context)  {
-        context.beginPath();
-        context.moveTo(this.a.x, this.a.y);
-        context.lineTo(this.b.x, this.b.y);
-        context.lineTo(this.c.x, this.c.y);
-        context.lineTo(this.a.x, this.a.y);
-        context.stroke();
+        let p = new Path2D();
+        p.moveTo(this.a.x, this.a.y);
+        p.lineTo(this.b.x, this.b.y);
+        p.lineTo(this.c.x, this.c.y);
+        p.closePath();
+        /*const l = this.b.subtract(this.a);
+        const len = l.x*l.x+l.y*l.y;
+        if(len < 50*35) {
+            //const c = Math.round((Math.max(this.a.x,this.b.x,this.c.x)-Math.min(this.a.x, this.b.x,this.c.x))/
+            //(Math.max(this.a.y,this.b.y,this.c.y)-Math.min(this.a.y, this.b.y,this.c.y))*360)%360;
+            const c = Math.round((this.a.x-this.b.x)/(this.a.x-this.b.x+this.a.y-this.b.y)*(this.a.x-this.b.x)*360)%360;
+            console.log(c);
+            //console.log("rgb("+Math.abs(this.a.x-this.b.x)*10+","+Math.abs(this.a.y-this.b.y)*10+","+Math.abs(this.b.y-this.c.y)*10+")");
+            //context.fillStyle = "rgb("+Math.abs(this.a.x-this.b.x)/4+","+Math.abs(this.a.y-this.b.y)/4+","+Math.abs(this.b.y-this.c.y)/4+")";
+            context.fillStyle = "hsl("+c+", 50%, 50%)";
+            //context.fillStyle = "blue";*/
+            const c = //Math.round((this.a.x-this.b.x)/(this.a.x-this.b.x+this.a.y-this.b.y)*(this.a.x-this.b.x)*360)%360;
+                (Math.round(3*(this.a.x-this.b.x)+7*(this.a.y-this.b.y)+11*(this.a.x-this.c.x)+17*(this.a.y-this.c.y))%360+360)%360;
+                context.fillStyle = "hsl("+c+", 50%, 50%)";
+            console.log((Math.round(this.a.x-this.b.x+(this.a.y-this.b.y))),c);
+            context.fill(p);
+        //} else {
+            //context.stroke(p);
+        //}
     }
 });
 
@@ -99,7 +117,7 @@ function createPinwheelTilingViewport(viewport, context, origin, l) {
     children = (t) => {
         const l = t.b.subtract(t.a);
         const len = l.x*l.x+l.y*l.y;
-        if(len < MIN_LENGTH * MIN_LENGTH) return [];
+        //if(len < MIN_LENGTH * MIN_LENGTH) return [];
         return generateFromA(subAFromParent(t));
     }
 
@@ -130,16 +148,20 @@ function createPinwheelTilingViewport(viewport, context, origin, l) {
         triangle.draw(context);
     }
 
-    drawChildren = (triangle) => {
+    drawChildren = (triangle, d) => {
+        let b = 11;
+        console.log("d:",d);
+        if(d > b) return;
         children(triangle)
             .filter(t => intersectsViewport(t,viewport))
             .forEach(t => {
+                if(d==b)
                 t.draw(context);
-                drawChildren(t);
+                drawChildren(t, d + 1);
         });
     }
 
-    drawChildren(triangle);
+    drawChildren(triangle, 1);
     
 }
 
