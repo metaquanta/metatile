@@ -2,7 +2,7 @@ const go = (f) => {
     const BORDER = 5;
     const ELEMENT_WIDTH = 10;
 
-    const context = (document) => {
+    const _context = (document) => {
         const canvas = document.getElementsByTagName('canvas')[0];
         canvas.height = canvas.clientHeight;
         canvas.width = canvas.clientWidth;
@@ -19,5 +19,13 @@ const go = (f) => {
         return context;
     }
 
-    f(context(document));
+    var context;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        context = _context(document);
+    });
+
+    window.addEventListener("load", () => {
+        f(context);
+    });
 }
