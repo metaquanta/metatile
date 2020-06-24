@@ -7,7 +7,8 @@ const Vec2 = (x, y) => ({
         return this.add(u.invert());
     },
     scale: (a) => Vec2(a*x, a*y),
-    perp: () => Vec2(y, -x)
+    perp: () => Vec2(y, -x),
+    dot: (u) => x*u.x + y*u.y
 });
 
 const Triangle = (a, b, c) => ({
@@ -15,7 +16,7 @@ const Triangle = (a, b, c) => ({
     translate: (v) =>
             Triangle(a.add(v), b.add(v), c.add(v)),
 
-    draw(context, colorizer)  {
+    draw(context, colorizer = () => 'black')  {
         let p = new Path2D();
         p.moveTo(this.a.x, this.a.y);
         p.lineTo(this.b.x, this.b.y);
@@ -37,56 +38,79 @@ const intersectsViewport = (t, viewport) => {
     return false;
 }
 
-function* triangles(viewport, parent_f, children_f, triangle, f, depth, height_buffer) {
+const isInTriangle = (p, t) => {
+    const c = t.c.subtract(t.a);
+    const b = t.b.subtract(t.a);
+    const q = p.subtract(t.a);
+    
+    const s0 = c.dot(c);
+    const s1 = c.dot(b);
+    const s2 = c.dot(q);
+    const s3 = b.dot(b);
+    const s4 = b.dot(q);
+    
+    const x = 1/(s0*s3 - s1*s1);
+    const e1 = (s3*s2 - s1*s4)*x;
+    const e2 = (s0*s4 - s1*s2)*x;
 
-    const containsViewport = (triangle) => {
-        if(viewport.x > Math.max(triangle.a.x, triangle.b.x, triangle.c.x)) {
-            return false;
-        }
-        if(viewport.x < Math.min(triangle.a.x, triangle.b.x, triangle.c.x)) {
-            return false;
-        }
-        if(viewport.y > Math.max(triangle.a.y, triangle.b.y, triangle.c.y)) {
-            return false;
-        }
-        if(viewport.y < Math.min(triangle.a.y, triangle.b.y, triangle.c.y)) {
-            return false;
-        }
-        return true;
+    //console.log(e1,e2)
+    
+    return (e1 >= 0) && (e2 >= 0) && (e1 + e2 < 1)
+}
+
+function* triangles(viewport, parent_f, children_f, seed, depth) {
+
+    const grow = (t, p) => {
+        //console.log(t,p);
+        if(
+            p.x > Math.max(t.a.x, t.b.x, t.c.x) ||
+            p.y > Math.max(t.a.y, t.b.y, t.c.y) ||
+            p.x < Math.min(t.a.x, t.b.x, t.c.x) ||
+            p.y < Math.min(t.a.y, t.b.y, t.c.y))
+        return grow(parent_f(t), p);
+        if(isInTriangle(p, t)) return t;
+        return grow(parent_f(t), p);
     }
 
-    while(!containsViewport(triangle)) {
-        triangle = parent_f(triangle);
-    }
-    for(let i = 0; i < height_buffer; i++) {
-        triangle = parent_f(triangle);
-    }
+    const root = grow(
+        grow(
+            grow(
+                grow(seed, viewport), 
+                Vec2(0,0)), 
+            Vec2(0, viewport.y)), 
+        Vec2(viewport.x, 0));
 
     function* descend(triangle, d = 1) {
+        console.log(d)
         if(d > depth) return;
         for(t of children_f(triangle)
             .filter(t => intersectsViewport(t, viewport))) {
-                if(d == depth) yield () => f(t);
+                if(d == depth) yield t;
                 else yield* descend(t, d + 1);
             }
     }
 
-    yield* descend(triangle);
-    
+    yield* descend(root);
 }
 
-function tileViewport(context, parent_f, children_f, color_f, seed_f, depth = 11, height_buffer = 5) {
+function tileViewport(context, parent_f, children_f, color_f, seed_f, depth = 1) {
     const generator = (function* () {
         while(true) {
-            yield* triangles(
-            Vec2(context.canvas.width,context.canvas.height), 
-            parent_f, children_f, 
-            seed_f(), 
-            ((c_f) => ((t) => t.draw(context, c_f)))(color_f()),
-            depth, height_buffer)
+            const cf = color_f();
+            const tg = triangles(
+                Vec2(context.canvas.width, context.canvas.height), 
+                parent_f, children_f, 
+                seed_f(),             
+                depth);
+            for(t of tg) {
+                yield () => t.draw(context, cf);
+            }
         }
     })();
+    //t=Triangle(Vec2(10,100), Vec2(10,10), Vec2(100,10));
+    //t.draw(context);
+    //console.log(isInTriangle(Vec2(20,20), t));
     window.setInterval(() => {
         generator.next().value();
-    }, 50);
+    }, 50);//*/
 }
