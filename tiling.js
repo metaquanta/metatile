@@ -81,7 +81,6 @@ function* triangles(viewport, parent_f, children_f, seed, depth) {
         Vec2(viewport.x, 0));
 
     function* descend(triangle, d = 1) {
-        console.log(d)
         if(d > depth) return;
         for(t of children_f(triangle)
             .filter(t => intersectsViewport(t, viewport))) {
@@ -93,10 +92,10 @@ function* triangles(viewport, parent_f, children_f, seed, depth) {
     yield* descend(root);
 }
 
-function tileViewport(context, parent_f, children_f, color_f, seed_f, depth = 1) {
-    const generator = (function* () {
-        while(true) {
-            const cf = color_f();
+function tileViewport(context, parent_f, children_f, color_f, seed_f, depth, speed, repeat) {
+    console.log("tileViewport()", depth, speed, repeat)
+    const _tile = function* () {
+        const cf = color_f();
             const tg = triangles(
                 Vec2(context.canvas.width, context.canvas.height), 
                 parent_f, children_f, 
@@ -105,12 +104,18 @@ function tileViewport(context, parent_f, children_f, color_f, seed_f, depth = 1)
             for(t of tg) {
                 yield () => t.draw(context, cf);
             }
+    }
+
+    const _tile_forever = (function* () {
+        while(true) {
+            yield* _tile();
         }
-    })();
-    //t=Triangle(Vec2(10,100), Vec2(10,10), Vec2(100,10));
-    //t.draw(context);
-    //console.log(isInTriangle(Vec2(20,20), t));
+    });
+
+    const generator = repeat ? _tile_forever() : _tile();
+    
     window.setInterval(() => {
-        generator.next().value();
-    }, 50);//*/
+        const i = generator.next();
+        if(!i.done) i.value();
+    }, speed);//*/
 }

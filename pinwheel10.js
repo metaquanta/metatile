@@ -43,8 +43,8 @@ go((ctx) => tileViewport(
     parent,
     children,
     () => colorizer(Math.round(Math.random()*100), Math.round(Math.random()*100)),
-    () => fromSSide(Vec2(Math.random()*200,Math.random()*200)).translate(Vec2(500,500)), 
-    4));
+    () => fromSSide(Vec2(Math.random()*500+500,Math.random()*500+500)).translate(Vec2(Math.random()*1000,Math.random()*1000)), 
+    5));
 
 /*go((ctx)=> {
     t=fromSSide(Vec2(20,20)).translate(Vec2(200,200))

@@ -65,4 +65,4 @@ go((ctx) => tileViewport(
     () => colorizer(Math.round(Math.random()*100), Math.round(Math.random()*100)),
     () => fromSSide(Vec2(Math.random()*200,Math.random()*200)).translate(Vec2(Math.random()*ctx.canvas.width*4+ctx.canvas.width/2,
     Math.random()*ctx.canvas.height*4+ctx.canvas.height/2)), 
-    11, 5));
+    7));

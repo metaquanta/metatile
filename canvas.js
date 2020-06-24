@@ -26,6 +26,6 @@ const go = (f) => {
     });
 
     window.addEventListener("load", () => {
-        f(context);
+        f(context, new URL(window.location.href).searchParams);
     });
 }
