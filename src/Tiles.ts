@@ -74,14 +74,16 @@ export type Triangle = {
   a: Vec2,
   b: Vec2,
   c: Vec2,
-  translate: (v: Vec2) => Triangle
+  translate: (v: Vec2) => Triangle,
+  polygon: () => Polygon
 }
 
 export const Triangle = (a: Vec2, b: Vec2, c: Vec2): Triangle => ({
   a,
   b,
   c,
-  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v))
+  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
+  polygon: () => Polygon([a, b, c])
 });
 
 export type Rhomb = {
@@ -90,7 +92,7 @@ export type Rhomb = {
   c: Vec2,
   d: Vec2,
   translate: (v: Vec2) => Rhomb,
-  draw(context: CanvasRenderingContext2D, colorizer?: (t: Rhomb) => string): void,
+  //draw(context: CanvasRenderingContext2D, colorizer?: (t: Rhomb) => string): void,
   polygon: () => Polygon
 }
 
@@ -100,7 +102,7 @@ export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
   c,
   d,
   translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
-  draw(context, colorizer = () => "black") {
+  /*draw(context, colorizer = () => "black") {
     let p = new Path2D();
     p.moveTo(this.a.x, this.a.y);
     p.lineTo(this.b.x, this.b.y);
@@ -109,7 +111,7 @@ export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
     p.closePath();
     context.fillStyle = colorizer(this);
     context.fill(p);
-  },
+  },*/
   polygon: () => Polygon([a, b, c, d])
 });
 
