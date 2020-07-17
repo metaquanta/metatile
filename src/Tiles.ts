@@ -1,7 +1,7 @@
 export type Tile = {
   parent?: () => Tile,
   children: () => Tile[],
-  draw: (ctx: CanvasRenderingContext2D, alpha?:number) => void,
+  draw: (ctx: CanvasRenderingContext2D, alpha?: number) => void,
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean
 }
@@ -16,12 +16,10 @@ export type Polygon = {
 
 export const Polygon = (vertices: Vec2[]): Polygon => {
   const triangles = () => vertices.slice(2).map((v, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
-  //console.log(`Polygon.triangles = ${triangles()}`)
   return ({
     vertices,
     triangles,
     intersectsRect: (viewport: Vec2): boolean => {
-      console.log(`Polygon.intersectsRect(${viewport})`)
       if (
         Math.max(...vertices.map(p => p.x)) > 0 &&
         Math.min(...vertices.map(p => p.x)) < viewport.x &&
@@ -34,7 +32,6 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
     },
     contains: (p) => triangles().map(t => triangleContainsPoint(t, p)).some(b => b),
     draw: (c, context) => {
-      console.log(`Polygon.draw()`)
       let p = new Path2D();
       p.moveTo(vertices[0].x, vertices[0].y);
       vertices.slice(1).forEach(v => p.lineTo(v.x, v.y));
@@ -134,9 +131,9 @@ const triangleContainsPoint = (t: Triangle, p: Vec2): boolean => {
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
 
-export const getColorizer = (numParts: number, s: number, l: number) => (part: number, theta: number, alpha=1) =>{
-  const a = (4*theta * (360 / numParts) / Math.PI / 2 + part * 360 / numParts)%360;
-  console.log(`color(${part}, ${theta}) [${4*theta * (1 / numParts) / Math.PI / 2}, ${part * 1 / numParts}]`);
+export const getColorizer = (numParts: number, s: number, l: number) => (part: number, theta: number, alpha = 1) => {
+  const a = (4 * theta * (360 / numParts) / Math.PI / 2 + part * 360 / numParts) % 360;
+  console.log(`color(${part}, ${theta}) [${4 * theta * (1 / numParts) / Math.PI / 2}, ${part * 1 / numParts}]`);
   return `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
 }
 
@@ -167,14 +164,12 @@ function tiles(
   console.log(`root: ${root}`)
 
   function* descend(tile: Tile, d = 1): Generator<Tile> {
-    console.log(`descend()`)
     if (d > depth) {
       throw Error(`UNREACHABLE! ${d} > ${depth} `);
     }
     for (let t of tile.children().filter((t) =>
       t.intersectsRect(viewport))) {
-        console.log(`depth: ${d}`)
-      if (d === depth-1)yield(t);
+      //if (d === depth - 1) yield (t);
       if (d === depth) yield t;
       else yield* descend(t, d + 1);
     }
@@ -202,7 +197,7 @@ function tileViewport(
 
   window.setInterval(() => {
     const { done, value } = generator.next();
-    if(!done) console.log(`generator-> ${done}, ${value}`)
+    if (!done) console.log(`generator-> ${done}, ${value}`)
     if (!done && value) value();
   }, 1);
 }
