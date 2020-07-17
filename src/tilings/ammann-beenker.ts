@@ -1,4 +1,4 @@
-import { Vec2, Rhomb, Tile, getColorizer, parity, theta } from './Tiles';
+import { Vec2, Rhomb, Tile, getColorizer, parity, theta } from '../Tiles';
 
 const SQRT2 = Math.sqrt(2);
 
