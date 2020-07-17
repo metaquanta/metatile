@@ -1,5 +1,5 @@
 import React, { MutableRefObject, useEffect, useRef } from 'react';
-import tile, { testTileSet } from './ammann-beenker';
+import tile, { testTileSet } from './tilings/ammann-beenker';
 import { tileViewport, Vec2 } from './Tiles';
 
 const watermark = (c: CanvasRenderingContext2D) => {
