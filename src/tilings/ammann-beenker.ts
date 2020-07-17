@@ -50,55 +50,58 @@ const rhombChildren = (rh: Rhomb): Tile[] => {
   ];
 }
 
-const colorizer = getColorizer(4, 85, 50);
-
-const drawSquare = (rh: Rhomb, ctx: CanvasRenderingContext2D, alpha: number): void => draw(rh, 0, ctx, alpha);
-
-const drawRhomb = (rh: Rhomb, ctx: CanvasRenderingContext2D, alpha: number): void => draw(rh, 2, ctx, alpha);
-
-const draw = (rh: Rhomb, part: number, ctx: CanvasRenderingContext2D, alpha: number, color?: string) => {
-  rh.polygon().draw(
-    color ||
-    colorizer(part + parity(rh.b.subtract(rh.a), rh.c.subtract(rh.a)), theta(rh.b.subtract(rh.a)), alpha),
-    ctx);
+type ColorPartition = {
+  part: number
 }
-
-const square = (rh: Rhomb): Tile => ({
+const square = (rh: Rhomb): Tile & ColorPartition => ({
+  polygon: rh.polygon(),
   parent: () => square(Rhomb(
     rotate(rh.b, rh.a),
     rotate(rh.c, rh.b),
     rotate(rh.d, rh.c),
     rotate(rh.a, rh.d))),
   children: () => squareChildren(rh),
-  draw: (ctx, alpha = 1) => drawSquare(rh, ctx, alpha),
+  part: 1,
+  draw: (ctx) => rh.polygon().draw(ctx),
   contains: (p) => rh.polygon().contains(p),
   intersectsRect: (p) => rh.polygon().intersectsRect(p)
 })
 
-const rhomb = (rh: Rhomb): Tile => ({
+const rhomb = (rh: Rhomb): Tile & ColorPartition => ({
+  polygon: rh.polygon(),
   children: () => rhombChildren(rh),
-  draw: (ctx, alpha = 1) => drawRhomb(rh, ctx, alpha),
+  part: 1,
+  draw: (ctx) => rh.polygon().draw(ctx),
   contains: (p) => rh.polygon().contains(p),
   intersectsRect: (p) => rh.polygon().intersectsRect(p)
 })
 
-const root = (p: Vec2, o: Vec2) => {
+const root = (p: Vec2, o: Vec2): Tile & ColorPartition => {
   const q = p.perp();
   return square(Rhomb(Vec2(0, 0), p, q.add(p), q).translate(o));
 }
 
 export const testTileSet = (ctx: CanvasRenderingContext2D) => {
   const sq = square(Rhomb(Vec2(0, 0), Vec2(400, 0), Vec2(400, 400), Vec2(0, 400)).translate(Vec2(1000, 700)));
-  sq.draw(ctx, 0.5);
+  //const colors = colorStream(15, 85, 50);
+  sq.draw(ctx);
   if (sq.parent) {
     const p = sq.parent();
-    p.draw(ctx, 0.5);
+    p.draw(ctx);
     const children = p.children();
     children.forEach(c => {
-      c.draw(ctx, 0.5)
+      c.draw(ctx)
     });
-    children[0].children().forEach(c => c.draw(ctx, 0.5))
+    children[0].children().forEach(c => c.draw(ctx))
   }
 }
 
-export default (seed: Vec2, origin = Vec2(0, 0)) => root(seed, origin);
+const colorizer = getColorizer(4, 85, 50);
+export default (seed: Vec2, origin = Vec2(0, 0)) => ({
+  tile: root(seed, origin),
+  colorer: (t: Tile & ColorPartition) => {
+    return colorizer(t.part + parity(t.polygon.vertices[1].subtract(t.polygon.vertices[0]),
+      t.polygon.vertices[2].subtract(t.polygon.vertices[0])),
+      theta(t.polygon.vertices[1].subtract(t.polygon.vertices[0])), 1.0);
+  }
+});

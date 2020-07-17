@@ -1,5 +1,5 @@
 import React, { MutableRefObject, useEffect, useRef } from 'react';
-import tile, { testTileSet } from './tilings/ammann-beenker';
+import getTile from './tilings/ammann-beenker';
 import { tileViewport, Vec2 } from './Tiles';
 
 const watermark = (c: CanvasRenderingContext2D) => {
@@ -31,7 +31,8 @@ export default () => {
     const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
     const render = () => {
         if (el.current instanceof HTMLCanvasElement) {
-            canvasRender(el.current, (ctx) => tileViewport(ctx, tile(Vec2(1500, 0), Vec2(1000, 1500)), 5));
+            const { tile } = getTile(Vec2(1500, 0), Vec2(1000, 1500))
+            canvasRender(el.current, (ctx) => tileViewport(ctx, tile, 5));
         }
     }
     useEffect(() => {

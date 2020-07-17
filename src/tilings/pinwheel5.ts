@@ -1,24 +1,12 @@
-import { Triangle, Vec2, Tile, getColorizer, parity, theta } from "../Tiles";
+import { Triangle, Vec2, Tile, } from "../Tiles";
 
 const root = (l: Vec2, o: Vec2): Tile => tile(Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())));
 
-const colorizer = getColorizer(2, 85, 50);
-
-const draw = (t: Triangle, ctx: CanvasRenderingContext2D, alpha: number, color?: string) => {
-  t.polygon().draw(
-    color ||
-    colorizer(parity(t.b.subtract(t.a), t.c.subtract(t.a)), theta(t.b.subtract(t.a)), alpha),
-    ctx);
-}
-
-const tile = (t: Triangle): Tile =>
-  ({
-    parent: () => tile(parentFromC(t)),
-    children: () => generateFromA(subAFromParent(t)).map(c => tile(c)),
-    draw: (ctx, alpha = 1) => draw(t, ctx, alpha),
-    contains: (p) => t.polygon().contains(p),
-    intersectsRect: (p) => t.polygon().intersectsRect(p)
-  })
+const tile = (t: Triangle): Tile => Tile
+  (t.polygon(),
+    () => tile(parentFromC(t)),
+    () => generateFromA(subAFromParent(t)).map(c => tile(c))
+  )
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parentFromC = (t: Triangle) => {

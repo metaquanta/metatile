@@ -1,17 +1,27 @@
 export type Tile = {
+  polygon: Polygon,
   parent?: () => Tile,
   children: () => Tile[],
-  draw: (ctx: CanvasRenderingContext2D, alpha?: number) => void,
+  draw: (ctx: CanvasRenderingContext2D) => void,
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean
 }
+
+export const Tile = (polygon: Polygon, parent: () => Tile, children: () => Tile[]): Tile => ({
+  polygon,
+  parent,
+  children,
+  draw: (ctx) => polygon.draw(ctx),
+  contains: (point) => polygon.contains(point),
+  intersectsRect: (rect) => polygon.intersectsRect(rect)
+})
 
 export type Polygon = {
   vertices: Vec2[],
   triangles: () => Triangle[],
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean,
-  draw: (c: string, ctx: CanvasRenderingContext2D) => void
+  draw: (ctx: CanvasRenderingContext2D) => void
 }
 
 export const Polygon = (vertices: Vec2[]): Polygon => {
@@ -31,13 +41,14 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
       return false;
     },
     contains: (p) => triangles().map(t => triangleContainsPoint(t, p)).some(b => b),
-    draw: (c, context) => {
+    draw: (context) => {
       let p = new Path2D();
       p.moveTo(vertices[0].x, vertices[0].y);
       vertices.slice(1).forEach(v => p.lineTo(v.x, v.y));
       p.closePath();
-      context.fillStyle = c;
-      context.fill(p);
+      //context.fillStyle = c;
+      //context.fill(p);
+      context.stroke(p);
     },
   })
 }
@@ -92,7 +103,6 @@ export type Rhomb = {
   c: Vec2,
   d: Vec2,
   translate: (v: Vec2) => Rhomb,
-  //draw(context: CanvasRenderingContext2D, colorizer?: (t: Rhomb) => string): void,
   polygon: () => Polygon
 }
 
@@ -102,16 +112,6 @@ export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
   c,
   d,
   translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
-  /*draw(context, colorizer = () => "black") {
-    let p = new Path2D();
-    p.moveTo(this.a.x, this.a.y);
-    p.lineTo(this.b.x, this.b.y);
-    p.lineTo(this.c.x, this.c.y);
-    p.lineTo(this.d.x, this.d.y);
-    p.closePath();
-    context.fillStyle = colorizer(this);
-    context.fill(p);
-  },*/
   polygon: () => Polygon([a, b, c, d])
 });
 
@@ -133,11 +133,20 @@ const triangleContainsPoint = (t: Triangle, p: Vec2): boolean => {
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
 
-export const getColorizer = (numParts: number, s: number, l: number) => (part: number, theta: number, alpha = 1) => {
-  const a = (4 * theta * (360 / numParts) / Math.PI / 2 + part * 360 / numParts) % 360;
-  console.log(`color(${part}, ${theta}) [${4 * theta * (1 / numParts) / Math.PI / 2}, ${part * 1 / numParts}]`);
-  return `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
-}
+export const getColorizer = (numParts: number, s: number, l: number) =>
+  (part: number, theta: number, alpha = 1) => {
+    const a = (4 * theta * (360 / numParts) / Math.PI / 2 + part * 360 / numParts) % 360;
+    console.log(`color(${part}, ${theta}) [${4 * theta * (1 / numParts) / Math.PI / 2}, ${part * 1 / numParts}]`);
+    return `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
+  }
+
+export const colorStream: (n: number, s: number, l: number, alpha?: number, i?: number) =>
+  Generator<string> = function* (n, s, l, alpha = 1.0, i = 0) {
+    for (; i < 360; i = i + 360 / n) {
+      yield `hsla(${i}, ${s}%, ${l}%, 1.0)`;
+    }
+    yield* colorStream(n, s, l);
+  }
 
 export const parity = (a: Vec2, b: Vec2) => a.dot(b) > 0 ? 0 : 1;
 
@@ -169,7 +178,7 @@ function tiles(
     if (d > depth) {
       throw Error(`UNREACHABLE! ${d} > ${depth} `);
     }
-    for (let t of tile.children().filter((t) =>
+    for (let t of tile.children().filter((t: Tile) =>
       t.intersectsRect(viewport))) {
       //if (d === depth - 1) yield (t);
       if (d === depth) yield t;
