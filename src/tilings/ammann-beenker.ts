@@ -62,7 +62,7 @@ const square = (rh: Rhomb): Tile & ColorPartition => ({
     rotate(rh.a, rh.d))),
   children: () => squareChildren(rh),
   part: 1,
-  draw: (ctx) => rh.polygon().draw(ctx),
+  getPath: () => rh.polygon().getPath(),
   contains: (p) => rh.polygon().contains(p),
   intersectsRect: (p) => rh.polygon().intersectsRect(p)
 })
@@ -71,7 +71,7 @@ const rhomb = (rh: Rhomb): Tile & ColorPartition => ({
   polygon: rh.polygon(),
   children: () => rhombChildren(rh),
   part: 1,
-  draw: (ctx) => rh.polygon().draw(ctx),
+  getPath: () => rh.polygon().getPath(),
   contains: (p) => rh.polygon().contains(p),
   intersectsRect: (p) => rh.polygon().intersectsRect(p)
 })
@@ -84,15 +84,15 @@ const root = (p: Vec2, o: Vec2): Tile & ColorPartition => {
 export const testTileSet = (ctx: CanvasRenderingContext2D) => {
   const sq = square(Rhomb(Vec2(0, 0), Vec2(400, 0), Vec2(400, 400), Vec2(0, 400)).translate(Vec2(1000, 700)));
   //const colors = colorStream(15, 85, 50);
-  sq.draw(ctx);
+  sq.getPath();
   if (sq.parent) {
     const p = sq.parent();
-    p.draw(ctx);
+    p.getPath();
     const children = p.children();
     children.forEach(c => {
-      c.draw(ctx)
+      c.getPath()
     });
-    children[0].children().forEach(c => c.draw(ctx))
+    children[0].children().forEach(c => c.getPath())
   }
 }
 

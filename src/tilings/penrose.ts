@@ -66,7 +66,7 @@ export const test = (ctx: CanvasRenderingContext2D) => {
   //r.children().map(g => g.draw(ctx))
   //r.children()[4].children().map(g => g.draw(ctx))
   //r.children().map(c => c.children().map(g => g.draw(ctx)))
-  r.children().map(c => c.children().map(d => d.children().map(g => g.draw(ctx))))
+  r.children().map(c => c.children().map(d => d.children().map(g => g.getPath())))
 }
 
 export default (seed: Vec2, origin = Vec2(0, 0)) => ({
