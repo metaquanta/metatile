@@ -48,6 +48,17 @@ const setSize = (canvas: HTMLCanvasElement) => {
     }
 }
 
+const getCenter = (): Vec2 => {
+    const c = Math.round(Math.max(window.screen.height, window.screen.width) * window.devicePixelRatio / 2);
+    return Vec2(c, c);
+}
+
+const getViewport = (canvas: HTMLCanvasElement): Vec2 => {
+    if (canvas.parentElement && canvas.parentElement.parentElement)
+        return Vec2(canvas.parentElement.parentElement.clientWidth, canvas.parentElement.parentElement.clientHeight).scale(window.devicePixelRatio);
+    return Vec2(1920, 1080);
+}
+
 const canvasRender = (canvas: HTMLCanvasElement) => {
     if (canvas instanceof HTMLCanvasElement) {
         setPosition(canvas);
@@ -55,8 +66,7 @@ const canvasRender = (canvas: HTMLCanvasElement) => {
         if (context instanceof CanvasRenderingContext2D) {
             setSize(canvas);
             watermark(context);
-            const { tile } = getTile(Vec2(800, 0));
-            tileViewport(context, tile, 14);
+            tileViewport(context, getCenter(), getViewport(canvas), (v) => getTile(v).tile, 14);
         }
     }
 }

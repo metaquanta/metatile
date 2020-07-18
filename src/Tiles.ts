@@ -2,7 +2,7 @@ export type Tile = {
   polygon: Polygon,
   parent?: () => Tile,
   children: () => Tile[],
-  draw: (ctx: CanvasRenderingContext2D) => void,
+  getPath: () => Path2D,
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean
 }
@@ -15,7 +15,7 @@ export const Tile = (
   polygon,
   parent,
   children,
-  draw: (ctx) => polygon.draw(ctx),
+  getPath: () => polygon.getPath(),
   contains: (point) => polygon.contains(point),
   intersectsRect: (rect) => polygon.intersectsRect(rect)
 })
@@ -25,7 +25,7 @@ export type Polygon = {
   triangles: () => Triangle[],
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean,
-  draw: (ctx: CanvasRenderingContext2D) => void,
+  getPath: () => Path2D,
   translate: (v: Vec2) => Polygon
 }
 
@@ -50,16 +50,17 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
     contains: (p) =>
       triangles().map(t =>
         triangleContainsPoint(t, p)).some(b => b),
-    draw: (context) => {
-      //vertices = vertices.map(v => v.add(Vec2(100, 100)));
+    getPath: (): Path2D => {
+      /*vertices = vertices.map(v => v.add(Vec2(1200, 1200)));*/
       let p = new Path2D();
+      /*context.strokeStyle = `rgba(0, 0, 0, 0.1)`;*/
       p.moveTo(vertices[0].x, vertices[0].y);
       vertices.slice(1).forEach(v => p.lineTo(v.x, v.y));
       p.closePath();
-      context.fillStyle = `rgba(0, 0, 0, 0.1)`;
+      /*context.fillStyle = `rgba(0, 0, 0, 0.05)`;
       context.fill(p);
       context.stroke(p);
-      context.beginPath();
+      /*context.beginPath();
       const q = vertices[vertices.length - 1];
       context.arc((vertices[0].x * 2 + vertices[1].x + q.x) / 4, (vertices[0].y * 2 + vertices[1].y + q.y) / 4, 4, 0, Math.PI * 2);
       context.fillStyle = "red";
@@ -67,7 +68,8 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
       context.beginPath();
       context.arc(vertices[1].x, vertices[1].y, 4, 0, Math.PI * 2);
       context.fillStyle = "black";
-      context.fill();
+      context.fill();*/
+      return p;
     },
     translate: (v: Vec2) => Polygon(vertices.map(u => u.add(v)))
   })
@@ -183,38 +185,61 @@ function tiles(
     throw Error("Seed tile missing parent()!");
   };
 
-  const root = grow(
+  /*const root = grow(
     grow(
       grow(
         grow(seed, viewport), Vec2(0, 0)
       ), Vec2(0, viewport.y)
     ), Vec2(viewport.x, 0)
-  );
-  //const root = seed;
-
-  console.log(`root: ${root}`)
+  );*/
+  const root = seed;
 
   function* descend(tile: Tile, d = 1): Generator<Tile> {
     if (d > depth) {
-      throw Error(`UNREACHABLE! ${d} > ${depth} `);
+      return;
+      //throw Error(`UNREACHABLE! ${d} > ${depth} `);
     }
     for (let t of tile.children().filter((t: Tile) =>
-      t.intersectsRect(viewport))) {
+      t)) {//t.intersectsRect(viewport))) {
       //if (d === depth - 1) yield (t);
-      if (d === depth) yield t;
-      else yield* descend(t, d + 1);
+      //if (d === depth) 
+      yield t;
+      //else
+      yield* descend(t, d + 1);
     }
   }
 
   return descend(root);
 }
 
+function drawPath(context: CanvasRenderingContext2D, polygon: Polygon, translate: Vec2 = Vec2(0, 0)) {
+  const p = polygon.translate(translate).getPath();
+
+  context.strokeStyle = `rgba(0, 0, 0, 0.1)`;
+  context.stroke(p);
+
+  context.fillStyle = `rgba(0, 0, 0, 0.05)`;
+  context.fill(p);
+}
+
 function tileViewport(
   context: CanvasRenderingContext2D,
-  root: Tile,
+  center: Vec2,
+  viewPort: Vec2,
+  getRoot: (v: Vec2) => Tile,
   depth: number
 ) {
-  console.log("tileViewport()", depth);
+
+  const vp = Math.min(viewPort.x, viewPort.y);
+  const size = Math.sqrt(2 * (vp * vp)) / ((1 + Math.sqrt(5)) / 2);
+  const yfudge = size / 10;
+  const xfudge = 0;
+  const trans = center.subtract(Vec2(vp / 2 - xfudge, vp / 2 - yfudge));
+  const root = getRoot(Vec2(size, 0));
+  console.log(`tiling... [${vp}, ${size}, ${trans}]`)
+  drawPath(context, root.polygon, trans);
+
+  console.log(`tileViewport() ${depth} - ${size} - +${trans}`);
 
   const generator = (function* () {
     for (let t of tiles(
@@ -222,23 +247,24 @@ function tileViewport(
       root,
       depth
     )) {
-      yield () => t.draw(context);
+      yield t;
     }
   })();
 
-  let p = new Path2D();
-  p.moveTo(200, 200);
-  p.lineTo(200, context.canvas.height - 200);
-  p.lineTo(context.canvas.width - 200, context.canvas.height - 200);
-  p.lineTo(context.canvas.width - 200, 200);
-  p.closePath();
-  context.stroke(p);
+  let intervalId: number;
+  const d = () => {
+    for (let i = 0; i < 1000; i++) {
+      const { done, value } = generator.next();
+      //if (!done) console.log(`generator-> ${done}, ${value}`)
+      if (!done && value) drawPath(context, value.polygon, trans);
+      if (done) {
+        window.clearInterval(intervalId);
+        console.log("DONE")
+      }
+    }
+  };
 
-  window.setInterval(() => {
-    const { done, value } = generator.next();
-    //if (!done) console.log(`generator-> ${done}, ${value}`)
-    if (!done && value) value();
-  }, 0);
+  intervalId = window.setInterval(d, 0);
 }
 
 export { tileViewport };
