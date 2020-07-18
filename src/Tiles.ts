@@ -7,7 +7,11 @@ export type Tile = {
   intersectsRect: (p: Vec2) => boolean
 }
 
-export const Tile = (polygon: Polygon, parent: () => Tile, children: () => Tile[]): Tile => ({
+export const Tile = (
+  polygon: Polygon,
+  children: () => Tile[],
+  parent?: () => Tile
+): Tile => ({
   polygon,
   parent,
   children,
@@ -21,11 +25,14 @@ export type Polygon = {
   triangles: () => Triangle[],
   contains: (p: Vec2) => boolean,
   intersectsRect: (p: Vec2) => boolean,
-  draw: (ctx: CanvasRenderingContext2D) => void
+  draw: (ctx: CanvasRenderingContext2D) => void,
+  translate: (v: Vec2) => Polygon
 }
 
 export const Polygon = (vertices: Vec2[]): Polygon => {
-  const triangles = () => vertices.slice(2).map((v, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
+  const triangles = () =>
+    vertices.slice(2).map((v, i) =>
+      Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
   return ({
     vertices,
     triangles,
@@ -40,16 +47,29 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
       }
       return false;
     },
-    contains: (p) => triangles().map(t => triangleContainsPoint(t, p)).some(b => b),
+    contains: (p) =>
+      triangles().map(t =>
+        triangleContainsPoint(t, p)).some(b => b),
     draw: (context) => {
+      //vertices = vertices.map(v => v.add(Vec2(100, 100)));
       let p = new Path2D();
       p.moveTo(vertices[0].x, vertices[0].y);
       vertices.slice(1).forEach(v => p.lineTo(v.x, v.y));
       p.closePath();
-      //context.fillStyle = c;
-      //context.fill(p);
+      context.fillStyle = `rgba(0, 0, 0, 0.1)`;
+      context.fill(p);
       context.stroke(p);
+      context.beginPath();
+      const q = vertices[vertices.length - 1];
+      context.arc((vertices[0].x * 2 + vertices[1].x + q.x) / 4, (vertices[0].y * 2 + vertices[1].y + q.y) / 4, 4, 0, Math.PI * 2);
+      context.fillStyle = "red";
+      context.fill();
+      context.beginPath();
+      context.arc(vertices[1].x, vertices[1].y, 4, 0, Math.PI * 2);
+      context.fillStyle = "black";
+      context.fill();
     },
+    translate: (v: Vec2) => Polygon(vertices.map(u => u.add(v)))
   })
 }
 
@@ -198,7 +218,7 @@ function tileViewport(
 
   const generator = (function* () {
     for (let t of tiles(
-      Vec2(context.canvas.width, context.canvas.height),
+      Vec2(context.canvas.width - 400, context.canvas.height - 400),
       root,
       depth
     )) {
@@ -206,11 +226,19 @@ function tileViewport(
     }
   })();
 
+  let p = new Path2D();
+  p.moveTo(200, 200);
+  p.lineTo(200, context.canvas.height - 200);
+  p.lineTo(context.canvas.width - 200, context.canvas.height - 200);
+  p.lineTo(context.canvas.width - 200, 200);
+  p.closePath();
+  context.stroke(p);
+
   window.setInterval(() => {
     const { done, value } = generator.next();
-    if (!done) console.log(`generator-> ${done}, ${value}`)
+    //if (!done) console.log(`generator-> ${done}, ${value}`)
     if (!done && value) value();
-  }, 1);
+  }, 0);
 }
 
 export { tileViewport };
