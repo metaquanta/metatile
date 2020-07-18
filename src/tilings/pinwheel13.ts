@@ -49,6 +49,6 @@ const children = (t: Triangle) => {
 
 const root = (l: Vec2, o: Vec2): Tile => tile(fromSSide(l).translate(o));
 
-const tile = (t: Triangle): Tile => Tile(t.polygon(), () => tile(parent(t)), () => children(t).map(c => tile(c)));
+const tile = (t: Triangle): Tile => Tile(t.polygon(), () => children(t).map(c => tile(c)), () => tile(parent(t)));
 
 export default (seed: Vec2, origin = Vec2(0, 0)) => root(seed, origin);

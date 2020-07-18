@@ -4,8 +4,8 @@ const root = (l: Vec2, o: Vec2): Tile => tile(Triangle(Vec2(0, 0), l.perp(), l.s
 
 const tile = (t: Triangle): Tile => Tile
   (t.polygon(),
-    () => tile(parentFromC(t)),
-    () => generateFromA(subAFromParent(t)).map(c => tile(c))
+    () => generateFromA(subAFromParent(t)).map(c => tile(c)),
+    () => tile(parentFromC(t))
   )
 
 // A->B is S side, B->C is M side, C->A is L side.
