@@ -1,5 +1,5 @@
-import root from "./penrose";
-import { Vec2 } from "../Tiles";
+import root from './penrose';
+import {Vec2} from './Tile';
 
 /*const children1 = (r1: Rhomb) => {
   const r = r1.translate(r1.c.invert());
@@ -31,7 +31,8 @@ test('penrose parent inverts children', () => {
   const v = Vec2(900, 200);
   const r = root(u, v).tile;
   if (r.parent === undefined) {
-    fail(); return;
+    fail();
+    return;
   }
   const s = r.parent().children()[0];
   vecsEqual(r.polygon.vertices[0], s.polygon.vertices[0]);
@@ -80,4 +81,4 @@ test('penrose romb2 children', () => {
 const vecsEqual = (u: Vec2, v: Vec2) => {
   expect(u.x).toBeCloseTo(v.x);
   expect(u.y).toBeCloseTo(v.y);
-}
+};

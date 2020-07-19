@@ -1,19 +1,29 @@
-import { Triangle, Vec2, Tile, } from "../Tiles";
+import {Triangle, Vec2, TileWithParent} from './Tile';
+import {tileGenerator, Tiling} from './Tiling';
 
-const root = (l: Vec2, o: Vec2): Tile => tile(Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())));
+const root = (l: Vec2, origin: Vec2 = Vec2(0, 0)): TileWithParent =>
+  tile(
+    Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())).translate(origin),
+    0
+  );
 
-const tile = (t: Triangle): Tile => Tile
-  (t.polygon(),
-    () => generateFromA(subAFromParent(t)).map(c => tile(c)),
-    () => tile(parentFromC(t))
-  )
+const tile = (t: Triangle, depth: number): TileWithParent =>
+  TileWithParent(
+    t.polygon(),
+    () => generateFromA(subAFromParent(t), depth - 1),
+    () => parentFromC(t, depth + 1),
+    depth
+  );
 
 // A->B is S side, B->C is M side, C->A is L side.
-const parentFromC = (t: Triangle) => {
+const parentFromC = (t: Triangle, depth: number) => {
   const m = t.b.subtract(t.c);
   const s = t.b.subtract(t.a);
   //console.log(m,s)
-  return Triangle(t.a.add(m.scale(0.5)), t.b.add(s), t.a.subtract(m.scale(2)));
+  return tile(
+    Triangle(t.a.add(m.scale(0.5)), t.b.add(s), t.a.subtract(m.scale(2))),
+    depth
+  );
 };
 
 const subAFromParent = (t: Triangle) => {
@@ -22,7 +32,7 @@ const subAFromParent = (t: Triangle) => {
   return Triangle(t.c.add(m.scale(0.5)), t.c.add(l.scale(2 / 5)), t.c);
 };
 
-const generateFromA = (t: Triangle) => {
+const generateFromA = (t: Triangle, depth: number) => {
   //      A
   //   /  |
   // C----B
@@ -51,7 +61,17 @@ const generateFromA = (t: Triangle) => {
   const b = B(t);
   const c = C(b);
   const d = D(c);
-  return [t, b, c, d, E(d)];
+  return [
+    tile(c, depth),
+    tile(t, depth),
+    tile(b, depth),
+    tile(d, depth),
+    tile(E(d), depth),
+  ];
 };
 
-export default (seed: Vec2, origin = Vec2(0, 0)) => root(seed, origin);
+export default (): Tiling => ({
+  getTile: (seed, origin) => root(seed, origin),
+  tileGenerator: (tile, includeAncestors?, viewport?) =>
+    tileGenerator(tile, 0, includeAncestors, viewport),
+});
