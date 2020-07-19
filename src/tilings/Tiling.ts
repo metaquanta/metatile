@@ -104,7 +104,8 @@ export const tileGenerator = function* (
       if (viewport === undefined || t.intersectsViewport(viewport)) {
         if (tile.depth === depth) yield t;
         else if (tile.depth > depth) {
-          if (includeAncestors) yield t;
+          if (includeAncestors) 
+          yield t;
           yield* descend(t, tile.depth - 1); // d=-1
         }
       }
