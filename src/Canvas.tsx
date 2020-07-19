@@ -1,100 +1,142 @@
-import React, { MutableRefObject, useEffect, useRef } from 'react';
-import getTile from './tilings/penrose';
-import { tileViewport, Vec2 } from './Tiles';
+import React, {MutableRefObject, useEffect, useRef} from 'react';
+//import penrose from './tilings/penrose';
+import pinwheel5 from './tilings/pinwheel5';
+import {Vec2} from './tilings/Tile';
+import {tileViewport, ViewPort} from './tilings/Tiling';
 
 const watermark = (c: CanvasRenderingContext2D) => {
-    if (c.canvas.parentElement && c.canvas.parentElement.parentElement) {
-        const pr = Math.round(window.devicePixelRatio);
-        //c.scale(1 / pr, 1 / pr);
+  if (c.canvas.parentElement && c.canvas.parentElement.parentElement) {
+    const pr = Math.round(window.devicePixelRatio);
 
-        const th = 3 * pr;
-        const width = Math.round(c.canvas.parentElement.parentElement.clientWidth * pr - 3 * th);
-        const height = Math.round(c.canvas.parentElement.parentElement.clientHeight * pr - 3 * th);
-        const left = Math.round((c.canvas.width - width) / 2);
-        const top = Math.round((c.canvas.height - height) / 2);
+    const size = getSize(c.canvas);
+    c.fillStyle = 'grey';
+    c.fillRect(0, 0, size * pr, size * pr);
 
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(left, top);
-        c.lineTo(width + left, top);
-        c.lineTo(width + left, height + top);
-        c.lineTo(left, height + top);
-        c.lineTo(left, top);
-        c.stroke();
-    }
-}
+    const th = 3 * pr;
+    const width = Math.round(
+      c.canvas.parentElement.parentElement.clientWidth * pr - 3 * th
+    );
+    const height = Math.round(
+      c.canvas.parentElement.parentElement.clientHeight * pr - 3 * th
+    );
+    const left = Math.round((c.canvas.width - width) / 2);
+    const top = Math.round((c.canvas.height - height) / 2);
+
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(left, top);
+    c.lineTo(width + left, top);
+    c.lineTo(width + left, height + top);
+    c.lineTo(left, height + top);
+    c.lineTo(left, top);
+    c.stroke();
+  }
+};
+
+const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
+  if (canvas.parentElement && canvas.parentElement.parentElement) {
+    console.log(
+      `setPosition(): ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+    );
+    const outerWidth = canvas.parentElement.parentElement.clientWidth;
+    const outerHeight = canvas.parentElement.parentElement.clientHeight;
+    const innerWidth = Math.max(window.screen.height, window.screen.width);
+    return Vec2(
+      Math.round((outerWidth - innerWidth) / 2),
+      Math.round((outerHeight - innerWidth) / 2)
+    );
+  }
+  return Vec2(0, 0);
+};
 
 const setPosition = (canvas: HTMLCanvasElement) => {
-    if (canvas.parentElement && canvas.parentElement.parentElement) {
-        console.log(`setPosition(): ${canvas.parentElement.parentElement.clientWidth}x${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}x${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`);
-        const outerWidth = canvas.parentElement.parentElement.clientWidth;
-        const outerHeight = canvas.parentElement.parentElement.clientHeight;
-        const innerWidth = Math.max(window.screen.height, window.screen.width);
-        canvas.parentElement.style.top = `${Math.round((outerHeight - innerWidth) / 2)}px`;
-        canvas.parentElement.style.left = `${Math.round((outerWidth - innerWidth) / 2)}px`;
-        console.log(`             - ${canvas.parentElement.parentElement.clientWidth}x${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}x${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`);
-    }
-}
+  const origin = getPosition(canvas);
+  if (canvas.parentElement && canvas.parentElement.parentElement) {
+    console.log(
+      `setPosition(): ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+    );
+    canvas.parentElement.style.top = `${origin.y}px`;
+    canvas.parentElement.style.left = `${origin.x}px`;
+    console.log(
+      `             ⤷ ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+    );
+  }
+};
+
+const getSize = (canvas: HTMLCanvasElement): number => {
+  if (canvas.parentElement && canvas.parentElement.parentElement) {
+    console.log(
+      `setSize(): ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
+    );
+    return Math.round(Math.max(window.screen.height, window.screen.width));
+  }
+  return 1920;
+};
 
 const setSize = (canvas: HTMLCanvasElement) => {
-    if (canvas.parentElement && canvas.parentElement.parentElement) {
-        console.log(`setSize(): ${window.screen.width}x${window.screen.height} - ${canvas.parentElement.style.width}x${canvas.parentElement.style.height} - ${canvas.width}x${canvas.height}`);
-        const innerWidth = Math.round(Math.max(window.screen.height, window.screen.width));
-        canvas.parentElement.style.height = `${innerWidth}px`;
-        canvas.parentElement.style.width = `${innerWidth}px`;
-        canvas.height = innerWidth * Math.round(window.devicePixelRatio);
-        canvas.width = innerWidth * Math.round(window.devicePixelRatio);
-        console.log(`         - ${window.screen.width}x${window.screen.height} - ${canvas.parentElement.style.width} x ${canvas.parentElement.style.height} - ${canvas.width}x${canvas.height}`);
-    }
-}
+  if (canvas.parentElement && canvas.parentElement.parentElement) {
+    console.log(
+      `setSize(): ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
+    );
+    const size = getSize(canvas);
+    canvas.parentElement.style.height = `${size}px`;
+    canvas.parentElement.style.width = `${size}px`;
+    canvas.height = size * Math.round(window.devicePixelRatio);
+    canvas.width = size * Math.round(window.devicePixelRatio);
+    console.log(
+      `         ⤷ ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
+    );
+  }
+};
 
-const getCenter = (): Vec2 => {
-    const c = Math.round(Math.max(window.screen.height, window.screen.width) * window.devicePixelRatio / 2);
-    return Vec2(c, c);
-}
-
-const getViewport = (canvas: HTMLCanvasElement): Vec2 => {
-    if (canvas.parentElement && canvas.parentElement.parentElement)
-        return Vec2(canvas.parentElement.parentElement.clientWidth, canvas.parentElement.parentElement.clientHeight).scale(window.devicePixelRatio);
-    return Vec2(1920, 1080);
+function getViewport(canvas: HTMLCanvasElement): Vec2 {
+  if (canvas.parentElement && canvas.parentElement.parentElement)
+    return Vec2(
+      canvas.parentElement.parentElement.clientWidth,
+      canvas.parentElement.parentElement.clientHeight
+    ).scale(window.devicePixelRatio);
+  return Vec2(1920, 1080);
 }
 
 const canvasRender = (canvas: HTMLCanvasElement) => {
-    if (canvas instanceof HTMLCanvasElement) {
-        setPosition(canvas);
-        const context = canvas.getContext('2d');
-        if (context instanceof CanvasRenderingContext2D) {
-            setSize(canvas);
-            watermark(context);
-            tileViewport(context, getCenter(), getViewport(canvas), (v) => getTile(v).tile, 14);
-        }
+  if (canvas instanceof HTMLCanvasElement) {
+    setPosition(canvas);
+    //const context = canvas.getContext('2d', { alpha: false });
+    const context = canvas.getContext('2d', {alpha: false});
+    if (context instanceof CanvasRenderingContext2D) {
+      setSize(canvas);
+      watermark(context);
+      tileViewport(
+        context,
+        pinwheel5().getTile(Vec2(100, 0), Vec2(1000,1000)),
+        pinwheel5(),
+        ViewPort(getViewport(canvas), getPosition(canvas).invert().scale(2))
+      );
     }
-}
+  }
+};
 
 export default () => {
-    const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
-    const render = () => {
-        if (el.current instanceof HTMLCanvasElement) {
-            //const { tile } = getTile(Vec2(1600, 0))
-            //canvasRender(el.current, (ctx) => tileViewport(ctx, tile, 14));
-            canvasRender(el.current);
-            //canvasRender(el.current, (ctx) => test(ctx))
-        }
+  const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
+  const render = () => {
+    if (el.current instanceof HTMLCanvasElement) {
+      canvasRender(el.current);
     }
-    const update = () => {
-        if (el.current instanceof HTMLCanvasElement) {
-            setPosition(el.current);
-        }
+  };
+  const update = () => {
+    if (el.current instanceof HTMLCanvasElement) {
+      setPosition(el.current);
     }
+  };
 
-    useEffect(() => {
-        if (el.current instanceof HTMLCanvasElement) {
-            render();
-        }
-    });
-    useEffect(() => {
-        window.addEventListener('resize', update);
-        return () => window.removeEventListener('resize', update);
-    });
-    return (<canvas ref={el} />);
-}
+  useEffect(() => {
+    if (el.current instanceof HTMLCanvasElement) {
+      render();
+    }
+  });
+  useEffect(() => {
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  });
+  return <canvas ref={el} />;
+};
