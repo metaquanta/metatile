@@ -1,6 +1,7 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-13-tiles/
 
 import {Tile, TileWithParent, Triangle, Vec2} from './Tile';
+import {tileGenerator, Tiling} from './Tiling';
 
 const fromSSide = (l: Vec2) => {
   console.log(`seed(x: ${l.x}, y: ${l.y})`);
@@ -45,13 +46,13 @@ const children = (t: Triangle) => {
   const c11 = Triangle(c10.c, c10.b.add(s.scale(1 / 2)), c10.a);
 
   return [
+    c7,
     c1,
     c2,
     c3,
     c4,
     c5,
     c6,
-    c7,
     c3.translate(m.scale(1 / 3)),
     c1.translate(m.scale(2 / 3)),
     c10,
@@ -61,13 +62,22 @@ const children = (t: Triangle) => {
   ];
 };
 
-const root = (l: Vec2, o: Vec2): Tile => tile(fromSSide(l).translate(o));
-
-const tile = (t: Triangle): TileWithParent =>
-  TileWithParent(
-    t.polygon(),
-    () => children(t).map(c => tile(c)),
-    () => tile(parent(t))
+const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
+  tile(
+    Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())).translate(o),
+    0
   );
 
-export default (seed: Vec2, origin = Vec2(0, 0)) => root(seed, origin);
+const tile = (t: Triangle, depth: number): TileWithParent =>
+  TileWithParent(
+    t.polygon(),
+    () => children(t).map(c => tile(c, depth - 1)),
+    () => tile(parent(t), depth + 1),
+    depth
+  );
+
+export default (): Tiling => ({
+  getTile: (seed, origin) => root(seed, origin),
+  tileGenerator: (tile, includeAncestors?, viewport?) =>
+    tileGenerator(tile, 0, includeAncestors, viewport),
+});
