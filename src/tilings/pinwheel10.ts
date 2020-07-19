@@ -1,6 +1,6 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-10-tiles/
 
-import { Tile, Triangle, Vec2 } from "../Tiles";
+import {Tile, TileWithParent, Triangle, Vec2} from './Tile';
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: Triangle) => {
@@ -46,9 +46,14 @@ const children = (t: Triangle) => {
   ];
 };
 
-const root = (l: Vec2, o: Vec2): Tile => tile(Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())));
+const root = (l: Vec2): Tile =>
+  tile(Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())));
 
-const tile = (t: Triangle): Tile => Tile(t.polygon(),
-  () => children(t).map(c => tile(c)), () => tile(parent(t)));
+const tile = (t: Triangle): TileWithParent =>
+  TileWithParent(
+    t.polygon(),
+    () => children(t).map(c => tile(c)),
+    () => tile(parent(t))
+  );
 
-export default (seed: Vec2, origin = Vec2(0, 0)) => root(seed, origin);
+export default (seed: Vec2) => root(seed);
