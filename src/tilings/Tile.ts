@@ -9,7 +9,7 @@ export type Tile = {
   variant?: number;
 };
 
-const tileIntersectsViewport = (tile: Tile, viewport: ViewPort) =>
+export const tileIntersectsViewport = (tile: Tile, viewport: ViewPort) =>
   tile.polygon
     .translate(Vec2(viewport.x0, viewport.y0).invert())
     .intersectsRect(Vec2(viewport.xf - viewport.x0, viewport.yf - viewport.y0));
