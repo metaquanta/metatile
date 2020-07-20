@@ -63,10 +63,7 @@ const children = (t: Triangle) => {
 };
 
 const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
-  tile(
-    Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())).translate(o),
-    0
-  );
+  tile(Triangle(l.perp().scale(2 / 3), Vec2(0, 0), l).translate(o), 0);
 
 const tile = (t: Triangle, depth: number): TileWithParent =>
   TileWithParent(

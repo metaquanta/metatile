@@ -16,11 +16,12 @@ const rhomb1 = (u: Vec2) => {
   return Rhomb(Vec2(0, 0), u, u.add(v), v);
 };
 
-const tile1 = (r: Rhomb): TileWithParent =>
+const tile1 = (r: Rhomb, d = -100): TileWithParent =>
   TileWithParent(
     r.polygon(),
-    () => children1(r),
-    () => parent(r)
+    () => children1(r, d - 1),
+    () => parent(r, d + 1),
+    d
   );
 
 const tile2 = (r: Rhomb): Tile => Tile(r.polygon(), () => children2(r));
@@ -30,14 +31,14 @@ const tile2 = (r: Rhomb): Tile => Tile(r.polygon(), () => children2(r));
   return Rhomb(Vec2(0, 0), u, u.add(v), v);
 };*/
 
-const parent = (r1: Rhomb): TileWithParent => {
+const parent = (r1: Rhomb, d: number): TileWithParent => {
   const r = r1.translate(r1.a.invert());
   const u = r.b.scale(IF);
   const v = r.d.scale(IF);
-  return tile1(Rhomb(u.add(v), v, r.a, u).translate(r1.a));
+  return tile1(Rhomb(u.add(v), v, r.a, u).translate(r1.a), d);
 };
 
-const children1 = (r1: Rhomb): Tile[] => {
+const children1 = (r1: Rhomb, d: number): Tile[] => {
   const r = r1.translate(r1.c.invert());
   const u = r.b.scale(DF);
   const v = r.d.scale(DF);
@@ -49,13 +50,14 @@ const children1 = (r1: Rhomb): Tile[] => {
     .map(r => tile2(r))
     .concat(
       [
-        Rhomb(r.c, v, u.add(v), u),
         //Rhomb(r.b, u.add(v), r.a, r.a.subtract(u.add(v)).add(r.b)),
         Rhomb(r.d, r.a.subtract(u.add(v)).add(r.d), r.a, u.add(v)),
+        Rhomb(r.c, v, u.add(v), u),
       ]
         .map(r => r.translate(r1.c))
-        .map(r => tile1(r))
-    );
+        .map(r => tile1(r, d))
+    )
+    .reverse();
 };
 
 const children2 = (r2: Rhomb): Tile[] => {
@@ -83,7 +85,7 @@ export const test = (ctx: CanvasRenderingContext2D) => {
 
 export default (): Tiling => ({
   getTile: (seed, origin) =>
-    tile1(rhomb1(seed).translate(origin || Vec2(0, 0))),
+    tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), 0),
   tileGenerator: (tile, includeAncestors?, viewport?) =>
     tileGenerator(tile, 0, includeAncestors, viewport),
 });
