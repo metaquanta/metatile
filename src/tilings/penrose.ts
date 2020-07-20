@@ -1,4 +1,4 @@
-import {Rhomb, Vec2, Tile, TileWithParent} from './Tile';
+import {Rhomb, Vec2, TileWithParent, tileIntersectsViewport} from './Tile';
 import {tileGenerator, Tiling} from './Tiling';
 
 const SIN15 = Math.sin(Math.PI / 5);
@@ -16,51 +16,77 @@ const rhomb1 = (u: Vec2) => {
   return Rhomb(Vec2(0, 0), u, u.add(v), v);
 };
 
-const tile1 = (r: Rhomb, d = -100): TileWithParent =>
-  TileWithParent(
-    r.polygon(),
-    () => children1(r, d - 1),
-    () => parent(r, d + 1),
-    d
-  );
+const contains = (r: Rhomb, p: Vec2): boolean => {
+  const c = firstChild(firstChild(firstChild(firstChild(r))));
+  console.log(`contains<penrose>(${r}, ${p}, ${c})`);
+  return c.polygon().contains(p);
+};
 
-const tile2 = (r: Rhomb): Tile => Tile(r.polygon(), () => children2(r));
+const tile1 = (r: Rhomb, p?: TileWithParent, d = -100): TileWithParent =>
+  tile(r, t => children1(r, t, d - 1), 0, p, d);
 
-/*const rhomb2 = (u: Vec2) => {
-  const v = rotate(u);
-  return Rhomb(Vec2(0, 0), u, u.add(v), v);
-};*/
+const tile2 = (r: Rhomb, p: TileWithParent, d = -100): TileWithParent =>
+  tile(r, t => children2(r, t, d - 1), 1, p, d);
+
+const tile = (
+  r: Rhomb,
+  cf: (t: TileWithParent) => TileWithParent[],
+  variant: number,
+  p?: TileWithParent,
+  depth = -100
+): TileWithParent => ({
+  polygon: r.polygon(),
+  children() {
+    return cf(this);
+  },
+  parent: () => p || parent(r, depth + 1),
+  depth,
+  variant,
+  contains: (p: Vec2) => contains(r, p),
+  intersectsViewport(vp) {
+    return tileIntersectsViewport(this.parent().parent(), vp);
+  },
+  getPath: () => r.polygon().getPath(),
+});
 
 const parent = (r1: Rhomb, d: number): TileWithParent => {
   const r = r1.translate(r1.a.invert());
   const u = r.b.scale(IF);
   const v = r.d.scale(IF);
-  return tile1(Rhomb(u.add(v), v, r.a, u).translate(r1.a), d);
+  return tile1(Rhomb(u.add(v), v, r.a, u).translate(r1.a), undefined, d);
 };
 
-const children1 = (r1: Rhomb, d: number): Tile[] => {
+const firstChild = (p: Rhomb): Rhomb => {
+  const r = p.translate(p.c.invert());
+  const u = r.b.scale(DF);
+  const v = r.d.scale(DF);
+  return Rhomb(r.c, v, u.add(v), u).translate(p.c);
+};
+
+const children1 = (
+  r1: Rhomb,
+  p: TileWithParent,
+  d: number
+): TileWithParent[] => {
   const r = r1.translate(r1.c.invert());
   const u = r.b.scale(DF);
   const v = r.d.scale(DF);
+  //Rhomb(r.d, u.add(v), v, r.d.add(u.invert()))
+  //Rhomb(r.b, u.add(v), r.a, r.a.subtract(u.add(v)).add(r.b)),
   return [
-    Rhomb(r.b, r.b.add(v.invert()), u, u.add(v)),
-    //Rhomb(r.d, u.add(v), v, r.d.add(u.invert()))
-  ]
-    .map(r => r.translate(r1.c))
-    .map(r => tile2(r))
-    .concat(
-      [
-        //Rhomb(r.b, u.add(v), r.a, r.a.subtract(u.add(v)).add(r.b)),
-        Rhomb(r.d, r.a.subtract(u.add(v)).add(r.d), r.a, u.add(v)),
-        Rhomb(r.c, v, u.add(v), u),
-      ]
-        .map(r => r.translate(r1.c))
-        .map(r => tile1(r, d))
-    )
-    .reverse();
+    tile1(firstChild(r1), p, d),
+    tile2(Rhomb(r.b, r.b.add(v.invert()), u, u.add(v)).translate(r1.c), p, d),
+    tile1(
+      Rhomb(r.d, r.a.subtract(u.add(v)).add(r.d), r.a, u.add(v)).translate(r1.c)
+    ),
+  ];
 };
 
-const children2 = (r2: Rhomb): Tile[] => {
+const children2 = (
+  r2: Rhomb,
+  p: TileWithParent,
+  d: number
+): TileWithParent[] => {
   const r = r2.translate(r2.a.invert());
   const u = r.b.scale(DF);
   //const v = r.d.scale(DF);
@@ -68,7 +94,11 @@ const children2 = (r2: Rhomb): Tile[] => {
     //tile1(Rhomb(r.b, r.b.add(v), r.a, v.invert()).translate(r2.a)),
     tile1(Rhomb(r.d, u.invert(), r.a, r.d.add(u)).translate(r2.a)),
     //tile2(Rhomb(r.c, r.a, v.add(r.b), r.c.add(v).add(r.b)).translate(r2.a)),
-    tile2(Rhomb(r.c, r.c.add(u).add(r.d), u.add(r.d), r.a).translate(r2.a)),
+    tile2(
+      Rhomb(r.c, r.c.add(u).add(r.d), u.add(r.d), r.a).translate(r2.a),
+      p,
+      d
+    ),
   ];
 };
 
@@ -85,7 +115,7 @@ export const test = (ctx: CanvasRenderingContext2D) => {
 
 export default (): Tiling => ({
   getTile: (seed, origin) =>
-    tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), 0),
+    tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), undefined, 0),
   tileGenerator: (tile, includeAncestors?, viewport?) =>
     tileGenerator(tile, 0, includeAncestors, viewport),
 });
