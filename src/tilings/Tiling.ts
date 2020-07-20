@@ -95,6 +95,7 @@ export const tileGenerator = function* (
   function* ascend(tile: TileWithParent): Generator<Tile> {
     console.log(`ascend(${tile.polygon})`);
     const p = tile.parent(); //p.d=+1, tile.d=0
+    //yield p;
     if (p.depth <= tile.depth) {
       console.log('!!!!!');
       return;
@@ -104,8 +105,7 @@ export const tileGenerator = function* (
       if (viewport === undefined || t.intersectsViewport(viewport)) {
         if (tile.depth === depth) yield t;
         else if (tile.depth > depth) {
-          if (includeAncestors) 
-          yield t;
+          if (includeAncestors) yield t;
           yield* descend(t, tile.depth - 1); // d=-1
         }
       }
@@ -124,7 +124,6 @@ export const tileGenerator = function* (
   console.log(`tileGenerator() d=${root.depth} df=${depth}`);
 
   if (root.depth === depth) yield root;
-
   yield* ascend(root);
 };
 

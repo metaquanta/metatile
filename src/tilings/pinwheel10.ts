@@ -9,9 +9,9 @@ const parent = (t: Triangle) => {
   const s = t.b.subtract(t.a);
   //console.log(m,s)
   return Triangle(
-    t.a.add(s.perp()).subtract(s),
-    t.b.add(s.scale(2)).subtract(s),
-    t.a.add(m.scale(3)).subtract(s)
+    t.a.add(m.scale(1 / 3).invert()),
+    t.b.add(s.scale(2)),
+    t.a.add(m.scale(3))
   );
 };
 
@@ -34,11 +34,11 @@ const children = (t: Triangle) => {
   const c6 = c4.translate(c4.b.subtract(c4.a));
   const c7 = c2.translate(c2.c.subtract(c2.a));
   return [
-    c3,
+    c5,
     c1,
     c2,
+    c3,
     c4,
-    c5,
     c6,
     c7,
     c5.translate(c5.c.subtract(c5.b)),
@@ -49,7 +49,7 @@ const children = (t: Triangle) => {
 
 const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
   tile(
-    Triangle(Vec2(0, 0), l.perp(), l.scale(2).add(l.perp())).translate(o),
+    Triangle(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp()).translate(o),
     0
   );
 

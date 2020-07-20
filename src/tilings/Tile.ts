@@ -41,7 +41,7 @@ export const TileWithParent = (
   polygon: Polygon,
   children: () => Tile[],
   parent: () => TileWithParent,
-  depth = 0,
+  depth: number,
   variant?: number
 ): TileWithParent => ({
   polygon,
