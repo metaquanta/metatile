@@ -96,6 +96,7 @@ export const tileGenerator = function* (
     console.log(`ascend(${tile.polygon})`);
     const p = tile.parent(); //p.d=+1, tile.d=0
     //yield p;
+    //const p = tile.parent().parent().children()[1];
     if (p.depth <= tile.depth) {
       console.log('!!!!!');
       return;
@@ -135,6 +136,31 @@ function drawPath(context: CanvasRenderingContext2D, polygon: Polygon) {
 
   context.fillStyle = 'rgba(0, 0, 0, 0.05)';
   context.fill(p);
+
+  /*const i = [
+    polygon.vertices[1],
+    polygon.vertices[polygon.vertices.length - 1],
+    polygon.vertices[0].scale(4),
+  ]
+    .reduce((a, b) => a.add(b))
+    .scale(1 / 6);
+
+  context.strokeStyle = 'red';
+  context.beginPath();
+  context.arc(i.x, i.y, 3, 0, Math.PI * 2);
+  context.stroke();
+
+  const j = [
+    polygon.vertices[2],
+    polygon.vertices[1].scale(4),
+    polygon.vertices[0],
+  ]
+    .reduce((a, b) => a.add(b))
+    .scale(1 / 6);
+  context.strokeStyle = 'black';
+  context.beginPath();
+  context.arc(j.x, j.y, 3, 0, Math.PI * 2);
+  context.stroke();*/
 }
 
 export function tileViewport(

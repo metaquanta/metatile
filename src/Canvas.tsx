@@ -4,10 +4,11 @@ import pinwheel13 from './tilings/pinwheel13';
 import pinwheel5 from './tilings/pinwheel5';
 import penrose from './tilings/penrose';
 import ammann from './tilings/ammann-beenker';
-import { Vec2 } from './tilings/Tile';
+import viper from './tilings/viper';
+import {Vec2} from './tilings/Tile';
 import {tileViewport, ViewPort} from './tilings/Tiling';
 
-const tilings = [pinwheel5(), pinwheel10(), pinwheel13(), penrose(), ammann()];
+const tilings = [pinwheel5(), pinwheel10(), pinwheel13(), penrose(), viper()];
 
 const watermark = (c: CanvasRenderingContext2D) => {
   if (c.canvas.parentElement && c.canvas.parentElement.parentElement) {
@@ -113,8 +114,8 @@ const canvasRender = (canvas: HTMLCanvasElement) => {
       watermark(context);
       tileViewport(
         context,
-        tilings[3].getTile(Vec2(100, 0), Vec2(1000, 1500)),
-        tilings[3],
+        tilings[4].getTile(Vec2(50, 0), Vec2(1500, 1500)),
+        tilings[4],
         ViewPort(getViewport(canvas), getPosition(canvas).invert().scale(2))
       );
     }
