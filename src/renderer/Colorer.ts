@@ -3,18 +3,25 @@ import { Vec2 } from "../classes/Vec2";
 
 export type Colorer = (t: Tile) => string;
 
-export const colorStreamer = (colorer: (t: Tile) => string) => function* () {
-  while (true) {
-    yield colorer;
-  }
-}
+export const colorStreamer = (colorer: (t: Tile) => string) =>
+  function* () {
+    while (true) {
+      yield colorer;
+    }
+  };
 
-export const colorAngles = (numParts: number, partMult: number, s: number, l: number, alpha = 1.0) => (
-  t: Tile
-) => {
+export const colorAngles = (
+  numParts: number,
+  partMult: number,
+  s: number,
+  l: number,
+  alpha = 1.0
+) => (t: Tile) => {
   const th = theta(t.polygon.vertices[1].subtract(t.polygon.vertices[0]));
   const a =
-    ((th * 360) / numParts / Math.PI / 2 + ((t.variant || 1) * partMult * 360) / numParts) % 360;
+    ((th * 360) / numParts / Math.PI / 2 +
+      ((t.variant || 1) * partMult * 360) / numParts) %
+    360;
   const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
   return color;
 };

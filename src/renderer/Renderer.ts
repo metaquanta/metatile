@@ -62,7 +62,7 @@ export function Renderer(ctx: CanvasRenderingContext2D): Renderer {
       } else {
         this.intervalId = this.startInterval(() => r.renderNext());
       }
-    }
+    },
   };
 
   const renderer: PrivateRenderer = {
