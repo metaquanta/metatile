@@ -1,5 +1,5 @@
-import {Rhomb, Vec2, TileWithParent, tileIntersectsViewport} from './Tile';
-import {tileGenerator, Tiling} from './Tiling';
+import { Rhomb, Vec2, TileWithParent, tileIntersectsViewport } from "./Tile";
+import { tileGenerator, Tiling } from "./Tiling";
 
 const SIN15 = Math.sin(Math.PI / 5);
 const COS15 = Math.cos(Math.PI / 5);
@@ -23,10 +23,10 @@ const contains = (r: Rhomb, p: Vec2): boolean => {
 };
 
 const tile1 = (r: Rhomb, p?: TileWithParent, d = -100): TileWithParent =>
-  tile(r, t => children1(r, t, d - 1), 0, p, d);
+  tile(r, (t) => children1(r, t, d - 1), 0, p, d);
 
 const tile2 = (r: Rhomb, p: TileWithParent, d = -100): TileWithParent =>
-  tile(r, t => children2(r, t, d - 1), 1, p, d);
+  tile(r, (t) => children2(r, t, d - 1), 1, p, d);
 
 const tile = (
   r: Rhomb,

@@ -1,5 +1,5 @@
-import {Triangle, Vec2, TileWithParent} from './Tile';
-import {tileGenerator, Tiling} from './Tiling';
+import { Triangle, Vec2, TileWithParent } from "./Tile";
+import { tileGenerator, Tiling } from "./Tiling";
 
 const root = (l: Vec2, origin: Vec2 = Vec2(0, 0)): TileWithParent =>
   tile(Triangle(l.scale(1 / 2), Vec2(0, 0), l.perp()).translate(origin), 0);

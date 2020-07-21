@@ -1,11 +1,11 @@
-import React, {MutableRefObject, useEffect, useRef} from 'react';
-import pinwheel10 from './tilings/pinwheel10';
-import pinwheel13 from './tilings/pinwheel13';
-import pinwheel5 from './tilings/pinwheel5';
-import penrose from './tilings/penrose';
-import viper from './tilings/viper';
-import {Vec2} from './tilings/Tile';
-import {tileViewport, ViewPort} from './tilings/Tiling';
+import React, { MutableRefObject, useEffect, useRef } from "react";
+import pinwheel10 from "./tilings/pinwheel10";
+import pinwheel13 from "./tilings/pinwheel13";
+import pinwheel5 from "./tilings/pinwheel5";
+import penrose from "./tilings/penrose";
+import viper from "./tilings/viper";
+import { Vec2 } from "./tilings/Tile";
+import { tileViewport, ViewPort } from "./tilings/Tiling";
 
 const tilings = [pinwheel5(), pinwheel10(), pinwheel13(), penrose(), viper()];
 
@@ -14,7 +14,7 @@ const watermark = (c: CanvasRenderingContext2D) => {
     const pr = Math.round(window.devicePixelRatio);
 
     const size = getSize(c.canvas);
-    c.fillStyle = 'grey';
+    c.fillStyle = "grey";
     c.fillRect(0, 0, size * pr, size * pr);
 
     const th = 3 * pr;
@@ -44,9 +44,9 @@ const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
     const outerHeight = canvas.parentElement.parentElement.clientHeight;
     const innerWidth = Math.max(window.screen.height, window.screen.width);
     console.log(
-      `setPosition(): ${outerWidth}×${outerHeight}`+
-      ` - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight}`+
-      ` - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+      `setPosition(): ${outerWidth}×${outerHeight}` +
+        ` - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight}` +
+        ` - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
     );
     return Vec2(
       Math.round((outerWidth - innerWidth) / 2),
@@ -67,9 +67,9 @@ const setPosition = (canvas: HTMLCanvasElement) => {
 const getSize = (canvas: HTMLCanvasElement): number => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
     console.log(
-      `setSize(): ${window.screen.width}×${window.screen.height}`+
-      ` - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height}`+
-      ` - ${canvas.width}×${canvas.height}`
+      `setSize(): ${window.screen.width}×${window.screen.height}` +
+        ` - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height}` +
+        ` - ${canvas.width}×${canvas.height}`
     );
     return Math.round(Math.max(window.screen.height, window.screen.width));
   }
@@ -102,7 +102,7 @@ function getViewportPosition(canvas: HTMLCanvasElement): Vec2 {
 const canvasRender = (canvas: HTMLCanvasElement) => {
   if (canvas instanceof HTMLCanvasElement) {
     setPosition(canvas);
-    const context = canvas.getContext('2d', {alpha: false});
+    const context = canvas.getContext("2d", { alpha: false });
     if (context instanceof CanvasRenderingContext2D) {
       setSize(canvas);
       watermark(context);
@@ -117,7 +117,7 @@ const canvasRender = (canvas: HTMLCanvasElement) => {
   }
 };
 
-export default () => {
+export default function Canvas() {
   const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
   const update = () => {
     if (el.current instanceof HTMLCanvasElement) {
@@ -133,8 +133,12 @@ export default () => {
     }
   });
   useEffect(() => {
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   });
-  return <canvas ref={el} />;
-};
+  return (
+    <div className="canvas">
+      <canvas ref={el} />
+    </div>
+  );
+}

@@ -1,4 +1,4 @@
-import {Polygon, Tile, TileWithParent, Vec2} from './Tile';
+import { Polygon, Tile, TileWithParent, Vec2 } from "./Tile";
 
 export type Tiling = {
   getTile: (edge: Vec2, pos?: Vec2) => TileWithParent;
@@ -42,7 +42,7 @@ export const getColorizer = (numParts: number, s: number, l: number) => (
   alpha = 1
 ) => {
   const a =
-    (theta * 360 / numParts / Math.PI / 2 + part * 360 / numParts) % 360;
+    ((theta * 360) / numParts / Math.PI / 2 + (part * 360) / numParts) % 360;
   const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
   return color;
 };
@@ -61,13 +61,13 @@ export const colorStream: (
 };
 
 export const theta = (a: Vec2) => {
-  return Math.atan(a.y/a.x)+(a.x>0 ? Math.PI:0);
-}
+  return Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0);
+};
 
 export const cover = (t: TileWithParent, p: Vec2): Tile => {
   if (t.contains(p)) return t;
   if (t.parent) return cover(t.parent(), p);
-  throw Error('Seed tile missing parent()!');
+  throw Error("Seed tile missing parent()!");
 };
 
 export const tileGenerator = function* (
@@ -93,7 +93,7 @@ export const tileGenerator = function* (
     const p = tile.parent(); //p.d=+1, tile.d=0
 
     if (p.depth <= tile.depth) {
-      console.log('!!!!!');
+      console.log("!!!!!");
       return;
     }
     for (const t of p.children().slice(1)) {
@@ -110,8 +110,8 @@ export const tileGenerator = function* (
       viewport === undefined ||
       viewport
         .vertices()
-        .map(v => p.contains(v))
-        .some(b => !b)
+        .map((v) => p.contains(v))
+        .some((b) => !b)
     ) {
       yield* ascend(p);
     }
@@ -142,7 +142,7 @@ function labelVerts(context: CanvasRenderingContext2D, polygon: Polygon) {
     .reduce((a, b) => a.add(b))
     .scale(1 / 6);
 
-  context.strokeStyle = 'red';
+  context.strokeStyle = "red";
   context.beginPath();
   context.arc(p.x, p.y, 3, 0, Math.PI * 2);
   context.stroke();
@@ -155,7 +155,7 @@ function labelVerts(context: CanvasRenderingContext2D, polygon: Polygon) {
     .reduce((a, b) => a.add(b))
     .scale(1 / 6);
 
-  context.strokeStyle = 'black';
+  context.strokeStyle = "black";
   context.beginPath();
   context.arc(q.x, q.y, 3, 0, Math.PI * 2);
   context.stroke();
@@ -169,7 +169,7 @@ export function tileViewport(
 ) {
   console.log(`tileViewport(${tile.polygon}, ${tiling}, ${viewPort})`);
 
-  const generator: Generator<Tile,Tile> = tiling.tileGenerator(
+  const generator: Generator<Tile, Tile> = tiling.tileGenerator(
     tile,
     false,
     viewPort
@@ -178,18 +178,18 @@ export function tileViewport(
 
   const intervalId = window.setInterval(() => {
     for (let i = 0; i < 10; i++) {
-      const {done, value} = generator.next();
+      const { done, value } = generator.next();
       if (!done && value) {
         const verts = value.polygon.vertices;
         context.fillStyle = colorer(
           theta(verts[1].subtract(verts[0])),
-          2*(value.variant||0)
+          2 * (value.variant || 0)
         );
         drawPath(context, value.polygon);
       }
       if (done) {
         window.clearInterval(intervalId);
-        console.log('DONE');
+        console.log("DONE");
       }
     }
   }, 0);
