@@ -7,6 +7,7 @@ export type Tiling = {
     includeAncestors?: boolean,
     viewport?: ViewPort
   ) => Generator<Tile>;
+  numVariants: number;
 };
 
 export type ViewPort = {
@@ -36,19 +37,14 @@ export const ViewPort = (size: Vec2, origin: Vec2): ViewPort => ({
 });
 
 export const getColorizer = (numParts: number, s: number, l: number) => (
-  part: number,
   theta: number,
+  part = 0,
   alpha = 1
 ) => {
   const a =
-    ((4 * theta * (360 / numParts)) / Math.PI / 2 + (part * 360) / numParts) %
-    360;
-  console.log(
-    `color(${part}, ${theta}) [${(4 * theta * (1 / numParts)) / Math.PI / 2}, ${
-      (part * 1) / numParts
-    }]`
-  );
-  return `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
+    (theta * 360 / numParts / Math.PI / 2 + part * 360 / numParts) % 360;
+  const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
+  return color;
 };
 
 export const colorStream: (
@@ -59,14 +55,14 @@ export const colorStream: (
   i?: number
 ) => Generator<string> = function* (n, s, l, alpha = 1.0, i = 0) {
   for (; i < 360; i = i + 360 / n) {
-    yield `hsla(${i}, ${s}%, ${l}%, 1.0)`;
+    yield `hsla(${i}, ${s}%, ${l}%, ${alpha})`;
   }
   yield* colorStream(n, s, l);
 };
 
-export const parity = (a: Vec2, b: Vec2) => (a.dot(b) > 0 ? 0 : 1);
-
-export const theta = (a: Vec2) => Math.acos(a.dot(Vec2(1, 0)) / a.magnitude());
+export const theta = (a: Vec2) => {
+  return Math.atan(a.y/a.x)+(a.x>0 ? Math.PI:0);
+}
 
 export const cover = (t: TileWithParent, p: Vec2): Tile => {
   if (t.contains(p)) return t;
@@ -95,8 +91,7 @@ export const tileGenerator = function* (
   function* ascend(tile: TileWithParent): Generator<Tile> {
     console.log(`ascend(${tile.polygon})`);
     const p = tile.parent(); //p.d=+1, tile.d=0
-    //yield p;
-    //const p = tile.parent().parent().children()[1];
+
     if (p.depth <= tile.depth) {
       console.log('!!!!!');
       return;
@@ -131,13 +126,15 @@ export const tileGenerator = function* (
 function drawPath(context: CanvasRenderingContext2D, polygon: Polygon) {
   const p = polygon.getPath();
 
-  context.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+  //context.strokeStyle = 'rgba(0, 0, 0, 0.1)';
   context.stroke(p);
 
-  context.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  //context.fillStyle = 'rgba(0, 0, 0, 0.05)';
   context.fill(p);
+}
 
-  /*const i = [
+function labelVerts(context: CanvasRenderingContext2D, polygon: Polygon) {
+  const p = [
     polygon.vertices[1],
     polygon.vertices[polygon.vertices.length - 1],
     polygon.vertices[0].scale(4),
@@ -147,20 +144,21 @@ function drawPath(context: CanvasRenderingContext2D, polygon: Polygon) {
 
   context.strokeStyle = 'red';
   context.beginPath();
-  context.arc(i.x, i.y, 3, 0, Math.PI * 2);
+  context.arc(p.x, p.y, 3, 0, Math.PI * 2);
   context.stroke();
 
-  const j = [
+  const q = [
     polygon.vertices[2],
     polygon.vertices[1].scale(4),
     polygon.vertices[0],
   ]
     .reduce((a, b) => a.add(b))
     .scale(1 / 6);
+
   context.strokeStyle = 'black';
   context.beginPath();
-  context.arc(j.x, j.y, 3, 0, Math.PI * 2);
-  context.stroke();*/
+  context.arc(q.x, q.y, 3, 0, Math.PI * 2);
+  context.stroke();
 }
 
 export function tileViewport(
@@ -169,23 +167,26 @@ export function tileViewport(
   tiling: Tiling,
   viewPort: ViewPort
 ) {
-  /*const vp = Math.min(viewPort.x, viewPort.y);
-  const size = Math.sqrt(2 * (vp * vp)) / ((1 + Math.sqrt(5)) / 2);
-  const yfudge = size / 10;
-  const xfudge = 0;
-  const trans = center.subtract(Vec2(vp / 2 - xfudge, vp / 2 - yfudge));
-  const root = getRoot(Vec2(size, 0));
-  console.log(`tiling... [${vp}, ${size}, ${trans}]`)
-  drawPath(context, root.polygon, trans);*/
-
   console.log(`tileViewport(${tile.polygon}, ${tiling}, ${viewPort})`);
 
-  const generator = tiling.tileGenerator(tile, false, viewPort);
+  const generator: Generator<Tile,Tile> = tiling.tileGenerator(
+    tile,
+    false,
+    viewPort
+  );
+  const colorer = getColorizer(4, 50, 50);
 
   const intervalId = window.setInterval(() => {
     for (let i = 0; i < 10; i++) {
       const {done, value} = generator.next();
-      if (!done && value) drawPath(context, value.polygon);
+      if (!done && value) {
+        const verts = value.polygon.vertices;
+        context.fillStyle = colorer(
+          theta(verts[1].subtract(verts[0])),
+          2*(value.variant||0)
+        );
+        drawPath(context, value.polygon);
+      }
       if (done) {
         window.clearInterval(intervalId);
         console.log('DONE');

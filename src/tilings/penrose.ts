@@ -102,20 +102,10 @@ const children2 = (
   ];
 };
 
-export const test = (ctx: CanvasRenderingContext2D) => {
-  const r = tile1(rhomb1(Vec2(400, 0)).translate(Vec2(900, 500)));
-  //r.draw(ctx);
-  //r.children().map(g => g.draw(ctx))
-  //r.children()[4].children().map(g => g.draw(ctx))
-  //r.children().map(c => c.children().map(g => g.draw(ctx)))
-  r.children().map(c =>
-    c.children().map(d => d.children().map(g => g.getPath()))
-  );
-};
-
 export default (): Tiling => ({
   getTile: (seed, origin) =>
     tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), undefined, 0),
   tileGenerator: (tile, includeAncestors?, viewport?) =>
     tileGenerator(tile, 0, includeAncestors, viewport),
+  numVariants: 2,
 });

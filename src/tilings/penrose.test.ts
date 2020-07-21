@@ -1,4 +1,4 @@
-import root from './penrose';
+import tiling from './penrose';
 import {Vec2} from './Tile';
 
 /*const children1 = (r1: Rhomb) => {
@@ -29,11 +29,7 @@ const children2 = (r2: Rhomb): Tile[] => {
 test('penrose parent inverts children', () => {
   const u = Vec2(400, 0);
   const v = Vec2(900, 200);
-  const r = root(u, v).tile;
-  if (r.parent === undefined) {
-    fail();
-    return;
-  }
+  const r = tiling().getTile(u, v);
   const s = r.parent().children()[0];
   vecsEqual(r.polygon.vertices[0], s.polygon.vertices[0]);
   vecsEqual(r.polygon.vertices[1], s.polygon.vertices[1]);
@@ -42,7 +38,7 @@ test('penrose parent inverts children', () => {
 });
 
 test('penrose romb1 children', () => {
-  const r = root(Vec2(400, 0), Vec2(900, 200)).tile;
+  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200));
   const c = r.children();
   vecsEqual(r.polygon.vertices[2], c[0].polygon.vertices[0]);
   vecsEqual(r.polygon.vertices[1], c[1].polygon.vertices[0]);
@@ -54,7 +50,7 @@ test('penrose romb1 children', () => {
 });
 
 test('penrose romb1 grand-children', () => {
-  const r = root(Vec2(400, 0), Vec2(900, 200)).tile.children()[0];
+  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200)).children()[0];
   const c = r.children();
   vecsEqual(r.polygon.vertices[2], c[0].polygon.vertices[0]);
   vecsEqual(r.polygon.vertices[1], c[1].polygon.vertices[0]);
@@ -66,7 +62,7 @@ test('penrose romb1 grand-children', () => {
 });
 
 test('penrose romb2 children', () => {
-  const r = root(Vec2(400, 0), Vec2(900, 200)).tile.children()[3];
+  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200)).children()[3];
   const c = r.children();
   vecsEqual(r.polygon.vertices[0], c[0].polygon.vertices[0]);
   vecsEqual(r.polygon.vertices[1], c[0].polygon.vertices[2]);
