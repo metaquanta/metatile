@@ -44,9 +44,7 @@ const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
     const outerHeight = canvas.parentElement.parentElement.clientHeight;
     const innerWidth = Math.max(window.screen.height, window.screen.width);
     console.log(
-      `setPosition(): ${outerWidth}×${outerHeight}` +
-        ` - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight}` +
-        ` - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+      `setPosition(): ${outerWidth}×${outerHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
     );
     return Vec2(
       Math.round((outerWidth - innerWidth) / 2),
@@ -67,9 +65,7 @@ const setPosition = (canvas: HTMLCanvasElement) => {
 const getSize = (canvas: HTMLCanvasElement): number => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
     console.log(
-      `setSize(): ${window.screen.width}×${window.screen.height}` +
-        ` - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height}` +
-        ` - ${canvas.width}×${canvas.height}`
+      `setSize(): ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
     );
     return Math.round(Math.max(window.screen.height, window.screen.width));
   }
