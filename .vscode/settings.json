@@ -1,0 +1,4 @@
+{
+  "prettier.configPath": "package.json",
+  "eslint.alwaysShowStatus": true
+}
