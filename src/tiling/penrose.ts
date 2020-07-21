@@ -1,7 +1,7 @@
 import { TileWithParent, tileIntersectsViewport } from "../classes/Tile";
 import { Rhomb } from "../classes/Polygon";
 import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "./Tiling";
+import { tileGenerator, Tiling } from "../classes/Tiling";
 
 const SIN15 = Math.sin(Math.PI / 5);
 const COS15 = Math.cos(Math.PI / 5);
@@ -107,7 +107,7 @@ const children2 = (
 export default (): Tiling => ({
   getTile: (seed, origin) =>
     tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), undefined, 0),
-  tileGenerator: (tile, includeAncestors?, viewport?) =>
-    tileGenerator(tile, 0, includeAncestors, viewport),
+  tileGenerator: (tile, includeAncestors?) =>
+    tileGenerator(tile, 0, includeAncestors),
   numVariants: 2,
 });

@@ -1,10 +1,7 @@
-import React, { MutableRefObject, useEffect, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
 import { ViewPort } from "../classes/ViewPort";
 import { Renderer } from "../renderer/Renderer";
-import draw from "../renderer/DrawTile";
-import { Colorer } from "../renderer/Colorer";
 
 const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
@@ -63,47 +60,19 @@ function getViewport(canvas: HTMLCanvasElement): ViewPort {
   return ViewPort(Vec2(1920, 1080), p);
 }
 
-const renderCanvas = (
-  r: Renderer,
-  tiling: Tiling,
-  colorer: Generator<Colorer>,
-  canvas: HTMLCanvasElement
-) => {
-  setPosition(canvas);
-  setSize(canvas);
-  r.setDrawTiles(draw);
-  r.setfillColorer(colorer);
-  r.setTileStream(
-    tileGenerator(
-      tiling.getTile(Vec2(15, 35), Vec2(1000, 700)),
-      0,
-      false,
-      getViewport(canvas)
-    )
-  );
-};
-
-export default function Canvas(props: {
-  tiling: Tiling;
-  colorer: Generator<Colorer>;
-}) {
+export default function Canvas(props: { renderer: Renderer }) {
+  console.log("Canvas()");
   const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
-  const [state, setState] = useState<{ renderer: Renderer | undefined }>({
-    renderer: undefined,
-  });
-
-  const setContext = (ctx: CanvasRenderingContext2D) => {
-    const renderer = Renderer(ctx);
-    setState({ renderer });
-    if (state.renderer)
-      renderCanvas(state.renderer, props.tiling, props.colorer, ctx.canvas);
-  };
 
   useEffect(() => {
+    console.log("Canvas.useEffect() [canvas/context]");
     if (el.current instanceof HTMLCanvasElement) {
+      setSize(el.current);
+      setPosition(el.current);
+      props.renderer.setViewPort(getViewport(el.current));
       const ctx = el.current.getContext("2d", { alpha: false });
       if (ctx) {
-        setContext(ctx);
+        props.renderer.setContext(ctx);
       }
     }
   });
@@ -115,6 +84,7 @@ export default function Canvas(props: {
   };
 
   useEffect(() => {
+    console.log("Canvas.useEffect() [resize]");
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   });
