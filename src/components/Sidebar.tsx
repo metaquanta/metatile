@@ -65,15 +65,20 @@ export default function Sidebar(props: {
         onTransitionEnd={sidebarTransitioned}
         ref={sb}
       >
-        <form>
-          <select name="tiling" onChange={tilingSelected}>
-            {props.tilings.map((v, i) => (
-              <option selected={i === props.selectedTiling} value={i}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </form>
+        <div
+          className="controls"
+          style={{ opacity: state.visible ? "100%" : "0%" }}
+        >
+          <form>
+            <select name="tiling" onChange={tilingSelected}>
+              {props.tilings.map((v, i) => (
+                <option selected={i === props.selectedTiling} value={i}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
-import { Vec2, Rhomb, Tile, TileWithParent } from "./Tile";
+import { Tile, TileWithParent } from "../classes/Tile";
+import { Rhomb } from "../classes/Polygon";
+import { Vec2 } from "../classes/Vec2";
 import { tileGenerator, Tiling } from "./Tiling";
 
 const SQRT2 = Math.sqrt(2);

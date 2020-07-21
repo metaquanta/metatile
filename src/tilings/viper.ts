@@ -1,6 +1,8 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/viper/
 
-import { TileWithParent, Triangle, Vec2 } from "./Tile";
+import { TileWithParent } from "../classes/Tile";
+import { Triangle } from "../classes/Polygon";
+import { Vec2 } from "../classes/Vec2";
 import { tileGenerator, Tiling } from "./Tiling";
 
 const ISQRT15 = 1 / Math.sqrt(15);
