@@ -1,4 +1,4 @@
-import {Polygon, Tile, Vec2} from './Tile';
+import { Polygon, Tile, Vec2 } from "./Tile";
 
 /*export type Tile = {
   polygon: Polygon,
@@ -20,7 +20,7 @@ export type Polygon = {
 }
 */
 
-test('polygon translates', () => {
+test("polygon translates", () => {
   const p = Polygon([Vec2(0, 0), Vec2(1, 1), Vec2(0, 2)]).translate(Vec2(1, 1));
   const q = p.vertices[0];
   const r = p.vertices[1];
@@ -33,7 +33,7 @@ test('polygon translates', () => {
   expect(s.y).toBe(3);
 });
 
-test('tile translates', () => {
+test("tile translates", () => {
   const p = Tile(
     Polygon([Vec2(0, 0), Vec2(1, 1), Vec2(0, 2)]).translate(Vec2(1, 1)),
     () => []

@@ -1,4 +1,4 @@
-import {ViewPort} from './Tiling';
+import { ViewPort } from "./Tiling";
 
 export type Tile = {
   polygon: Polygon;
@@ -21,7 +21,7 @@ export const Tile = (
   polygon,
   children,
   getPath: () => polygon.getPath(),
-  contains: point => {
+  contains: (point) => {
     const b = polygon.contains(point);
     console.log(`${polygon}.contains(${point}) = ${b}`);
     return b;
@@ -49,7 +49,7 @@ export const TileWithParent = (
   parent,
   depth,
   getPath: () => polygon.getPath(),
-  contains: point => polygon.contains(point),
+  contains: (point) => polygon.contains(point),
   intersectsViewport(rect) {
     return tileIntersectsViewport(this, rect);
   },
@@ -74,36 +74,36 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
   return {
     vertices,
     triangles,
-    intersectsRect: viewport => {
+    intersectsRect: (viewport) => {
       if (
-        Math.max(...vertices.map(p => p.x)) > 0 &&
-        Math.min(...vertices.map(p => p.x)) < viewport.x &&
-        Math.max(...vertices.map(p => p.y)) > 0 &&
-        Math.min(...vertices.map(p => p.y)) < viewport.y
+        Math.max(...vertices.map((p) => p.x)) > 0 &&
+        Math.min(...vertices.map((p) => p.x)) < viewport.x &&
+        Math.max(...vertices.map((p) => p.y)) > 0 &&
+        Math.min(...vertices.map((p) => p.y)) < viewport.y
       ) {
         return true;
       }
       return false;
     },
-    contains: p =>
+    contains: (p) =>
       triangles()
-        .map(t => t.containsPoint(p))
-        .some(b => b),
+        .map((t) => t.containsPoint(p))
+        .some((b) => b),
     getPath: () => {
       const p = new Path2D();
       p.moveTo(vertices[0].x, vertices[0].y);
-      vertices.slice(1).forEach(v => p.lineTo(v.x, v.y));
+      vertices.slice(1).forEach((v) => p.lineTo(v.x, v.y));
       p.closePath();
       return p;
     },
-    translate: v => Polygon(vertices.map(u => u.add(v))),
+    translate: (v) => Polygon(vertices.map((u) => u.add(v))),
     toString: () => {
-      if (vertices.length === 0) return '∅';
-      if (vertices.length === 1) return '⋅' + vertices[0];
+      if (vertices.length === 0) return "∅";
+      if (vertices.length === 1) return "⋅" + vertices[0];
       return `⦗${vertices
-        .map(v => v.toString())
+        .map((v) => v.toString())
         .join(
-          vertices.length < 6 ? ['⭎', '⯅', '⯁', '⯂'][vertices.length - 2] : '⬣'
+          vertices.length < 6 ? ["⭎", "⯅", "⯁", "⯂"][vertices.length - 2] : "⬣"
         )}⦘`;
     },
   };
@@ -125,14 +125,14 @@ export type Vec2 = {
 export const Vec2 = (x: number, y: number): Vec2 => ({
   x,
   y,
-  add: u => Vec2(x + u.x, y + u.y),
+  add: (u) => Vec2(x + u.x, y + u.y),
   invert: () => Vec2(-x, -y),
   subtract(u) {
     return this.add(u.invert());
   },
-  scale: a => Vec2(a * x, a * y),
+  scale: (a) => Vec2(a * x, a * y),
   perp: () => Vec2(y, -x),
-  dot: u => x * u.x + y * u.y,
+  dot: (u) => x * u.x + y * u.y,
   magnitude: () => Math.sqrt(x * x + y * y),
   toString: () => `⟨${x}, ${y}⟩`,
 });
@@ -169,7 +169,7 @@ export const Triangle = (a: Vec2, b: Vec2, c: Vec2): Triangle => ({
   a,
   b,
   c,
-  translate: v => Triangle(a.add(v), b.add(v), c.add(v)),
+  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
   polygon: () => Polygon([a, b, c]),
   containsPoint(v) {
     return triangleContainsPoint(this, v);
@@ -192,7 +192,7 @@ export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
   b,
   c,
   d,
-  translate: v => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
+  translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
   polygon: () => Polygon([a, b, c, d]),
   toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`,
 });

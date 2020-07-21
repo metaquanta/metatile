@@ -1,7 +1,7 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-10-tiles/
 
-import {TileWithParent, Triangle, Vec2} from './Tile';
-import {tileGenerator, Tiling} from './Tiling';
+import { TileWithParent, Triangle, Vec2 } from "./Tile";
+import { tileGenerator, Tiling } from "./Tiling";
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: Triangle) => {
@@ -56,7 +56,7 @@ const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
 const tile = (t: Triangle, depth: number): TileWithParent =>
   TileWithParent(
     t.polygon(),
-    () => children(t).map(c => tile(c, depth - 1)),
+    () => children(t).map((c) => tile(c, depth - 1)),
     () => tile(parent(t), depth + 1),
     depth
   );

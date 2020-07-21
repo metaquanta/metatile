@@ -1,5 +1,5 @@
-import {Vec2, Rhomb, Tile, TileWithParent} from './Tile';
-import {tileGenerator, Tiling} from './Tiling';
+import { Vec2, Rhomb, Tile, TileWithParent } from "./Tile";
+import { tileGenerator, Tiling } from "./Tiling";
 
 const SQRT2 = Math.sqrt(2);
 
@@ -106,10 +106,10 @@ export const testTileSet = () => {
     const p = sq.parent();
     p.getPath();
     const children = p.children();
-    children.forEach(c => {
+    children.forEach((c) => {
       c.getPath();
     });
-    children[0].children().forEach(c => c.getPath());
+    children[0].children().forEach((c) => c.getPath());
   }
 };
 

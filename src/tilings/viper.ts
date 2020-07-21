@@ -1,7 +1,7 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/viper/
 
-import {Tile, TileWithParent, Triangle, Vec2} from './Tile';
-import {tileGenerator, Tiling} from './Tiling';
+import { Tile, TileWithParent, Triangle, Vec2 } from "./Tile";
+import { tileGenerator, Tiling } from "./Tiling";
 
 const ISQRT15 = 1 / Math.sqrt(15);
 
@@ -44,7 +44,7 @@ const children = (t: Triangle) => {
 const tile = (t: Triangle, depth: number): TileWithParent =>
   TileWithParent(
     t.polygon(),
-    () => children(t).map(c => tile(c, depth - 1)),
+    () => children(t).map((c) => tile(c, depth - 1)),
     () => tile(parent(t), depth + 1),
     depth
   );
