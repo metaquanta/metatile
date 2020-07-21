@@ -7,57 +7,81 @@ import pinwheel13 from "../tiling/pinwheel13";
 import pinwheel5 from "../tiling/pinwheel5";
 import viper from "../tiling/viper";
 import { colorAngles, colorStreamer } from "../renderer/Colorer";
-import renderer from "../renderer/Renderer";
+import renderer, { Renderer } from "../renderer/Renderer";
 import draw from "../renderer/DrawTile";
 import { Vec2 } from "../classes/Vec2";
+import { Tiling } from "../classes/Tiling";
 
-export default function App() {
-  console.log("App()");
-  const [state, setState] = useState({
-    selectedTiling: 0,
-    renderer: renderer({
-      strokeColorer: false,
-      fillColorer: true,
-      viewPort: true,
-      speed: 100,
-    }),
-  });
+class App extends React.Component<
+  {},
+  { selectedTiling: number; renderer: Renderer }
+> {
+  tilings: Tiling[];
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      selectedTiling: 0,
+      renderer: renderer({
+        strokeColorer: false,
+        fillColorer: false,
+        viewPort: true,
+        speed: 1,
+      }),
+    };
+    const v = Vec2(20, 30);
+    const u = Vec2(1000, 500);
 
-  const tilings = [pinwheel5(), pinwheel10(), pinwheel13(), penrose(), viper()];
-
-  const v = Vec2(20, 30);
-  const u = Vec2(1000, 500);
-
-  function setTiling(tiling: number) {
-    console.log(`App.setTiling(${tiling})`);
-    const r = state.renderer;
-    r.setTileStream(
-      tilings[tiling].tileGenerator(tilings[tiling].getTile(v, u), false)
-    );
-    setState({ selectedTiling: tiling, renderer: r });
+    //this.state.renderer.setfillColorer(colorStreamer(colorAngles(4, 2, 50, 50))());
+    this.state.renderer.setDrawTiles(draw);
+    this.tilings = [
+      pinwheel5(),
+      pinwheel10(),
+      pinwheel13(),
+      penrose(),
+      viper(),
+    ];
   }
 
-  useEffect(() => {
-    console.log(`App.useEffect()`);
-    const r = state.renderer;
+  setTiling(n: number) {
+    const v = Vec2(20, 30);
+    const u = Vec2(1000, 500);
+
+    this.setState((state) => ({ selectedTiling: n }));
+    this.state.renderer.setTileStream(
+      this.tilings[n].tileGenerator(this.tilings[n].getTile(v, u), false)
+    );
+    /*const r = this.state.renderer;
     r.setfillColorer(colorStreamer(colorAngles(4, 2, 50, 50))());
     r.setDrawTiles(draw);
     r.setTileStream(
-      tilings[state.selectedTiling].tileGenerator(
-        tilings[state.selectedTiling].getTile(v, u),
+      this.tilings[this.state.selectedTiling].tileGenerator(
+        this.tilings[this.state.selectedTiling].getTile(v, u),
         false
       )
-    );
-  });
+    );*/
+  }
 
-  return (
-    <div className="app">
-      <Sidebar
-        selectedTiling={state.selectedTiling}
-        tilings={["pinwheel5", "pinwheel10", "pinwheel13", "penrose", "viper"]}
-        setTiling={setTiling}
-      />
-      <Canvas renderer={state.renderer} />
-    </div>
-  );
+  render() {
+    return (
+      <div className="app">
+        <Sidebar
+          selectedTiling={this.state.selectedTiling}
+          tilings={[
+            "pinwheel5",
+            "pinwheel10",
+            "pinwheel13",
+            "penrose",
+            "viper",
+          ]}
+          setTiling={(n: number) => this.setTiling(n)}
+        />
+        <Canvas
+          renderer={this.state.renderer}
+          tiling={this.tilings[this.state.selectedTiling]}
+        />
+      </div>
+    );
+  }
 }
+
+export default App;

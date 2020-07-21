@@ -48,10 +48,14 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
     resolveStop: undefined,
     speed: params.speed,
     startInterval(r): number {
+      console.log(
+        `Renderer:Looper.startInterval() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
+      );
       return window.setInterval(() => {
         if (this.stop) {
           this.stop = false;
           window.clearInterval(this.intervalId);
+          this.intervalId = undefined;
           if (this.resolveStop) this.resolveStop();
           return;
         }
@@ -61,6 +65,9 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
       }, 0);
     },
     stopInterval(): Promise<unknown> {
+      console.log(
+        `Renderer:Looper.stopInterval() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
+      );
       const promise = new Promise((res, rej) => {
         this.resolveStop = res;
       });
@@ -68,7 +75,10 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
       return promise;
     },
     restart(r) {
-      if (this.intervalId) {
+      console.log(
+        `Renderer:Looper.restart() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
+      );
+      if (this.intervalId && !this.stop) {
         this.stopInterval().then(() => {
           r.clearCanvas();
           this.intervalId = this.startInterval(r);
@@ -187,7 +197,7 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
           this.drawTile(tilesValue, this.ctx);
         }
         if (tilesDone) {
-          console.log("DONE");
+          console.log(`DONE [${tilesDone}, ${tilesValue}]`);
           looper.stopInterval();
         }
       }
