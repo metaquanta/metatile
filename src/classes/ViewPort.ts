@@ -21,7 +21,7 @@ export const ViewPort = (size: Vec2, origin: Vec2): ViewPort => ({
     Vec2(0, size.y).add(origin),
   ],
   toString: () =>
-    `⦗↤${origin.x}, ↥${origin.y}, ↦${origin.x + size.x}, ↧${origin.y + size.y
+    `⦗↤${origin.x}, ↥${origin.y}, ↦${origin.x + size.x}, ↧${
+      origin.y + size.y
     }⦘`,
 });
-

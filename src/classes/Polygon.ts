@@ -11,24 +11,28 @@ export type Polygon = {
 };
 
 export const Polygon = (vertices: Vec2[]): Polygon => {
-  const triangles = () => vertices
-    .slice(2)
-    .map((_, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
+  const triangles = () =>
+    vertices
+      .slice(2)
+      .map((_, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
   return {
     vertices,
     triangles,
     intersectsRect: (viewport) => {
-      if (Math.max(...vertices.map((p) => p.x)) > 0 &&
+      if (
+        Math.max(...vertices.map((p) => p.x)) > 0 &&
         Math.min(...vertices.map((p) => p.x)) < viewport.x &&
         Math.max(...vertices.map((p) => p.y)) > 0 &&
-        Math.min(...vertices.map((p) => p.y)) < viewport.y) {
+        Math.min(...vertices.map((p) => p.y)) < viewport.y
+      ) {
         return true;
       }
       return false;
     },
-    contains: (p) => triangles()
-      .map((t) => t.containsPoint(p))
-      .some((b) => b),
+    contains: (p) =>
+      triangles()
+        .map((t) => t.containsPoint(p))
+        .some((b) => b),
     getPath: () => {
       const p = new Path2D();
       p.moveTo(vertices[0].x, vertices[0].y);
@@ -38,10 +42,8 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
     },
     translate: (v) => Polygon(vertices.map((u) => u.add(v))),
     toString: () => {
-      if (vertices.length === 0)
-        return "∅";
-      if (vertices.length === 1)
-        return "⋅" + vertices[0];
+      if (vertices.length === 0) return "∅";
+      if (vertices.length === 1) return "⋅" + vertices[0];
       return `⦗${vertices
         .map((v) => v.toString())
         .join(
@@ -50,8 +52,6 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
     },
   };
 };
-
-
 
 export type Triangle = {
   a: Vec2;
