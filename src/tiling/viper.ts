@@ -3,7 +3,7 @@
 import { TileWithParent } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "./Tiling";
+import { tileGenerator, Tiling } from "../classes/Tiling";
 
 const ISQRT15 = 1 / Math.sqrt(15);
 
@@ -54,7 +54,7 @@ const tile = (t: Triangle, depth: number): TileWithParent =>
 export default (): Tiling => ({
   getTile: (seed, origin = Vec2(0, 0)) =>
     tile(fromVec(seed).translate(origin), 0),
-  tileGenerator: (tile, includeAncestors?, viewport?) =>
-    tileGenerator(tile, 0, includeAncestors, viewport),
+  tileGenerator: (tile, includeAncestors?) =>
+    tileGenerator(tile, 0, includeAncestors),
   numVariants: 2,
 });

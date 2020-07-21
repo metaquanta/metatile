@@ -1,7 +1,7 @@
 import { Tile, TileWithParent } from "../classes/Tile";
 import { Rhomb } from "../classes/Polygon";
 import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "./Tiling";
+import { tileGenerator, Tiling } from "../classes/Tiling";
 
 const SQRT2 = Math.sqrt(2);
 
@@ -117,7 +117,7 @@ export const testTileSet = () => {
 
 export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?, viewport?) =>
-    tileGenerator(tile, -1, includeAncestors, viewport),
+  tileGenerator: (tile, includeAncestors?) =>
+    tileGenerator(tile, -1, includeAncestors),
   numVariants: 2,
 });

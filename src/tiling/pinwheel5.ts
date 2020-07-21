@@ -1,7 +1,7 @@
 import { TileWithParent } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "./Tiling";
+import { tileGenerator, Tiling } from "../classes/Tiling";
 
 const root = (l: Vec2, origin: Vec2 = Vec2(0, 0)): TileWithParent =>
   tile(Triangle(l.scale(1 / 2), Vec2(0, 0), l.perp()).translate(origin), 0);
@@ -71,7 +71,7 @@ const generateFromA = (t: Triangle, depth: number) => {
 
 export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?, viewport?) =>
-    tileGenerator(tile, 0, includeAncestors, viewport),
+  tileGenerator: (tile, includeAncestors?) =>
+    tileGenerator(tile, 0, includeAncestors),
   numVariants: 2,
 });
