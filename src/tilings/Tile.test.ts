@@ -1,4 +1,6 @@
-import { Polygon, Tile, Vec2 } from "./Tile";
+import { Tile } from "./Tile";
+import { Polygon } from "./Polygon";
+import { Vec2 } from "./Vec2";
 
 /*export type Tile = {
   polygon: Polygon,

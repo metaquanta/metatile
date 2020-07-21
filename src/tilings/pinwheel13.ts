@@ -1,6 +1,8 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-13-tiles/
 
-import { TileWithParent, Triangle, Vec2 } from "./Tile";
+import { TileWithParent } from "../classes/Tile";
+import { Triangle } from "../classes/Polygon";
+import { Vec2 } from "../classes/Vec2";
 import { tileGenerator, Tiling } from "./Tiling";
 
 // A->B is S side, B->C is M side, C->A is L side.

@@ -23,12 +23,28 @@ div.sidebar {
   position: fixed;
   top: 0px;
   left: 0px;
-  width: 300px;
+  width: 200px;
   bottom: 0px;
   background-color: rgba(0, 0, 0, 0);
   z-index: 10;
   transition: all 0.5s ease;
   visibility: "hidden";
+}
+
+div.controls {
+  position: absolute;
+  top: 30px;
+  transition: all 0.5s ease;
+  padding: 25px;
+}
+
+select {
+  padding: 4px;
+  margin: 0;
+  border: 0;
+  background-color: #202020;
+  color: whitesmoke;
+  width: 150px;
 }
 
 div.canvas {

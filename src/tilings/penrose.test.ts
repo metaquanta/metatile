@@ -1,5 +1,5 @@
 import tiling from "./penrose";
-import { Vec2 } from "./Tile";
+import { Vec2 } from "../classes/Vec2";
 
 /*const children1 = (r1: Rhomb) => {
   const r = r1.translate(r1.c.invert());
