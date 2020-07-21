@@ -3,7 +3,6 @@ import pinwheel10 from './tilings/pinwheel10';
 import pinwheel13 from './tilings/pinwheel13';
 import pinwheel5 from './tilings/pinwheel5';
 import penrose from './tilings/penrose';
-import ammann from './tilings/ammann-beenker';
 import viper from './tilings/viper';
 import {Vec2} from './tilings/Tile';
 import {tileViewport, ViewPort} from './tilings/Tiling';
@@ -41,12 +40,14 @@ const watermark = (c: CanvasRenderingContext2D) => {
 
 const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
-    console.log(
-      `setPosition(): ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
-    );
     const outerWidth = canvas.parentElement.parentElement.clientWidth;
     const outerHeight = canvas.parentElement.parentElement.clientHeight;
     const innerWidth = Math.max(window.screen.height, window.screen.width);
+    console.log(
+      `setPosition(): ${outerWidth}×${outerHeight}`+
+      ` - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight}`+
+      ` - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
+    );
     return Vec2(
       Math.round((outerWidth - innerWidth) / 2),
       Math.round((outerHeight - innerWidth) / 2)
@@ -58,21 +59,17 @@ const getPosition = (canvas: HTMLCanvasElement): Vec2 => {
 const setPosition = (canvas: HTMLCanvasElement) => {
   const origin = getPosition(canvas);
   if (canvas.parentElement && canvas.parentElement.parentElement) {
-    console.log(
-      `setPosition(): ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
-    );
     canvas.parentElement.style.top = `${origin.y}px`;
     canvas.parentElement.style.left = `${origin.x}px`;
-    console.log(
-      `             ⤷ ${canvas.parentElement.parentElement.clientWidth}×${canvas.parentElement.parentElement.clientHeight} - ${canvas.parentElement.clientWidth}×${canvas.parentElement.clientHeight} - (${canvas.parentElement.style.top},${canvas.parentElement.style.left})`
-    );
   }
 };
 
 const getSize = (canvas: HTMLCanvasElement): number => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
     console.log(
-      `setSize(): ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
+      `setSize(): ${window.screen.width}×${window.screen.height}`+
+      ` - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height}`+
+      ` - ${canvas.width}×${canvas.height}`
     );
     return Math.round(Math.max(window.screen.height, window.screen.width));
   }
@@ -81,17 +78,11 @@ const getSize = (canvas: HTMLCanvasElement): number => {
 
 const setSize = (canvas: HTMLCanvasElement) => {
   if (canvas.parentElement && canvas.parentElement.parentElement) {
-    console.log(
-      `setSize(): ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
-    );
     const size = getSize(canvas);
     canvas.parentElement.style.height = `${size}px`;
     canvas.parentElement.style.width = `${size}px`;
-    canvas.height = size * Math.round(window.devicePixelRatio);
-    canvas.width = size * Math.round(window.devicePixelRatio);
-    console.log(
-      `         ⤷ ${window.screen.width}×${window.screen.height} - ${canvas.parentElement.style.width}×${canvas.parentElement.style.height} - ${canvas.width}×${canvas.height}`
-    );
+    canvas.height = Math.round(size * window.devicePixelRatio);
+    canvas.width = Math.round(size * window.devicePixelRatio);
   }
 };
 
@@ -104,19 +95,23 @@ function getViewport(canvas: HTMLCanvasElement): Vec2 {
   return Vec2(1920, 1080);
 }
 
+function getViewportPosition(canvas: HTMLCanvasElement): Vec2 {
+  return getPosition(canvas).invert().scale(window.devicePixelRatio);
+}
+
 const canvasRender = (canvas: HTMLCanvasElement) => {
   if (canvas instanceof HTMLCanvasElement) {
     setPosition(canvas);
-    //const context = canvas.getContext('2d', { alpha: false });
     const context = canvas.getContext('2d', {alpha: false});
     if (context instanceof CanvasRenderingContext2D) {
       setSize(canvas);
       watermark(context);
+      const t = 2;
       tileViewport(
         context,
-        tilings[4].getTile(Vec2(50, 0), Vec2(1500, 1500)),
-        tilings[4],
-        ViewPort(getViewport(canvas), getPosition(canvas).invert().scale(2))
+        tilings[t].getTile(Vec2(100, 100), Vec2(1500, 1500)),
+        tilings[t],
+        ViewPort(getViewport(canvas), getViewportPosition(canvas))
       );
     }
   }
@@ -124,11 +119,6 @@ const canvasRender = (canvas: HTMLCanvasElement) => {
 
 export default () => {
   const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
-  const render = () => {
-    if (el.current instanceof HTMLCanvasElement) {
-      canvasRender(el.current);
-    }
-  };
   const update = () => {
     if (el.current instanceof HTMLCanvasElement) {
       setPosition(el.current);
@@ -137,7 +127,9 @@ export default () => {
 
   useEffect(() => {
     if (el.current instanceof HTMLCanvasElement) {
-      render();
+      if (el.current instanceof HTMLCanvasElement) {
+        canvasRender(el.current);
+      }
     }
   });
   useEffect(() => {

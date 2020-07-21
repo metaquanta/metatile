@@ -117,4 +117,5 @@ export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
   tileGenerator: (tile, includeAncestors?, viewport?) =>
     tileGenerator(tile, -1, includeAncestors, viewport),
+  numVariants: 2,
 });
