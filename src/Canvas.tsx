@@ -1,13 +1,6 @@
 import React, { MutableRefObject, useEffect, useRef } from "react";
-import pinwheel10 from "./tilings/pinwheel10";
-import pinwheel13 from "./tilings/pinwheel13";
-import pinwheel5 from "./tilings/pinwheel5";
-import penrose from "./tilings/penrose";
-import viper from "./tilings/viper";
 import { Vec2 } from "./tilings/Tile";
-import { tileViewport, ViewPort } from "./tilings/Tiling";
-
-const tilings = [pinwheel5(), pinwheel10(), pinwheel13(), penrose(), viper()];
+import { tileViewport, Tiling, ViewPort } from "./tilings/Tiling";
 
 const watermark = (c: CanvasRenderingContext2D) => {
   if (c.canvas.parentElement && c.canvas.parentElement.parentElement) {
@@ -95,25 +88,24 @@ function getViewportPosition(canvas: HTMLCanvasElement): Vec2 {
   return getPosition(canvas).invert().scale(window.devicePixelRatio);
 }
 
-const canvasRender = (canvas: HTMLCanvasElement) => {
+const canvasRender = (canvas: HTMLCanvasElement, tiling: Tiling) => {
   if (canvas instanceof HTMLCanvasElement) {
     setPosition(canvas);
     const context = canvas.getContext("2d", { alpha: false });
     if (context instanceof CanvasRenderingContext2D) {
       setSize(canvas);
       watermark(context);
-      const t = 2;
       tileViewport(
         context,
-        tilings[t].getTile(Vec2(100, 100), Vec2(1500, 1500)),
-        tilings[t],
+        tiling.getTile(Vec2(100, 100), Vec2(1500, 1500)),
+        tiling,
         ViewPort(getViewport(canvas), getViewportPosition(canvas))
       );
     }
   }
 };
 
-export default function Canvas() {
+export default function Canvas(props: { tiling: Tiling }) {
   const el: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
   const update = () => {
     if (el.current instanceof HTMLCanvasElement) {
@@ -124,7 +116,7 @@ export default function Canvas() {
   useEffect(() => {
     if (el.current instanceof HTMLCanvasElement) {
       if (el.current instanceof HTMLCanvasElement) {
-        canvasRender(el.current);
+        canvasRender(el.current, props.tiling);
       }
     }
   });

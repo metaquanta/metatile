@@ -1,12 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Sidebar from "./Sidebar";
-import Canvas from "./Canvas";
+import App from "./App";
 
 ReactDOM.render(
   <React.StrictMode>
-    <Canvas />
-    <Sidebar />
+    <App />
   </React.StrictMode>,
   document.getElementById("root")
 );
