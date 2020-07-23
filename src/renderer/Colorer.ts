@@ -3,7 +3,9 @@ import { Vec2 } from "../classes/Vec2";
 
 export type Colorer = (t: Tile) => string;
 
-export const colorStreamer = (colorer: (t: Tile) => string) =>
+export const colorStreamer = (
+  colorer: (t: Tile) => string
+): (() => Generator<Colorer>) =>
   function* () {
     while (true) {
       yield colorer;
@@ -16,7 +18,7 @@ export const colorAngles = (
   s: number,
   l: number,
   alpha = 1.0
-) => (t: Tile) => {
+): ((t: Tile) => string) => (t) => {
   const th = theta(t.polygon.vertices[1].subtract(t.polygon.vertices[0]));
   const a =
     ((th * 360) / numParts / Math.PI / 2 +
@@ -39,6 +41,6 @@ export const colorStream: (
   yield* colorStream(n, s, l);
 };
 
-export const theta = (a: Vec2) => {
+export const theta = (a: Vec2): number => {
   return Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0);
 };

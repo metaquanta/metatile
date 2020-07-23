@@ -1,129 +1,91 @@
 import { Tile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
-import { Colorer } from "./Colorer";
+import draw from "./DrawTile";
 
 export type Renderer = {
-  setSpeed: (s: number) => void;
-  setDrawTiles: (f: (t: Tile, ctx: CanvasRenderingContext2D) => void) => void;
-  setTileStream: (f: (vp: ViewPort | undefined) => Generator<Tile>) => void;
-  setfillColorer: (c: Generator<Colorer>) => void;
-  setStrokeColorer: (c: Generator<Colorer>) => void;
-  setContext: (ctx: CanvasRenderingContext2D) => void;
-  setViewPort: (vp: ViewPort | undefined) => void;
-};
-
-export type RendererOptions = {
-  speed: number;
-  fillColorer: boolean;
-  strokeColorer: boolean;
-  viewPort: boolean;
+  //setDrawTiles: (f: (t: Tile, ctx: CanvasRenderingContext2D) => void) => void;
+  setTileStream: (tiles: Generator<Tile, void, ViewPort>) => void;
+  //setfillColorer: (c: Generator<Colorer>) => void;
+  //setStrokeColorer: (c: Generator<Colorer>) => void;
+  //setViewPort: (vp: ViewPort | undefined) => void;
 };
 
 type Looper = {
   speed: number;
-  stop: boolean;
-  intervalId: number | undefined;
-  resolveStop: (() => void) | undefined;
-  startInterval: (r: { renderNext: () => void }) => number;
-  stopInterval: () => Promise<unknown>;
-  restart: (r: { renderNext: () => void; clearCanvas: () => void }) => void;
+  stopped: boolean;
+  resolveStopped: (() => void) | undefined;
+  start: (r: () => void) => void;
+  stop: () => Promise<unknown>;
+  iter: (() => void) | undefined;
 };
 
 type PrivateRenderer = Renderer & {
-  f: ((vp: ViewPort | undefined) => Generator<Tile>) | undefined;
+  //f: ((vp: ViewPort | undefined) => Generator<Tile>) | undefined;
   tiles: Generator<Tile> | undefined;
-  fillColorers: Generator<(t: Tile) => string> | undefined;
-  strokeColorers: Generator<(t: Tile) => string> | undefined;
-  drawTile: ((t: Tile, ctx: CanvasRenderingContext2D) => void) | undefined;
+  //fillColorers: Generator<(t: Tile) => string> | undefined;
+  //strokeColorers: Generator<(t: Tile) => string> | undefined;
+  //drawTile: ((t: Tile, ctx: CanvasRenderingContext2D) => void) | undefined;
   renderNext: () => void;
   clearCanvas: () => void;
-  ctx: CanvasRenderingContext2D | undefined;
-  vp: ViewPort | undefined;
+  ctx: CanvasRenderingContext2D;
+  vp: ViewPort;
 };
 
-const renderer = (params: RendererOptions): PrivateRenderer => {
+const renderer = (
+  canvas: HTMLCanvasElement,
+  viewPort: ViewPort
+): PrivateRenderer => {
   const looper: Looper = {
-    intervalId: undefined,
-    stop: false,
-    resolveStop: undefined,
-    speed: params.speed,
-    startInterval(r): number {
-      console.log(
-        `Renderer:Looper.startInterval() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
-      );
-      return window.setInterval(() => {
-        if (this.stop) {
-          this.stop = false;
-          window.clearInterval(this.intervalId);
-          this.intervalId = undefined;
-          if (this.resolveStop) this.resolveStop();
-          return;
+    stopped: true,
+    speed: 100,
+    resolveStopped: undefined,
+    iter: undefined,
+    start(task) {
+      console.log(`Renderer:Looper.start()`);
+      this.stopped = false;
+      this.iter = () => {
+        if (this.stopped) {
+          if (this.resolveStopped) this.resolveStopped();
+        } else {
+          for (let i = 0; i < this.speed; i++) {
+            task();
+          }
+          window.requestAnimationFrame(() => this.iter && this.iter());
         }
-        for (let i = 0; i < this.speed; i++) {
-          r.renderNext();
-        }
-      }, 0);
+      };
+      window.requestAnimationFrame(() => this.iter && this.iter());
     },
-    stopInterval(): Promise<unknown> {
-      console.log(
-        `Renderer:Looper.stopInterval() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
-      );
-      const promise = new Promise((res, rej) => {
-        this.resolveStop = res;
+    stop(): Promise<unknown> {
+      console.log(`Renderer:Looper.stop()`);
+      const promise = new Promise((f) => {
+        this.resolveStopped = f;
       });
-      this.stop = true;
+      this.stopped = true;
       return promise;
-    },
-    restart(r) {
-      console.log(
-        `Renderer:Looper.restart() [${this.intervalId}, ${this.stop}, ${this.resolveStop}]`
-      );
-      if (this.intervalId && !this.stop) {
-        this.stopInterval().then(() => {
-          r.clearCanvas();
-          this.intervalId = this.startInterval(r);
-        });
-      } else {
-        this.intervalId = this.startInterval(r);
-      }
-    },
+    }
   };
   return {
-    f: undefined,
     tiles: undefined,
-    fillColorers: undefined,
-    strokeColorers: undefined,
-    drawTile: undefined,
-    ctx: undefined,
-    vp: undefined,
+    ctx: <CanvasRenderingContext2D>canvas.getContext("2d"), //todo
+    vp: viewPort,
 
-    setSpeed(s) {
-      looper.speed = s;
-    },
-    setDrawTiles(f) {
+    /*setDrawTiles(f) {
       this.drawTile = f;
       console.log(
-        `Renderer.setDrawTiles() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
+        `Renderer.setDrawTiles() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
         }, d():${this.drawTile !== undefined}`
       );
       if (this.f && this.ctx) looper.restart(this);
+    },*/
+    setTileStream(tiles) {
+      this.tiles = tiles;
+      console.log(`Renderer.setTileStream() - tiles:${tiles}`);
+      looper.start(() => this.renderNext());
     },
-    setTileStream(t) {
-      this.f = t;
-      this.tiles = undefined;
-      console.log(
-        `Renderer.setTileStream() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.ctx && this.drawTile) looper.restart(this);
-    },
-    setfillColorer(c) {
+    /*setfillColorer(c) {
       this.fillColorers = c;
       console.log(
-        `Renderer.setfillColorer() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
+        `Renderer.setfillColorer() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
         }, d():${this.drawTile !== undefined}`
       );
       if (this.f && this.ctx && this.drawTile) looper.restart(this);
@@ -131,8 +93,7 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
     setStrokeColorer(c) {
       this.strokeColorers = c;
       console.log(
-        `Renderer.setStrokeColorer() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
+        `Renderer.setStrokeColorer() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
         }, d():${this.drawTile !== undefined}`
       );
       if (this.f && this.ctx && this.drawTile) looper.restart(this);
@@ -140,8 +101,7 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
     setContext(ctx) {
       this.ctx = this.ctx || ctx;
       console.log(
-        `Renderer.setContext() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
+        `Renderer.setContext() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
         }, d():${this.drawTile !== undefined}`
       );
       if (this.f && this.drawTile) looper.restart(this);
@@ -149,14 +109,13 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
     setViewPort(vp) {
       this.vp = vp;
       console.log(
-        `Renderer.setViewPort() - tiles:${this.f !== undefined}, ctx:${
-          this.ctx !== undefined
+        `Renderer.setViewPort() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
         }, d():${this.drawTile !== undefined}`
       );
       if (this.f && this.ctx && this.drawTile) looper.restart(this);
-    },
+    },*/
     renderNext() {
-      if (params.fillColorer && this.fillColorers === undefined) {
+      /*if (params.fillColorer && this.fillColorers === undefined) {
         console.log(`Renderer - fillColorer required but missing`);
         return;
       }
@@ -172,40 +131,31 @@ const renderer = (params: RendererOptions): PrivateRenderer => {
       if (this.tiles === undefined) {
         console.log(`Renderer - Tile Generator missing!!!`);
         return;
-      }
-      if (this.f && this.drawTile && this.ctx) {
-        const { done: tilesDone, value: tilesValue } = this.tiles.next();
+      }*/
+      //if (this.f && this.drawTile && this.ctx) {
+      if (this.tiles) {
+        const { done: tilesDone, value: tilesValue } = this.tiles.next(this.vp);
         if (!tilesDone && tilesValue) {
-          if (this.fillColorers) {
-            const {
-              done: fillsDone,
-              value: fillsValue,
-            } = this.fillColorers.next();
-            if (!fillsDone && fillsValue) {
-              this.ctx.fillStyle = fillsValue(tilesValue);
-            }
-          }
-          if (this.strokeColorers) {
-            const {
-              done: strokesDone,
-              value: strokesValue,
-            } = this.strokeColorers.next();
-            if (!strokesDone && strokesValue) {
-              this.ctx.strokeStyle = strokesValue(tilesValue);
-            }
-          }
-          this.drawTile(tilesValue, this.ctx);
+          this.ctx.fillStyle = "pink"; //todo
+
+          this.ctx.strokeStyle = "black"; //todo
+          draw(tilesValue, this.ctx);
         }
         if (tilesDone) {
           console.log(`DONE [${tilesDone}, ${tilesValue}]`);
-          looper.stopInterval();
+          looper.stop();
         }
       }
     },
     clearCanvas() {
-      if (this.ctx)
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    },
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
   };
 };
-export default renderer;
+
+export function Renderer(
+  canvas: HTMLCanvasElement,
+  viewport: ViewPort
+): Renderer {
+  return renderer(canvas, viewport);
+}

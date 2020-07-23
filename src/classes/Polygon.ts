@@ -49,7 +49,7 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
         .join(
           vertices.length < 6 ? ["⭎", "⯅", "⯁", "⯂"][vertices.length - 2] : "⬣"
         )}⦘`;
-    },
+    }
   };
 };
 
@@ -89,7 +89,7 @@ export const Triangle = (a: Vec2, b: Vec2, c: Vec2): Triangle => ({
   containsPoint(v) {
     return triangleContainsPoint(this, v);
   },
-  toString: () => `⟮${a}▽${b}▼${c}⟯`,
+  toString: () => `⟮${a}▽${b}▼${c}⟯`
 });
 
 export type Rhomb = {
@@ -109,5 +109,5 @@ export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
   d,
   translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
   polygon: () => Polygon([a, b, c, d]),
-  toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`,
+  toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
 });

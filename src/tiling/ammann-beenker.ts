@@ -7,7 +7,7 @@ const SQRT2 = Math.sqrt(2);
 
 enum TileVariants {
   Square,
-  Rhomb,
+  Rhomb
 }
 
 const squareChildren = (sq: Rhomb, depth: number): Tile[] => {
@@ -39,7 +39,7 @@ const squareChildren = (sq: Rhomb, depth: number): Tile[] => {
     rhomb(Rhomb(sq.d, inner_sq.b, inner_sq.a, c)),
     rhomb(Rhomb(sq.a, inner_sq.c, inner_sq.b, d)),
     square(Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d)), depth),
-    square(Rhomb(sq.c, inner_sq.a, b, b.add(unit_d)), depth),
+    square(Rhomb(sq.c, inner_sq.a, b, b.add(unit_d)), depth)
     //square(Rhomb(sq.c, c.add(unit_d), c, inner_sq.a), depth),
     //square(Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b), depth),
   ];
@@ -64,7 +64,7 @@ const rhombChildren = (rh: Rhomb): Tile[] => {
     square(Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))),
     rhomb(rh1),
     rhomb(rh2),
-    rhomb(rh3),
+    rhomb(rh3)
   ];
 };
 
@@ -96,7 +96,7 @@ const root = (p: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent => {
   return square(Rhomb(Vec2(0, 0), p, q.add(p), q).translate(o), 0);
 };
 
-export const testTileSet = () => {
+export const testTileSet = (): void => {
   const sq = square(
     Rhomb(Vec2(0, 0), Vec2(400, 0), Vec2(400, 400), Vec2(0, 400)).translate(
       Vec2(1000, 700)
@@ -119,5 +119,5 @@ export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
   tileGenerator: (tile, includeAncestors?) =>
     tileGenerator(tile, -1, includeAncestors),
-  numVariants: 2,
+  numVariants: 2
 });

@@ -1,4 +1,4 @@
-import { TileWithParent, tileIntersectsViewport } from "../classes/Tile";
+import { TileWithParent } from "../classes/Tile";
 import { Rhomb } from "../classes/Polygon";
 import { Vec2 } from "../classes/Vec2";
 import { tileGenerator, Tiling } from "../classes/Tiling";
@@ -45,10 +45,7 @@ const tile = (
   depth,
   variant,
   contains: (p: Vec2) => contains(r, p),
-  intersectsViewport(vp) {
-    return tileIntersectsViewport(this.parent().parent(), vp);
-  },
-  getPath: () => r.polygon().getPath(),
+  getPath: () => r.polygon().getPath()
 });
 
 const parent = (r1: Rhomb, d: number): TileWithParent => {
@@ -80,7 +77,7 @@ const children1 = (
     tile2(Rhomb(r.b, r.b.add(v.invert()), u, u.add(v)).translate(r1.c), p, d),
     tile1(
       Rhomb(r.d, r.a.subtract(u.add(v)).add(r.d), r.a, u.add(v)).translate(r1.c)
-    ),
+    )
   ];
 };
 
@@ -100,7 +97,7 @@ const children2 = (
       Rhomb(r.c, r.c.add(u).add(r.d), u.add(r.d), r.a).translate(r2.a),
       p,
       d
-    ),
+    )
   ];
 };
 
@@ -109,5 +106,5 @@ export default (): Tiling => ({
     tile1(rhomb1(seed).translate(origin || Vec2(0, 0)), undefined, 0),
   tileGenerator: (tile, includeAncestors?) =>
     tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2,
+  numVariants: 2
 });

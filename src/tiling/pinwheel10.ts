@@ -45,7 +45,7 @@ const children = (t: Triangle) => {
     c7,
     c5.translate(c5.c.subtract(c5.b)),
     c6.translate(c6.b.subtract(c6.c)),
-    c7.translate(c7.c.subtract(c7.a)),
+    c7.translate(c7.c.subtract(c7.a))
   ];
 };
 
@@ -67,5 +67,5 @@ export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
   tileGenerator: (tile, includeAncestors?) =>
     tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2,
+  numVariants: 2
 });

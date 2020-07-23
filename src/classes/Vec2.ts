@@ -23,5 +23,5 @@ export const Vec2 = (x: number, y: number): Vec2 => ({
   perp: () => Vec2(y, -x),
   dot: (u) => x * u.x + y * u.y,
   magnitude: () => Math.sqrt(x * x + y * y),
-  toString: () => `⟨${x}, ${y}⟩`,
+  toString: () => `⟨${x}, ${y}⟩`
 });

@@ -56,5 +56,5 @@ export default (): Tiling => ({
     tile(fromVec(seed).translate(origin), 0),
   tileGenerator: (tile, includeAncestors?) =>
     tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2,
+  numVariants: 2
 });
