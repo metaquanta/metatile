@@ -1,59 +1,19 @@
 html,
 body,
-#root,
-div.app {
+#mq-tiling-outer {
   margin: 0;
   background: rgb(128, 128, 128);
   width: 100%;
   height: 100%;
 }
 
-div.hamburger {
-  position: fixed;
-  left: 12px;
-  top: 0px;
-  z-index: 100;
-  font-size: 2em;
-  cursor: pointer;
-  transition: color 0.5s ease;
-  visibility: "hidden";
-}
-
-div.sidebar {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 200px;
-  bottom: 0px;
-  background-color: rgba(0, 0, 0, 0);
-  z-index: 10;
-  transition: all 0.5s ease;
-  visibility: "hidden";
-}
-
-div.controls {
-  position: absolute;
-  top: 30px;
-  transition: all 0.5s ease;
-  padding: 25px;
-}
-
-select {
-  padding: 4px;
-  margin: 0;
-  border: 0;
-  background-color: #202020;
-  color: whitesmoke;
-  width: 150px;
-}
-
-div.canvas {
+#mq-tiling-inner {
   position: fixed;
   width: 1600px;
   height: 1600px;
 }
 
-canvas {
+#mq-tiling-canvas {
   width: 100%;
   height: 100%;
 }

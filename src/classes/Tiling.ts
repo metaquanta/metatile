@@ -7,7 +7,7 @@ export type Tiling = {
   tileGenerator: (
     tile: TileWithParent,
     includeAncestors?: boolean
-  ) => (vp: ViewPort | undefined) => Generator<Tile>;
+  ) => () => Generator<Tile, void, ViewPort>;
   numVariants: number;
 };
 
@@ -22,20 +22,21 @@ export const tileGenerator = (
   depth: number,
   includeAncestors = false
 ) =>
-  function* (viewport: ViewPort | undefined): Generator<Tile> {
-    function* descend(tile: Tile, d: number): Generator<Tile> {
+  function* (): Generator<Tile, void, ViewPort> {
+    let viewport: ViewPort | undefined = undefined;
+    function* descend(tile: Tile, d: number): Generator<Tile, void, ViewPort> {
       for (const t of tile.children()) {
-        if (viewport === undefined || t.intersectsViewport(viewport)) {
-          if (d === depth) yield t;
+        if (viewport === undefined || viewport.intersects(t.polygon)) {
+          if (d === depth) viewport = yield t;
           else if (d > depth) {
-            if (includeAncestors) yield t;
+            if (includeAncestors) viewport = yield t;
             yield* descend(t, d - 1);
           }
         }
       }
     }
 
-    function* ascend(tile: TileWithParent): Generator<Tile> {
+    function* ascend(tile: TileWithParent): Generator<Tile, void, ViewPort> {
       console.log(`ascend(${tile.polygon})`);
       const p = tile.parent(); //p.d=+1, tile.d=0
 
@@ -45,10 +46,10 @@ export const tileGenerator = (
       }
       for (const t of p.children().slice(1)) {
         //p.d=0
-        if (viewport === undefined || t.intersectsViewport(viewport)) {
-          if (tile.depth === depth) yield t;
+        if (viewport === undefined || viewport.intersects(t.polygon)) {
+          if (tile.depth === depth) viewport = yield t;
           else if (tile.depth > depth) {
-            if (includeAncestors) yield t;
+            if (includeAncestors) viewport = yield t;
             yield* descend(t, tile.depth - 1); // d=-1
           }
         }
@@ -66,6 +67,6 @@ export const tileGenerator = (
 
     console.log(`tileGenerator() d=${root.depth} df=${depth}`);
 
-    if (root.depth === depth) yield root;
+    if (root.depth === depth) viewport = yield root;
     yield* ascend(root);
   };

@@ -3,7 +3,7 @@ import { Tile } from "../classes/Tile";
 export default function labelVerts(
   tile: Tile,
   context: CanvasRenderingContext2D
-) {
+): void {
   const vertices = tile.polygon.vertices;
   const p = [vertices[1], vertices[vertices.length - 1], vertices[0].scale(4)]
     .reduce((a, b) => a.add(b))

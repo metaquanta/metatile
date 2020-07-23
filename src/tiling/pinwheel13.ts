@@ -55,7 +55,7 @@ const children = (t: Triangle, v: number): [Triangle, number][] => {
     [c10, (v + 1) % 2],
     [c11, (v + 1) % 2],
     [Triangle(c11.a, c11.b, t.b), v],
-    [Triangle(t.a, c10.b, c10.c), v],
+    [Triangle(t.a, c10.b, c10.c), v]
   ];
 };
 
@@ -75,5 +75,5 @@ export default (): Tiling => ({
   getTile: (seed, origin) => root(seed, origin),
   tileGenerator: (tile, includeAncestors?) =>
     tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2,
+  numVariants: 2
 });
