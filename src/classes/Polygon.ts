@@ -1,44 +1,46 @@
-import { Vec2 } from "./Vec2";
+import { V } from "./V";
 
-export type Polygon = {
-  vertices: Vec2[];
+export interface Polygon {
+  vertices: () => V[];
   triangles: () => Triangle[];
-  contains: (p: Vec2) => boolean;
-  intersectsRect: (p: Vec2) => boolean;
-  getPath: () => Path2D;
-  translate: (v: Vec2) => Polygon;
+  contains: (p: V | Polygon) => boolean;
+  intersects: (p: Polygon) => boolean;
+  translate: (v: V) => this;
   toString: () => string;
+}
+
+export type Triangle = Polygon & {
+  a: V;
+  b: V;
+  c: V;
 };
 
-export const Polygon = (vertices: Vec2[]): Polygon => {
+export type Rhomb = Polygon & {
+  a: V;
+  b: V;
+  c: V;
+  d: V;
+};
+
+export type Rect = Rhomb;
+
+function isPolygon(p: Polygon | V): boolean {
+  return (p as Polygon).vertices !== undefined;
+}
+
+export const Polygon = (vertices: V[]): Polygon => {
   const triangles = () =>
     vertices
       .slice(2)
       .map((_, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
   return {
-    vertices,
+    vertices: () => vertices,
     triangles,
-    intersectsRect: (viewport) => {
-      if (
-        Math.max(...vertices.map((p) => p.x)) > 0 &&
-        Math.min(...vertices.map((p) => p.x)) < viewport.x &&
-        Math.max(...vertices.map((p) => p.y)) > 0 &&
-        Math.min(...vertices.map((p) => p.y)) < viewport.y
-      ) {
-        return true;
-      }
-      return false;
+    contains(p) {
+      return contains(this, p);
     },
-    contains: (p) =>
-      triangles()
-        .map((t) => t.containsPoint(p))
-        .some((b) => b),
-    getPath: () => {
-      const p = new Path2D();
-      p.moveTo(vertices[0].x, vertices[0].y);
-      vertices.slice(1).forEach((v) => p.lineTo(v.x, v.y));
-      p.closePath();
-      return p;
+    intersects(p) {
+      return intersects(this, p);
     },
     translate: (v) => Polygon(vertices.map((u) => u.add(v))),
     toString: () => {
@@ -53,16 +55,68 @@ export const Polygon = (vertices: Vec2[]): Polygon => {
   };
 };
 
-export type Triangle = {
-  a: Vec2;
-  b: Vec2;
-  c: Vec2;
-  translate: (v: Vec2) => Triangle;
-  polygon: () => Polygon;
-  containsPoint: (v: Vec2) => boolean;
-  toString: () => string;
-};
-const triangleContainsPoint = (t: Triangle, p: Vec2): boolean => {
+export const Triangle = (a: V, b: V, c: V): Triangle => ({
+  a,
+  b,
+  c,
+  vertices: () => [a, b, c],
+  triangles() {
+    return [this];
+  },
+  contains(v) {
+    if (isPolygon(v)) {
+      return (v as Polygon).vertices().every((v) => this.contains(v));
+    }
+    return triangleContains(this, v as V);
+  },
+  intersects(p) {
+    return this.vertices().some((v) => p.contains(v));
+  },
+  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
+  toString: () => `⟮${a}▽${b}▼${c}⟯`
+});
+
+export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => ({
+  a,
+  b,
+  c,
+  d,
+  vertices: () => [a, b, c, d],
+  triangles: () => [Triangle(a, b, c), Triangle(a, c, d)],
+  contains(p) {
+    return contains(this, p);
+  },
+  intersects(p) {
+    return intersects(this, p);
+  },
+  translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
+  toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
+});
+
+export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
+  Rhomb(V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf));
+
+export function contains(p: Polygon, q: Polygon | V): boolean {
+  if (isPolygon(q)) {
+    return (q as Polygon).vertices().every((v) => contains(p, v));
+  }
+  return p.triangles().some((t) => t.contains(q));
+}
+
+export function intersects(p: Polygon, q: Polygon): boolean {
+  // ...or, their bounding boxes intersect. Add only necessary complexity.
+  const pxM = Math.max(...p.vertices().map((p) => p.x));
+  const pxm = Math.min(...p.vertices().map((p) => p.x));
+  const pyM = Math.max(...p.vertices().map((p) => p.x));
+  const pym = Math.min(...p.vertices().map((p) => p.x));
+  const qxM = Math.max(...q.vertices().map((p) => p.x));
+  const qxm = Math.min(...q.vertices().map((p) => p.x));
+  const qyM = Math.max(...q.vertices().map((p) => p.x));
+  const qym = Math.min(...q.vertices().map((p) => p.x));
+  return !(pxM < qxm || pxm > qxM || pyM < qym || pym > qyM);
+}
+
+export const triangleContains = (t: Triangle, p: V): boolean => {
   const c = t.c.subtract(t.a);
   const b = t.b.subtract(t.a);
   const q = p.subtract(t.a);
@@ -80,34 +134,13 @@ const triangleContainsPoint = (t: Triangle, p: Vec2): boolean => {
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
 
-export const Triangle = (a: Vec2, b: Vec2, c: Vec2): Triangle => ({
-  a,
-  b,
-  c,
-  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
-  polygon: () => Polygon([a, b, c]),
-  containsPoint(v) {
-    return triangleContainsPoint(this, v);
-  },
-  toString: () => `⟮${a}▽${b}▼${c}⟯`
-});
-
-export type Rhomb = {
-  a: Vec2;
-  b: Vec2;
-  c: Vec2;
-  d: Vec2;
-  translate: (v: Vec2) => Rhomb;
-  polygon: () => Polygon;
-  toString: () => string;
-};
-
-export const Rhomb = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Rhomb => ({
-  a,
-  b,
-  c,
-  d,
-  translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
-  polygon: () => Polygon([a, b, c, d]),
-  toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
-});
+export function pathFromPolygon(poly: Polygon): Path2D {
+  const p = new Path2D();
+  p.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
+  poly
+    .vertices()
+    .slice(1)
+    .forEach((v) => p.lineTo(v.x, v.y));
+  p.closePath();
+  return p;
+}

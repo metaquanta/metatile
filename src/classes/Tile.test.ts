@@ -1,32 +1,31 @@
-import { Tile } from "./Tile";
 import { Polygon } from "./Polygon";
-import { Vec2 } from "./Vec2";
+import { V } from "./V";
 
 /*export type Tile = {
   polygon: Polygon,
   parent?: () => Tile,
   children: () => Tile[],
   draw: (ctx: CanvasRenderingContext2D) => void,
-  contains: (p: Vec2) => boolean,
-  intersectsRect: (p: Vec2) => boolean,
-  translate: (v: Vec2) => Tile
+  contains: (p: V) => boolean,
+  intersectsRect: (p: V) => boolean,
+  translate: (v: V) => Tile
 }
 
 export type Polygon = {
-  vertices: Vec2[],
+  vertices: V[],
   triangles: () => Triangle[],
-  contains: (p: Vec2) => boolean,
-  intersectsRect: (p: Vec2) => boolean,
+  contains: (p: V) => boolean,
+  intersectsRect: (p: V) => boolean,
   draw: (ctx: CanvasRenderingContext2D) => void,
-  translate: (v: Vec2) => Polygon
+  translate: (v: V) => Polygon
 }
 */
 
 test("polygon translates", () => {
-  const p = Polygon([Vec2(0, 0), Vec2(1, 1), Vec2(0, 2)]).translate(Vec2(1, 1));
-  const q = p.vertices[0];
-  const r = p.vertices[1];
-  const s = p.vertices[2];
+  const p = Polygon([V(0, 0), V(1, 1), V(0, 2)]).translate(V(1, 1));
+  const q = p.vertices()[0];
+  const r = p.vertices()[1];
+  const s = p.vertices()[2];
   expect(q.x).toBe(1);
   expect(q.y).toBe(1);
   expect(r.x).toBe(2);
@@ -35,49 +34,33 @@ test("polygon translates", () => {
   expect(s.y).toBe(3);
 });
 
-test("tile translates", () => {
-  const p = Tile(
-    Polygon([Vec2(0, 0), Vec2(1, 1), Vec2(0, 2)]).translate(Vec2(1, 1)),
-    () => []
-  );
-  const q = p.polygon.vertices[0];
-  const r = p.polygon.vertices[1];
-  const s = p.polygon.vertices[2];
-  expect(q.x).toBe(1);
-  expect(q.y).toBe(1);
-  expect(r.x).toBe(2);
-  expect(r.y).toBe(2);
-  expect(s.x).toBe(1);
-  expect(s.y).toBe(3);
-});
-
-/*export type Vec2 = {
+/*export type V = {
   x: number,
   y: number,
-  add: (u: Vec2) => Vec2,
-  invert: () => Vec2,
-  subtract: (u: Vec2) => Vec2,
-  scale: (a: number) => Vec2,
-  perp: () => Vec2,
-  dot: (u: Vec2) => number,
+  add: (u: V) => V,
+  invert: () => V,
+  subtract: (u: V) => V,
+  scale: (a: number) => V,
+  perp: () => V,
+  dot: (u: V) => number,
   toString: () => string,
   magnitude: () => number
 }
 
 export type Triangle = {
-  a: Vec2,
-  b: Vec2,
-  c: Vec2,
-  translate: (v: Vec2) => Triangle,
+  a: V,
+  b: V,
+  c: V,
+  translate: (v: V) => Triangle,
   polygon: () => Polygon
 }
 
 export type Rhomb = {
-  a: Vec2,
-  b: Vec2,
-  c: Vec2,
-  d: Vec2,
-  translate: (v: Vec2) => Rhomb,
+  a: V,
+  b: V,
+  c: V,
+  d: V,
+  translate: (v: V) => Rhomb,
   polygon: () => Polygon
 }
 

@@ -1,16 +1,7 @@
 import { Tile } from "../classes/Tile";
-import { Vec2 } from "../classes/Vec2";
+import { V } from "../classes/V";
 
 export type Colorer = (t: Tile) => string;
-
-export const colorStreamer = (
-  colorer: (t: Tile) => string
-): (() => Generator<Colorer>) =>
-  function* () {
-    while (true) {
-      yield colorer;
-    }
-  };
 
 export const colorAngles = (
   numParts: number,
@@ -19,10 +10,11 @@ export const colorAngles = (
   l: number,
   alpha = 1.0
 ): ((t: Tile) => string) => (t) => {
-  const th = theta(t.polygon.vertices[1].subtract(t.polygon.vertices[0]));
+  const th = theta(t.vertices()[1].subtract(t.vertices()[0]));
+  const variant = 1;
   const a =
     ((th * 360) / numParts / Math.PI / 2 +
-      ((t.variant || 1) * partMult * 360) / numParts) %
+      ((variant || 1) * partMult * 360) / numParts) %
     360;
   const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
   return color;
@@ -41,6 +33,6 @@ export const colorStream: (
   yield* colorStream(n, s, l);
 };
 
-export const theta = (a: Vec2): number => {
+export const theta = (a: V): number => {
   return Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0);
 };

@@ -1,9 +1,8 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-10-tiles/
 
-import { TileWithParent } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
-import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
+import { V } from "../classes/V";
+import { TileSet, TriangleTile } from "../classes/Tile";
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: Triangle) => {
@@ -49,23 +48,11 @@ const children = (t: Triangle) => {
   ];
 };
 
-const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
-  tile(
-    Triangle(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp()).translate(o),
-    0
+const root = (l: V): TriangleTile =>
+  TriangleTile(
+    Triangle(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp()),
+    parent,
+    children
   );
 
-const tile = (t: Triangle, depth: number): TileWithParent =>
-  TileWithParent(
-    t.polygon(),
-    () => children(t).map((c) => tile(c, depth - 1)),
-    () => tile(parent(t), depth + 1),
-    depth
-  );
-
-export default (): Tiling => ({
-  getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?) =>
-    tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2
-});
+export default TileSet(root);

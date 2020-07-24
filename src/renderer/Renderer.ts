@@ -1,13 +1,13 @@
+import { Polygon } from "../classes/Polygon";
 import { Tile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
+import { Colorer } from "./Colorer";
 import draw from "./DrawTile";
 
 export type Renderer = {
-  //setDrawTiles: (f: (t: Tile, ctx: CanvasRenderingContext2D) => void) => void;
-  setTileStream: (tiles: Generator<Tile, void, ViewPort>) => void;
-  //setfillColorer: (c: Generator<Colorer>) => void;
-  //setStrokeColorer: (c: Generator<Colorer>) => void;
-  //setViewPort: (vp: ViewPort | undefined) => void;
+  setTileStream: (tiles: (vp: Polygon) => Generator<Tile>) => void;
+  setFillColorer: (c: Colorer) => void;
+  setStrokeColorer: (c: Colorer) => void;
 };
 
 type Looper = {
@@ -20,21 +20,29 @@ type Looper = {
 };
 
 type PrivateRenderer = Renderer & {
-  //f: ((vp: ViewPort | undefined) => Generator<Tile>) | undefined;
   tiles: Generator<Tile> | undefined;
-  //fillColorers: Generator<(t: Tile) => string> | undefined;
-  //strokeColorers: Generator<(t: Tile) => string> | undefined;
-  //drawTile: ((t: Tile, ctx: CanvasRenderingContext2D) => void) | undefined;
   renderNext: () => void;
   clearCanvas: () => void;
   ctx: CanvasRenderingContext2D;
   vp: ViewPort;
+  stop: () => void;
+  fillColorer: Colorer | undefined;
+  strokeColorer: Colorer | undefined;
 };
 
-const renderer = (
+export function Renderer(
   canvas: HTMLCanvasElement,
   viewPort: ViewPort
-): PrivateRenderer => {
+): Renderer {
+  const rrElem = canvas as HTMLCanvasElement & { ___renderer: PrivateRenderer };
+  if (rrElem.___renderer) {
+    if (rrElem.___renderer.vp === viewPort) {
+      return rrElem.___renderer;
+    } else {
+      rrElem.___renderer.stop();
+    }
+  }
+
   const looper: Looper = {
     stopped: true,
     speed: 100,
@@ -42,6 +50,9 @@ const renderer = (
     iter: undefined,
     start(task) {
       console.log(`Renderer:Looper.start()`);
+      if (!this.stopped) {
+        this.stop().then(() => this.start(task));
+      }
       this.stopped = false;
       this.iter = () => {
         if (this.stopped) {
@@ -56,7 +67,10 @@ const renderer = (
       window.requestAnimationFrame(() => this.iter && this.iter());
     },
     stop(): Promise<unknown> {
-      console.log(`Renderer:Looper.stop()`);
+      console.log(`Renderer:Looper.stop() [${this.stopped}]`);
+      if (this.stopped) {
+        return Promise.resolve();
+      }
       const promise = new Promise((f) => {
         this.resolveStopped = f;
       });
@@ -64,79 +78,37 @@ const renderer = (
       return promise;
     }
   };
-  return {
+
+  const renderer: PrivateRenderer = {
     tiles: undefined,
     ctx: <CanvasRenderingContext2D>canvas.getContext("2d"), //todo
     vp: viewPort,
-
-    /*setDrawTiles(f) {
-      this.drawTile = f;
-      console.log(
-        `Renderer.setDrawTiles() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.f && this.ctx) looper.restart(this);
-    },*/
+    fillColorer: undefined,
+    strokeColorer: undefined,
     setTileStream(tiles) {
-      this.tiles = tiles;
+      this.tiles = tiles(this.vp);
       console.log(`Renderer.setTileStream() - tiles:${tiles}`);
       looper.start(() => this.renderNext());
     },
-    /*setfillColorer(c) {
-      this.fillColorers = c;
-      console.log(
-        `Renderer.setfillColorer() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.f && this.ctx && this.drawTile) looper.restart(this);
+    setFillColorer(c) {
+      this.fillColorer = c;
+      if (this.tiles) {
+        console.log(`Renderer.setFillColorer(${c}) - tiles:${this.tiles}`);
+        looper.start(() => this.renderNext());
+      }
     },
     setStrokeColorer(c) {
-      this.strokeColorers = c;
-      console.log(
-        `Renderer.setStrokeColorer() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.f && this.ctx && this.drawTile) looper.restart(this);
-    },
-    setContext(ctx) {
-      this.ctx = this.ctx || ctx;
-      console.log(
-        `Renderer.setContext() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.f && this.drawTile) looper.restart(this);
-    },
-    setViewPort(vp) {
-      this.vp = vp;
-      console.log(
-        `Renderer.setViewPort() - tiles:${this.f !== undefined}, ctx:${this.ctx !== undefined
-        }, d():${this.drawTile !== undefined}`
-      );
-      if (this.f && this.ctx && this.drawTile) looper.restart(this);
-    },*/
-    renderNext() {
-      /*if (params.fillColorer && this.fillColorers === undefined) {
-        console.log(`Renderer - fillColorer required but missing`);
-        return;
-      }
-      if (params.strokeColorer && this.strokeColorers === undefined) {
-        console.log(`Renderer - strokeColorer required but missing`);
-        return;
-      }
-      if (params.viewPort && this.vp === undefined) {
-        console.log(`Renderer - viewPort required but missing`);
-        return;
-      }
-      if (this.tiles === undefined && this.f) this.tiles = this.f(this.vp);
-      if (this.tiles === undefined) {
-        console.log(`Renderer - Tile Generator missing!!!`);
-        return;
-      }*/
-      //if (this.f && this.drawTile && this.ctx) {
+      this.strokeColorer = c;
       if (this.tiles) {
-        const { done: tilesDone, value: tilesValue } = this.tiles.next(this.vp);
+        console.log(`Renderer.setStrokeColorer(${c}) - tiles:${this.tiles}`);
+        looper.start(() => this.renderNext());
+      }
+    },
+    renderNext() {
+      if (this.tiles) {
+        const { done: tilesDone, value: tilesValue } = this.tiles.next();
         if (!tilesDone && tilesValue) {
-          this.ctx.fillStyle = "pink"; //todo
+          this.ctx.fillStyle = "rgba(255, 192, 203, 0.3)"; //todo
 
           this.ctx.strokeStyle = "black"; //todo
           draw(tilesValue, this.ctx);
@@ -149,13 +121,12 @@ const renderer = (
     },
     clearCanvas() {
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    },
+    stop() {
+      looper.stop().then(() => this.clearCanvas());
     }
   };
-};
 
-export function Renderer(
-  canvas: HTMLCanvasElement,
-  viewport: ViewPort
-): Renderer {
-  return renderer(canvas, viewport);
+  rrElem.___renderer = renderer;
+  return renderer;
 }

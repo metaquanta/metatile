@@ -1,37 +1,31 @@
-import { TileWithParent } from "../classes/Tile";
+import { TileSet, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
-import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
+import { V } from "../classes/V";
 
-const root = (l: Vec2, origin: Vec2 = Vec2(0, 0)): TileWithParent =>
-  tile(Triangle(l.scale(1 / 2), Vec2(0, 0), l.perp()).translate(origin), 0);
-
-const tile = (t: Triangle, depth: number): TileWithParent =>
-  TileWithParent(
-    t.polygon(),
-    () => generateFromA(subAFromParent(t), depth - 1),
-    () => parentFromC(t, depth + 1),
-    depth
+const root = (l: V): TriangleTile =>
+  TriangleTile(
+    Triangle(l.scale(1 / 2), V(0, 0), l.perp()),
+    parentFromC,
+    children
   );
 
+const children = (t: Triangle) => generateFromA(subAFromParent(t));
+
 // A->B is S side, B->C is M side, C->A is L side.
-const parentFromC = (t: Triangle, depth: number) => {
+const parentFromC = (t: Triangle): Triangle => {
   const m = t.b.subtract(t.c);
   const s = t.b.subtract(t.a);
   //console.log(m,s)
-  return tile(
-    Triangle(t.a.add(m.scale(0.5)), t.b.add(s), t.a.subtract(m.scale(2))),
-    depth
-  );
+  return Triangle(t.a.add(m.scale(0.5)), t.b.add(s), t.a.subtract(m.scale(2)));
 };
 
-const subAFromParent = (t: Triangle) => {
+const subAFromParent = (t: Triangle): Triangle => {
   const l = t.a.subtract(t.c);
   const m = t.b.subtract(t.c);
   return Triangle(t.c.add(m.scale(0.5)), t.c.add(l.scale(2 / 5)), t.c);
 };
 
-const generateFromA = (t: Triangle, depth: number) => {
+const generateFromA = (t: Triangle) => {
   //      A
   //   /  |
   // C----B
@@ -60,18 +54,7 @@ const generateFromA = (t: Triangle, depth: number) => {
   const b = B(t);
   const c = C(b);
   const d = D(c);
-  return [
-    tile(c, depth),
-    tile(t, depth),
-    tile(b, depth),
-    tile(d, depth),
-    tile(E(d), depth)
-  ];
+  return [c, t, b, d, E(d)];
 };
 
-export default (): Tiling => ({
-  getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?) =>
-    tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2
-});
+export default TileSet(root);
