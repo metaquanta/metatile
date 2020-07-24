@@ -1,15 +1,14 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/viper/
 
-import { TileWithParent } from "../classes/Tile";
+import { TileSet, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
-import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
+import { V } from "../classes/V";
 
 const ISQRT15 = 1 / Math.sqrt(15);
 
-const fromVec = (l: Vec2) => {
+const fromVec = (l: V) => {
   const r = l.perp().scale(ISQRT15);
-  return Triangle(r, l, r.invert());
+  return TriangleTile(Triangle(r, l, r.invert()), parent, children);
 };
 
 const parent = (t: Triangle) => {
@@ -43,18 +42,4 @@ const children = (t: Triangle) => {
   return [c3, c1, c2, c4, c5, c6, c7, c8, c9];
 };
 
-const tile = (t: Triangle, depth: number): TileWithParent =>
-  TileWithParent(
-    t.polygon(),
-    () => children(t).map((c) => tile(c, depth - 1)),
-    () => tile(parent(t), depth + 1),
-    depth
-  );
-
-export default (): Tiling => ({
-  getTile: (seed, origin = Vec2(0, 0)) =>
-    tile(fromVec(seed).translate(origin), 0),
-  tileGenerator: (tile, includeAncestors?) =>
-    tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2
-});
+export default TileSet(fromVec);

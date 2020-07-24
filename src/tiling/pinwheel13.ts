@@ -1,9 +1,8 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-13-tiles/
 
-import { TileWithParent } from "../classes/Tile";
+import { TileSet, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
-import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
+import { V } from "../classes/V";
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: Triangle) => {
@@ -14,7 +13,7 @@ const parent = (t: Triangle) => {
   );
 };
 
-const children = (t: Triangle, v: number): [Triangle, number][] => {
+const children = (t: Triangle): Triangle[] => {
   // 1
   // m2  m3  4
   // 5  6  m7  m8  9
@@ -43,37 +42,23 @@ const children = (t: Triangle, v: number): [Triangle, number][] => {
   const c11 = Triangle(c10.c, c10.b.add(s.scale(1 / 2)), c10.a);
 
   return [
-    [c7, (v + 1) % 2],
-    [c1, v],
-    [c2, (v + 1) % 2],
-    [c3, (v + 1) % 2],
-    [c4, v],
-    [c5, v],
-    [c6, v],
-    [c3.translate(m.scale(1 / 3)), (v + 1) % 2],
-    [c1.translate(m.scale(2 / 3)), v],
-    [c10, (v + 1) % 2],
-    [c11, (v + 1) % 2],
-    [Triangle(c11.a, c11.b, t.b), v],
-    [Triangle(t.a, c10.b, c10.c), v]
+    c7,
+    c1,
+    c2,
+    c3,
+    c4,
+    c5,
+    c6,
+    c3.translate(m.scale(1 / 3)),
+    c1.translate(m.scale(2 / 3)),
+    c10,
+    c11,
+    Triangle(c11.a, c11.b, t.b),
+    Triangle(t.a, c10.b, c10.c)
   ];
 };
 
-const root = (l: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent =>
-  tile(Triangle(l.perp().scale(2 / 3), Vec2(0, 0), l).translate(o), 0, 0);
+const root = (l: V): TriangleTile =>
+  TriangleTile(Triangle(l.perp().scale(2 / 3), V(0, 0), l), parent, children);
 
-const tile = (t: Triangle, v: number, depth: number): TileWithParent =>
-  TileWithParent(
-    t.polygon(),
-    () => children(t, v).map((c) => tile(c[0], c[1], depth - 1)),
-    () => tile(parent(t), (v + 1) % 2, depth + 1),
-    depth,
-    v
-  );
-
-export default (): Tiling => ({
-  getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?) =>
-    tileGenerator(tile, 0, includeAncestors),
-  numVariants: 2
-});
+export default TileSet(root);

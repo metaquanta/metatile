@@ -1,16 +1,10 @@
-import { Tile, TileWithParent } from "../classes/Tile";
+import { RhombTile, TileSet } from "../classes/Tile";
 import { Rhomb } from "../classes/Polygon";
-import { Vec2 } from "../classes/Vec2";
-import { tileGenerator, Tiling } from "../classes/Tiling";
+import { V } from "../classes/V";
 
 const SQRT2 = Math.sqrt(2);
 
-enum TileVariants {
-  Square,
-  Rhomb
-}
-
-const squareChildren = (sq: Rhomb, depth: number): Tile[] => {
+const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
   const r = sq.translate(sq.a.invert());
   const unit_d = r.c.scale(1 / (2 + SQRT2));
   const unit_d2 = r.d.subtract(r.b).scale(1 / (2 + SQRT2));
@@ -33,19 +27,23 @@ const squareChildren = (sq: Rhomb, depth: number): Tile[] => {
     .add(sq.a);
   const d = r.d.scale(1 / (1 + SQRT2)).add(sq.a);
   return [
-    square(inner_sq, depth),
-    rhomb(Rhomb(sq.a, a, inner_sq.d, inner_sq.c)),
-    rhomb(Rhomb(sq.b, b, inner_sq.a, inner_sq.d)),
-    rhomb(Rhomb(sq.d, inner_sq.b, inner_sq.a, c)),
-    rhomb(Rhomb(sq.a, inner_sq.c, inner_sq.b, d)),
-    square(Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d)), depth),
-    square(Rhomb(sq.c, inner_sq.a, b, b.add(unit_d)), depth)
+    [
+      inner_sq,
+      Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d)),
+      Rhomb(sq.c, inner_sq.a, b, b.add(unit_d))
+    ],
+    [
+      Rhomb(sq.a, a, inner_sq.d, inner_sq.c),
+      Rhomb(sq.b, b, inner_sq.a, inner_sq.d),
+      Rhomb(sq.d, inner_sq.b, inner_sq.a, c),
+      Rhomb(sq.a, inner_sq.c, inner_sq.b, d)
+    ]
     //square(Rhomb(sq.c, c.add(unit_d), c, inner_sq.a), depth),
     //square(Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b), depth),
   ];
 };
 
-const rhombChildren = (rh: Rhomb): Tile[] => {
+const rhombChildren = (rh: Rhomb): [Rhomb[], Rhomb[]] => {
   const r = rh.translate(rh.a.invert());
   const u = r.b.scale(1 / (1 + SQRT2));
   const v = r.d.scale(1 / (1 + SQRT2));
@@ -58,13 +56,13 @@ const rhombChildren = (rh: Rhomb): Tile[] => {
   ).translate(rh.a);
   const rh3 = Rhomb(rh.b, rh2.c, rh.d, rh1.c);
   return [
-    square(Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c)),
-    square(Rhomb(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b))),
-    square(Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)),
-    square(Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))),
-    rhomb(rh1),
-    rhomb(rh2),
-    rhomb(rh3)
+    [
+      Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
+      Rhomb(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b)),
+      Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c),
+      Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))
+    ],
+    [rh1, rh2, rh3]
   ];
 };
 
@@ -79,24 +77,36 @@ const parent = (rh: Rhomb) => {
   );
 };
 
-const square = (rh: Rhomb, depth = -100): TileWithParent =>
-  TileWithParent(
-    rh.polygon(),
-    () => squareChildren(rh, depth - 1),
-    () => square(parent(rh), depth + 1),
-    depth,
-    TileVariants.Square
-  );
-
-const rhomb = (rh: Rhomb): Tile =>
-  Tile(rh.polygon(), () => rhombChildren(rh), TileVariants.Rhomb);
-
-const root = (p: Vec2, o: Vec2 = Vec2(0, 0)): TileWithParent => {
+const root = (p: V): Rhomb => {
   const q = p.perp();
-  return square(Rhomb(Vec2(0, 0), p, q.add(p), q).translate(o), 0);
+  return Rhomb(V(0, 0), p, q.add(p), q);
 };
 
-export const testTileSet = (): void => {
+function AmmBeeRhomb(
+  rhomb: Rhomb,
+  parent: () => RhombTile,
+  children: (r: Rhomb) => [Rhomb[], Rhomb[]]
+): RhombTile {
+  return {
+    ...rhomb,
+    parent,
+    children() {
+      const [fatChildren, thinChildren] = children(this);
+      return fatChildren
+        .map((c) => AmmBeeRhomb(c, () => this, squareChildren))
+        .concat(
+          thinChildren.map((c) => AmmBeeRhomb(c, () => this, rhombChildren))
+        );
+    },
+    translate: (v) => AmmBeeRhomb(rhomb.translate(v), parent, children)
+  };
+}
+
+function RootAmmBeeRhomb(r1: Rhomb): RhombTile {
+  return AmmBeeRhomb(r1, () => RootAmmBeeRhomb(parent(r1)), squareChildren);
+}
+
+/*export const testTileSet = (): void => {
   const sq = square(
     Rhomb(Vec2(0, 0), Vec2(400, 0), Vec2(400, 400), Vec2(0, 400)).translate(
       Vec2(1000, 700)
@@ -113,11 +123,6 @@ export const testTileSet = (): void => {
     });
     children[0].children().forEach((c) => c.getPath());
   }
-};
+};*/
 
-export default (): Tiling => ({
-  getTile: (seed, origin) => root(seed, origin),
-  tileGenerator: (tile, includeAncestors?) =>
-    tileGenerator(tile, -1, includeAncestors),
-  numVariants: 2
-});
+export default TileSet((seed) => RootAmmBeeRhomb(root(seed)));

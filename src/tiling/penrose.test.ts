@@ -1,5 +1,5 @@
-import tiling from "./penrose";
-import { Vec2 } from "../classes/Vec2";
+import { V } from "../classes/V";
+import { penrose } from "./penrose";
 
 /*const children1 = (r1: Rhomb) => {
   const r = r1.translate(r1.c.invert());
@@ -27,54 +27,54 @@ const children2 = (r2: Rhomb): Tile[] => {
 }*/
 
 test("penrose parent inverts children", () => {
-  const u = Vec2(400, 0);
-  const v = Vec2(900, 200);
-  const r = tiling().getTile(u, v);
+  const u = V(400, 0);
+  const v = V(900, 200);
+  const r = penrose.tileFromEdge(u, v);
   const s = r.parent().children()[0];
-  vecsEqual(r.polygon.vertices[0], s.polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[1], s.polygon.vertices[1]);
-  vecsEqual(r.polygon.vertices[2], s.polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[3], s.polygon.vertices[3]);
+  vecsEqual(r.vertices()[0], s.vertices()[0]);
+  vecsEqual(r.vertices()[1], s.vertices()[1]);
+  vecsEqual(r.vertices()[2], s.vertices()[2]);
+  vecsEqual(r.vertices()[3], s.vertices()[3]);
 });
 
 test("penrose romb1 children", () => {
-  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200));
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200));
   const c = r.children();
-  vecsEqual(r.polygon.vertices[2], c[0].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[1], c[1].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[1].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[3], c[2].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[2].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[1], c[3].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[3], c[4].polygon.vertices[0]);
+  vecsEqual(r.vertices()[2], c[0].vertices()[0]);
+  vecsEqual(r.vertices()[1], c[1].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[1].vertices()[2]);
+  vecsEqual(r.vertices()[3], c[2].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[2].vertices()[2]);
+  vecsEqual(r.vertices()[1], c[3].vertices()[0]);
+  vecsEqual(r.vertices()[3], c[4].vertices()[0]);
 });
 
 test("penrose romb1 grand-children", () => {
-  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200)).children()[0];
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[0];
   const c = r.children();
-  vecsEqual(r.polygon.vertices[2], c[0].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[1], c[1].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[1].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[3], c[2].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[2].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[1], c[3].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[3], c[4].polygon.vertices[0]);
+  vecsEqual(r.vertices()[2], c[0].vertices()[0]);
+  vecsEqual(r.vertices()[1], c[1].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[1].vertices()[2]);
+  vecsEqual(r.vertices()[3], c[2].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[2].vertices()[2]);
+  vecsEqual(r.vertices()[1], c[3].vertices()[0]);
+  vecsEqual(r.vertices()[3], c[4].vertices()[0]);
 });
 
 test("penrose romb2 children", () => {
-  const r = tiling().getTile(Vec2(400, 0), Vec2(900, 200)).children()[3];
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[3];
   const c = r.children();
-  vecsEqual(r.polygon.vertices[0], c[0].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[1], c[0].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[0], c[1].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[3], c[1].polygon.vertices[2]);
-  vecsEqual(r.polygon.vertices[2], c[2].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[2].polygon.vertices[1]);
-  vecsEqual(r.polygon.vertices[2], c[3].polygon.vertices[0]);
-  vecsEqual(r.polygon.vertices[0], c[3].polygon.vertices[3]);
+  vecsEqual(r.vertices()[0], c[0].vertices()[0]);
+  vecsEqual(r.vertices()[1], c[0].vertices()[2]);
+  vecsEqual(r.vertices()[0], c[1].vertices()[0]);
+  vecsEqual(r.vertices()[3], c[1].vertices()[2]);
+  vecsEqual(r.vertices()[2], c[2].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[2].vertices()[1]);
+  vecsEqual(r.vertices()[2], c[3].vertices()[0]);
+  vecsEqual(r.vertices()[0], c[3].vertices()[3]);
 });
 
-const vecsEqual = (u: Vec2, v: Vec2) => {
+const vecsEqual = (u: V, v: V) => {
   expect(u.x).toBeCloseTo(v.x);
   expect(u.y).toBeCloseTo(v.y);
 };

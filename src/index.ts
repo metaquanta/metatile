@@ -1,7 +1,7 @@
-import penrose from "./tiling/penrose";
-import { Vec2 } from "./classes/Vec2";
+import { penrose } from "./tiling/penrose";
 import { ViewPort } from "./classes/ViewPort";
 import { Renderer } from "./renderer/Renderer";
+import { Rect } from "./classes/Polygon";
 
 let MqTilingRenderer: Renderer | undefined = undefined;
 window.requestAnimationFrame(() => {
@@ -10,11 +10,8 @@ window.requestAnimationFrame(() => {
   if (vp)
     MqTilingRenderer = Renderer(
       <HTMLCanvasElement>el.getElementsByTagName("canvas")[0],
-      vp
+      Rect(500, 250, 2500, 750)
     );
-  const t = penrose();
-  if (MqTilingRenderer)
-    MqTilingRenderer.setTileStream(
-      t.tileGenerator(t.getTile(Vec2(35, 15), Vec2(1000, 1000)))()
-    );
+  const t = penrose.tile();
+  if (MqTilingRenderer) MqTilingRenderer.setTileStream(penrose.tiling(t).cover);
 });
