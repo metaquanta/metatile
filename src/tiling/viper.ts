@@ -42,4 +42,4 @@ const children = (t: Triangle) => {
   return [c3, c1, c2, c4, c5, c6, c7, c8, c9];
 };
 
-export default TileSet(fromVec);
+export default TileSet(fromVec, "triangle");

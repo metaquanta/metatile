@@ -7,6 +7,7 @@ import pinwheel5 from "./tiling/pinwheel5";
 import pinwheel10 from "./tiling/pinwheel10";
 import pinwheel13 from "./tiling/pinwheel13";
 import ammbee from "./tiling/ammann-beenker";
+import { colorAngles } from "./renderer/Colorer";
 
 const tileSets = [penrose, viper, pinwheel5, pinwheel10, pinwheel13, ammbee];
 
@@ -20,12 +21,15 @@ window.requestAnimationFrame(() => {
       vp
     );
   if (MqTilingRenderer) {
-    const tileSet = tileSets[5];
-    const tile = tileSet.tileFromEdge(V(25, 0), V(1500, 1500));
-
+    const tileSet = tileSets[2];
+    const tile = tileSet.tileFromEdge(V(50, 10), V(1500, 1500));
+    MqTilingRenderer.setFillColorer(colorAngles(50, 50, 1.0, tileSet.kinds, 2));
     MqTilingRenderer.setTileStream(
       tileSet.tiling(tile).cover
-      //tile.parent().children()
+      //tile
+      //.parent()
+      //.parent()
+      //.children()
       //.flatMap((t) => t.children())
       //.flatMap((t) => t.children())
       //.flatMap((t) => t.children())

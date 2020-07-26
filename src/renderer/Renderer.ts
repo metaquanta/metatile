@@ -1,8 +1,7 @@
-import { Polygon } from "../classes/Polygon";
+import { pathFromPolygon, Polygon } from "../classes/Polygon";
 import { Tile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
 import { Colorer } from "./Colorer";
-import draw from "./DrawTile";
 
 export type Renderer = {
   setTileStream: (
@@ -40,6 +39,15 @@ type PrivateRenderer = Renderer & {
 
 function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
   return (f as () => T).call !== undefined;
+}
+
+export default function draw(
+  tile: Polygon,
+  context: CanvasRenderingContext2D
+): void {
+  const p = pathFromPolygon(tile);
+  context.stroke(p);
+  context.fill(p);
 }
 
 export function Renderer(

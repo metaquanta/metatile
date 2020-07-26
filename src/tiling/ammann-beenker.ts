@@ -1,3 +1,5 @@
+// Reference: https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
+
 import { RhombTile, TileSet } from "../classes/Tile";
 import { Polygon, Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
@@ -93,10 +95,12 @@ const root = (p: V): Rhomb => {
 function AmmBeeRhomb(
   rhomb: Rhomb,
   parent: (r: Rhomb) => RhombTile,
-  children: (r: Rhomb) => [Rhomb[], Rhomb[]]
+  children: (r: Rhomb) => [Rhomb[], Rhomb[]],
+  kind: string
 ): RhombTile {
   return {
     ...rhomb,
+    rotationalSymmetry: kind == "square" ? 4 : 2,
     contains(p: Polygon | V, depth = 0) {
       if (depth === 0) return rhomb.contains(p);
       return rhomb.contains(p) && firstChild(rhomb).contains(p);
@@ -111,17 +115,28 @@ function AmmBeeRhomb(
     children() {
       const [fatChildren, thinChildren] = children(this);
       return fatChildren
-        .map((c) => AmmBeeRhomb(c, () => this, squareChildren))
+        .map((c) => AmmBeeRhomb(c, () => this, squareChildren, "square"))
         .concat(
-          thinChildren.map((c) => AmmBeeRhomb(c, () => this, rhombChildren))
+          thinChildren.map((c) =>
+            AmmBeeRhomb(c, () => this, rhombChildren, "rhomb")
+          )
         );
     },
-    translate: (v) => AmmBeeRhomb(rhomb.translate(v), parent, children)
+    translate: (v) => AmmBeeRhomb(rhomb.translate(v), parent, children, kind),
+    kind
   };
 }
 
 function RootAmmBeeRhomb(r1: Rhomb): RhombTile {
-  return AmmBeeRhomb(r1, (r) => RootAmmBeeRhomb(parent(r)), squareChildren);
+  return AmmBeeRhomb(
+    r1,
+    (r) => RootAmmBeeRhomb(parent(r)),
+    squareChildren,
+    "square"
+  );
 }
 
-export default TileSet((seed) => RootAmmBeeRhomb(root(seed)));
+export default TileSet((seed) => RootAmmBeeRhomb(root(seed)), [
+  "square",
+  "rhomb"
+]);

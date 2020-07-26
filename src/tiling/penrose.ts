@@ -1,3 +1,5 @@
+// Reference: https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/
+
 import { RhombTile, TileSet } from "../classes/Tile";
 import { Polygon, Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
@@ -22,10 +24,13 @@ type PenroseRhomb = RhombTile;
 function PenroseRhomb(
   rhomb: Rhomb,
   parent: (r: Rhomb) => PenroseRhomb,
-  children: (r: Rhomb) => [Rhomb[], Rhomb[]]
+  children: (r: Rhomb) => [Rhomb[], Rhomb[]],
+  kind: string
 ): PenroseRhomb {
   return {
     ...rhomb,
+    kind,
+    rotationalSymmetry: 2,
     contains(p: Polygon | V, depth = 0) {
       if (!rhomb.contains(p)) return false;
       const d = Math.min(depth, 4);
@@ -49,12 +54,14 @@ function PenroseRhomb(
     children() {
       const [fatChildren, thinChildren] = children(this);
       return fatChildren
-        .map((c) => PenroseRhomb(c, () => this, children1))
+        .map((c) => PenroseRhomb(c, () => this, children1, "fat rhomb"))
         .concat(
-          thinChildren.map((c) => PenroseRhomb(c, () => this, children2))
+          thinChildren.map((c) =>
+            PenroseRhomb(c, () => this, children2, "skinny rhomb")
+          )
         );
     },
-    translate: (v) => PenroseRhomb(rhomb.translate(v), parent, children)
+    translate: (v) => PenroseRhomb(rhomb.translate(v), parent, children, kind)
   };
 }
 
@@ -63,7 +70,7 @@ function root(r1: Rhomb): PenroseRhomb {
   const u = r.b.scale(IF);
   const v = r.d.scale(IF);
   const p = Rhomb(u.add(v), v, r.a, u).translate(r1.a);
-  return PenroseRhomb(p, root, children1);
+  return PenroseRhomb(p, root, children1, "fat rhomb");
 }
 
 const firstChild = (p: Rhomb): Rhomb => {
@@ -100,4 +107,7 @@ const children2 = (r2: Rhomb): [Rhomb[], Rhomb[]] => {
   ];
 };
 
-export default TileSet((seed) => root(rhomb1(seed)));
+export default TileSet((seed) => root(rhomb1(seed)), [
+  "fat rhomb",
+  "skinny rhomb"
+]);
