@@ -8,7 +8,7 @@ export type ViewPort = Rhomb & {
   toString: () => string;
 };
 
-export const ViewPort = (outer: HTMLDivElement): ViewPort | undefined => {
+export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   // How is this supposed to be done in typescript?
   const vp = outer as HTMLDivElement & { ___viewPort: ViewPort };
 
