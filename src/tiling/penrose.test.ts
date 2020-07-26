@@ -1,77 +1,44 @@
 import { V } from "../classes/V";
-import { penrose } from "./penrose";
-
-/*const children1 = (r1: Rhomb) => {
-  const r = r1.translate(r1.c.invert());
-  const u = r.b.scale(DF);
-  const v = r.d.scale(DF);
-  return [
-    tile1(Rhomb(r.c, v, u.add(v), u)),
-    tile1(Rhomb(r.b, u.add(v), r.a, r.a.subtract(u.add(v)).add(r.b))),
-    tile1(Rhomb(r.d, r.a.subtract(u.add(v)).add(r.d), r.a, u.add(v))),
-    tile2(Rhomb(r.b, r.b.add(v.invert()), u, u.add(v))),
-    tile2(Rhomb(r.d, u.add(v), v, r.d.add(u.invert())))
-  ].map(r => r.translate(r1.c));
-}
-
-const children2 = (r2: Rhomb): Tile[] => {
-  const r = r2.translate(r2.a.invert());
-  const u = r.b.scale(DF);
-  const v = r.d.scale(DF);
-  return [
-    tile1(Rhomb(r.a, v.invert(), r.b, r.b.add(v))),
-    tile1(Rhomb(r.a, r.d.add(u), r.d, u.invert())),
-    tile2(Rhomb(r.c, r.a, v.add(r.b), r.c.add(v).add(r.b))),
-    tile2(Rhomb(r.c, r.c.add(u).add(r.d), u.add(r.d), r.a))
-  ].map(r => r.translate(r2.a))
-}*/
+import penrose from "./penrose";
 
 test("penrose parent inverts children", () => {
   const u = V(400, 0);
   const v = V(900, 200);
   const r = penrose.tileFromEdge(u, v);
   const s = r.parent().children()[0];
-  vecsEqual(r.vertices()[0], s.vertices()[0]);
-  vecsEqual(r.vertices()[1], s.vertices()[1]);
-  vecsEqual(r.vertices()[2], s.vertices()[2]);
-  vecsEqual(r.vertices()[3], s.vertices()[3]);
+  vecsEqual(r.a, s.a);
+  vecsEqual(r.b, s.b);
+  vecsEqual(r.c, s.c);
+  vecsEqual(r.d, s.d);
 });
 
 test("penrose romb1 children", () => {
   const r = penrose.tileFromEdge(V(400, 0), V(900, 200));
   const c = r.children();
-  vecsEqual(r.vertices()[2], c[0].vertices()[0]);
-  vecsEqual(r.vertices()[1], c[1].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[1].vertices()[2]);
-  vecsEqual(r.vertices()[3], c[2].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[2].vertices()[2]);
-  vecsEqual(r.vertices()[1], c[3].vertices()[0]);
-  vecsEqual(r.vertices()[3], c[4].vertices()[0]);
+  vecsEqual(r.c, c[0].a);
+  vecsEqual(r.d, c[1].a);
+  vecsEqual(r.a, c[1].c);
+  vecsEqual(r.b, c[2].a);
 });
 
-test("penrose romb1 grand-children", () => {
+/*test("penrose romb1 grand-children", () => {
   const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[0];
   const c = r.children();
-  vecsEqual(r.vertices()[2], c[0].vertices()[0]);
-  vecsEqual(r.vertices()[1], c[1].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[1].vertices()[2]);
-  vecsEqual(r.vertices()[3], c[2].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[2].vertices()[2]);
-  vecsEqual(r.vertices()[1], c[3].vertices()[0]);
-  vecsEqual(r.vertices()[3], c[4].vertices()[0]);
-});
+  vecsEqual(r.c, c[0].a);
+  vecsEqual(r.b, c[1].a);
+  vecsEqual(r.a, c[1].c);
+  vecsEqual(r.d, c[2].a);
+  vecsEqual(r.a, c[2].c);
+  vecsEqual(r.b, c[3].a);
+  vecsEqual(r.d, c[4].a);
+});*/
 
 test("penrose romb2 children", () => {
-  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[3];
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[2];
   const c = r.children();
-  vecsEqual(r.vertices()[0], c[0].vertices()[0]);
-  vecsEqual(r.vertices()[1], c[0].vertices()[2]);
-  vecsEqual(r.vertices()[0], c[1].vertices()[0]);
-  vecsEqual(r.vertices()[3], c[1].vertices()[2]);
-  vecsEqual(r.vertices()[2], c[2].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[2].vertices()[1]);
-  vecsEqual(r.vertices()[2], c[3].vertices()[0]);
-  vecsEqual(r.vertices()[0], c[3].vertices()[3]);
+  vecsEqual(r.a, c[0].c);
+  vecsEqual(r.d, c[0].a);
+  vecsEqual(r.c, c[1].a);
 });
 
 const vecsEqual = (u: V, v: V) => {

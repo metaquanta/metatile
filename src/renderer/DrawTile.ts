@@ -1,8 +1,7 @@
-import { pathFromPolygon } from "../classes/Polygon";
-import { Tile } from "../classes/Tile";
+import { pathFromPolygon, Polygon } from "../classes/Polygon";
 
 export default function draw(
-  tile: Tile,
+  tile: Polygon,
   context: CanvasRenderingContext2D
 ): void {
   const p = pathFromPolygon(tile);
