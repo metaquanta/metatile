@@ -5,6 +5,8 @@ const s = V(31, 17);
 const t = V(97, 109);
 
 export interface Tile extends Polygon {
+  kind: string;
+  rotationalSymmetry: number;
   parent: () => this;
   children: () => this[];
   intersects: (p: Polygon, depth?: number) => boolean;
@@ -12,6 +14,7 @@ export interface Tile extends Polygon {
 }
 
 export interface TileSet<T extends Tile> {
+  kinds: string[];
   tile: () => T;
   tileFromEdge: (edge: V, pos?: V) => T;
   tiling: (tile: T) => Tiling<T>;
@@ -25,8 +28,12 @@ export type TriangleTile = Tile & Triangle;
 
 export type RhombTile = Tile & Rhomb;
 
-export function TileSet<T extends Tile>(f: (edge: V) => T): TileSet<T> {
+export function TileSet<T extends Tile>(
+  f: (edge: V) => T,
+  kinds: string[] | string
+): TileSet<T> {
   return {
+    kinds: typeof kinds == "string" ? [kinds] : kinds,
     tile: () => f(s).translate(t),
     tileFromEdge: (u: V, v?: V) => f(u).translate(v || V(0, 0)),
     tiling: (tile) => Tiling(tile)
@@ -41,14 +48,23 @@ export function Tiling<T extends Tile>(tile: T): Tiling<T> {
 
 export function TriangleTile(
   triangle: Triangle,
-  parent: (t: Triangle) => Triangle,
-  children: (t: Triangle) => Triangle[]
+  parent: (t: TriangleTile) => Triangle & { kind: string },
+  children: (t: TriangleTile) => (Triangle & { kind: string })[],
+  kind = "triangle"
 ): TriangleTile {
   return {
     ...triangle,
-    parent: () => TriangleTile(parent(triangle), parent, children),
-    children: () =>
-      children(triangle).map((c) => TriangleTile(c, parent, children)),
+    kind,
+    rotationalSymmetry: 1,
+    parent() {
+      const p = parent(this);
+      return TriangleTile(p, parent, children, p.kind);
+    },
+    children() {
+      return children(this).map((c) =>
+        TriangleTile(c, parent, children, c.kind)
+      );
+    },
     translate(v) {
       return TriangleTile(triangle.translate(v), parent, children);
     }
