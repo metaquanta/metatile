@@ -3,9 +3,12 @@ import { V } from "./V";
 export interface Polygon {
   vertices: () => V[];
   triangles: () => Triangle[];
+  sides: () => number;
   contains: (p: V | Polygon) => boolean;
   intersects: (p: Polygon) => boolean;
+  center: () => V;
   translate: (v: V) => this;
+  equals: (p: Polygon) => boolean;
   toString: () => string;
 }
 
@@ -36,13 +39,20 @@ export const Polygon = (vertices: V[]): Polygon => {
   return {
     vertices: () => vertices,
     triangles,
+    sides: () => vertices.length,
     contains(p) {
       return contains(this, p);
     },
     intersects(p) {
       return intersects(this, p);
     },
+    center() {
+      return vertices.reduce((a, b) => a.add(b)).scale(1 / vertices.length);
+    },
     translate: (v) => Polygon(vertices.map((u) => u.add(v))),
+    equals(p) {
+      return equals(this, p);
+    },
     toString: () => {
       if (vertices.length === 0) return "∅";
       if (vertices.length === 1) return "⋅" + vertices[0];
@@ -59,18 +69,9 @@ export const Triangle = (a: V, b: V, c: V): Triangle => ({
   a,
   b,
   c,
-  vertices: () => [a, b, c],
+  ...Polygon([a, b, c]),
   triangles() {
     return [this];
-  },
-  contains(v) {
-    if (isPolygon(v)) {
-      return (v as Polygon).vertices().every((v) => this.contains(v));
-    }
-    return triangleContains(this, v as V);
-  },
-  intersects(p) {
-    return this.vertices().some((v) => p.contains(v));
   },
   translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
   toString: () => `⟮${a}▽${b}▼${c}⟯`
@@ -81,14 +82,7 @@ export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => ({
   b,
   c,
   d,
-  vertices: () => [a, b, c, d],
-  triangles: () => [Triangle(a, b, c), Triangle(a, c, d)],
-  contains(p) {
-    return contains(this, p);
-  },
-  intersects(p) {
-    return intersects(this, p);
-  },
+  ...Polygon([a, b, c, d]),
   translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
   toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
 });
@@ -100,26 +94,14 @@ export function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
     return (q as Polygon).vertices().every((v) => contains(p, v));
   }
-  return p.triangles().some((t) => t.contains(q));
+  return p.triangles().some((t) => triangleContains(t, q as V));
 }
 
-export function intersects(p: Polygon, q: Polygon): boolean {
-  // ...or, their bounding boxes intersect. Add only necessary complexity.
-  const pxM = Math.max(...p.vertices().map((p) => p.x));
-  const pxm = Math.min(...p.vertices().map((p) => p.x));
-  const pyM = Math.max(...p.vertices().map((p) => p.x));
-  const pym = Math.min(...p.vertices().map((p) => p.x));
-  const qxM = Math.max(...q.vertices().map((p) => p.x));
-  const qxm = Math.min(...q.vertices().map((p) => p.x));
-  const qyM = Math.max(...q.vertices().map((p) => p.x));
-  const qym = Math.min(...q.vertices().map((p) => p.x));
-  return !(pxM < qxm || pxm > qxM || pyM < qym || pym > qyM);
-}
-
-export const triangleContains = (t: Triangle, p: V): boolean => {
-  const c = t.c.subtract(t.a);
-  const b = t.b.subtract(t.a);
-  const q = p.subtract(t.a);
+const triangleContains = (t: Polygon, p: V): boolean => {
+  const [ta, tb, tc] = t.vertices();
+  const c = tc.subtract(ta);
+  const b = tb.subtract(ta);
+  const q = p.subtract(ta);
 
   const s0 = c.dot(c);
   const s1 = c.dot(b);
@@ -133,6 +115,31 @@ export const triangleContains = (t: Triangle, p: V): boolean => {
 
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
+
+export function intersects(p: Polygon, q: Polygon): boolean {
+  // ...or, their bounding boxes intersect. Add only necessary complexity.
+  const pxM = Math.max(...p.vertices().map((p) => p.x));
+  const pxm = Math.min(...p.vertices().map((p) => p.x));
+  const pyM = Math.max(...p.vertices().map((p) => p.y));
+  const pym = Math.min(...p.vertices().map((p) => p.y));
+  const qxM = Math.max(...q.vertices().map((p) => p.x));
+  const qxm = Math.min(...q.vertices().map((p) => p.x));
+  const qyM = Math.max(...q.vertices().map((p) => p.y));
+  const qym = Math.min(...q.vertices().map((p) => p.y));
+  return !(pxM < qxm || pxm > qxM || pyM < qym || pym > qyM);
+}
+
+function equals(p: Polygon, q: Polygon) {
+  const qv = q.vertices();
+  const pv = p.vertices();
+  if (qv.length !== pv.length) return false;
+  const i = qv.findIndex((v) => v.equals(pv[0]));
+  if (i === -1) return false;
+  return qv
+    .slice(i, qv.length)
+    .concat(i > 0 ? qv.slice(0, i - 1) : [])
+    .every((v, i) => v.equals(pv[i]));
+}
 
 export function pathFromPolygon(poly: Polygon): Path2D {
   const p = new Path2D();

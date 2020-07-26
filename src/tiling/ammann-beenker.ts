@@ -1,5 +1,5 @@
 import { RhombTile, TileSet } from "../classes/Tile";
-import { Rhomb } from "../classes/Polygon";
+import { Polygon, Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
 
 const SQRT2 = Math.sqrt(2);
@@ -7,13 +7,7 @@ const SQRT2 = Math.sqrt(2);
 const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
   const r = sq.translate(sq.a.invert());
   const unit_d = r.c.scale(1 / (2 + SQRT2));
-  const unit_d2 = r.d.subtract(r.b).scale(1 / (2 + SQRT2));
-  const inner_sq = Rhomb(
-    unit_d.scale(1 + SQRT2),
-    unit_d2.scale(1 + SQRT2).add(r.b),
-    unit_d,
-    unit_d2.add(r.b)
-  ).translate(sq.a);
+  const inner_sq = firstChild(sq);
   const a = r.b.scale(1 / (1 + SQRT2)).add(sq.a);
   const b = r.c
     .subtract(r.b)
@@ -31,6 +25,9 @@ const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
       inner_sq,
       Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d)),
       Rhomb(sq.c, inner_sq.a, b, b.add(unit_d))
+
+      //Rhomb(sq.c, c.add(unit_d), c, inner_sq.a)
+      //Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b)
     ],
     [
       Rhomb(sq.a, a, inner_sq.d, inner_sq.c),
@@ -38,9 +35,19 @@ const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
       Rhomb(sq.d, inner_sq.b, inner_sq.a, c),
       Rhomb(sq.a, inner_sq.c, inner_sq.b, d)
     ]
-    //square(Rhomb(sq.c, c.add(unit_d), c, inner_sq.a), depth),
-    //square(Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b), depth),
   ];
+};
+
+const firstChild = (sq: Rhomb) => {
+  const r = sq.translate(sq.a.invert());
+  const unit_d = r.c.scale(1 / (2 + SQRT2));
+  const unit_d2 = r.d.subtract(r.b).scale(1 / (2 + SQRT2));
+  return Rhomb(
+    unit_d.scale(1 + SQRT2),
+    unit_d2.scale(1 + SQRT2).add(r.b),
+    unit_d,
+    unit_d2.add(r.b)
+  ).translate(sq.a);
 };
 
 const rhombChildren = (rh: Rhomb): [Rhomb[], Rhomb[]] => {
@@ -57,10 +64,11 @@ const rhombChildren = (rh: Rhomb): [Rhomb[], Rhomb[]] => {
   const rh3 = Rhomb(rh.b, rh2.c, rh.d, rh1.c);
   return [
     [
-      Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
       Rhomb(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b)),
-      Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c),
       Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))
+
+      //Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
+      //Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)
     ],
     [rh1, rh2, rh3]
   ];
@@ -84,12 +92,22 @@ const root = (p: V): Rhomb => {
 
 function AmmBeeRhomb(
   rhomb: Rhomb,
-  parent: () => RhombTile,
+  parent: (r: Rhomb) => RhombTile,
   children: (r: Rhomb) => [Rhomb[], Rhomb[]]
 ): RhombTile {
   return {
     ...rhomb,
-    parent,
+    contains(p: Polygon | V, depth = 0) {
+      if (depth === 0) return rhomb.contains(p);
+      return rhomb.contains(p) && firstChild(rhomb).contains(p);
+    },
+    intersects(p: Polygon, depth = 0) {
+      if (depth < 0) return rhomb.intersects(p);
+      return rhomb.intersects(p) || this.parent().intersects(p, depth - 1);
+    },
+    parent() {
+      return parent(this);
+    },
     children() {
       const [fatChildren, thinChildren] = children(this);
       return fatChildren
@@ -103,26 +121,7 @@ function AmmBeeRhomb(
 }
 
 function RootAmmBeeRhomb(r1: Rhomb): RhombTile {
-  return AmmBeeRhomb(r1, () => RootAmmBeeRhomb(parent(r1)), squareChildren);
+  return AmmBeeRhomb(r1, (r) => RootAmmBeeRhomb(parent(r)), squareChildren);
 }
-
-/*export const testTileSet = (): void => {
-  const sq = square(
-    Rhomb(Vec2(0, 0), Vec2(400, 0), Vec2(400, 400), Vec2(0, 400)).translate(
-      Vec2(1000, 700)
-    )
-  );
-  //const colors = colorStream(15, 85, 50);
-  sq.getPath();
-  if (sq.parent) {
-    const p = sq.parent();
-    p.getPath();
-    const children = p.children();
-    children.forEach((c) => {
-      c.getPath();
-    });
-    children[0].children().forEach((c) => c.getPath());
-  }
-};*/
 
 export default TileSet((seed) => RootAmmBeeRhomb(root(seed)));

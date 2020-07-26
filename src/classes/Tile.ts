@@ -1,12 +1,14 @@
 import { Polygon, Rhomb, Triangle } from "./Polygon";
 import { V } from "./V";
 
-const u = V(31, 17);
-const v = V(97, 109);
+const s = V(31, 17);
+const t = V(97, 109);
 
 export interface Tile extends Polygon {
   parent: () => this;
   children: () => this[];
+  intersects: (p: Polygon, depth?: number) => boolean;
+  contains: (p: Polygon | V, depth?: number) => boolean;
 }
 
 export interface TileSet<T extends Tile> {
@@ -25,7 +27,7 @@ export type RhombTile = Tile & Rhomb;
 
 export function TileSet<T extends Tile>(f: (edge: V) => T): TileSet<T> {
   return {
-    tile: () => f(u).translate(v),
+    tile: () => f(s).translate(t),
     tileFromEdge: (u: V, v?: V) => f(u).translate(v || V(0, 0)),
     tiling: (tile) => Tiling(tile)
   };
@@ -58,8 +60,12 @@ export function* coverWith<T extends Tile>(
   mask: Polygon
 ): Generator<T> {
   function* descend(tile: T, d: number): Generator<T> {
+    if (d < 0) {
+      console.log(`!!!unreachable!!! d: ${d}`);
+      return;
+    }
     for (const t of tile.children()) {
-      if (t.intersects(mask)) {
+      if (t.intersects(mask, d)) {
         if (d === 1) yield t;
         else yield* descend(t, d - 1);
       }
@@ -67,18 +73,22 @@ export function* coverWith<T extends Tile>(
   }
 
   function* ascend(tile: T, d: number): Generator<T> {
+    if (d > 15) {
+      console.log(`!!!maximum depth exceeded!!! d: ${d}`);
+      return;
+    }
     const parent = tile.parent();
     for (const t of parent.children()) {
-      if (t !== tile && t.intersects(mask)) {
+      if (!tile.equals(t) && t.intersects(mask, d)) {
         if (d === 0) yield t;
         else yield* descend(t, d);
       }
     }
-    if (!parent.contains(mask)) {
+    if (!parent.contains(mask, d + 1)) {
       yield* ascend(parent, d + 1);
     }
   }
 
-  yield tile;
+  if (tile.intersects(mask, 0)) yield tile;
   yield* ascend(tile, 0);
 }

@@ -1,5 +1,5 @@
 import { RhombTile, TileSet } from "../classes/Tile";
-import { Rhomb } from "../classes/Polygon";
+import { Polygon, Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
 
 const SIN15 = Math.sin(Math.PI / 5);
@@ -17,17 +17,35 @@ const rhomb1 = (u: V) => {
   return Rhomb(V(0, 0), u, u.add(v), v);
 };
 
+type PenroseRhomb = RhombTile;
+
 function PenroseRhomb(
   rhomb: Rhomb,
-  parent: () => RhombTile,
+  parent: (r: Rhomb) => PenroseRhomb,
   children: (r: Rhomb) => [Rhomb[], Rhomb[]]
-): RhombTile {
+): PenroseRhomb {
   return {
     ...rhomb,
-    contains(p) {
-      return firstChild(firstChild(firstChild(firstChild(this)))).contains(p);
+    contains(p: Polygon | V, depth = 0) {
+      if (!rhomb.contains(p)) return false;
+      const d = Math.min(depth, 4);
+      let rh = rhomb;
+      for (let i = 0; i <= d; i++) {
+        if (!rh.contains(p)) return false;
+        rh = firstChild(rh);
+      }
+      return true;
     },
-    parent,
+    intersects(p: Polygon, depth = 0) {
+      if (rhomb.intersects(p)) return true;
+      if (depth <= 0) return false;
+      if (depth > 0 && this.children().some((c) => c.intersects(p)))
+        return true;
+      return this.parent().intersects(p, depth - 1);
+    },
+    parent() {
+      return parent(this);
+    },
     children() {
       const [fatChildren, thinChildren] = children(this);
       return fatChildren
@@ -40,12 +58,12 @@ function PenroseRhomb(
   };
 }
 
-function RootPenroseRhomb(r1: Rhomb): RhombTile {
+function root(r1: Rhomb): PenroseRhomb {
   const r = r1.translate(r1.a.invert());
   const u = r.b.scale(IF);
   const v = r.d.scale(IF);
   const p = Rhomb(u.add(v), v, r.a, u).translate(r1.a);
-  return PenroseRhomb(p, () => RootPenroseRhomb(p), children1);
+  return PenroseRhomb(p, root, children1);
 }
 
 const firstChild = (p: Rhomb): Rhomb => {
@@ -82,4 +100,4 @@ const children2 = (r2: Rhomb): [Rhomb[], Rhomb[]] => {
   ];
 };
 
-export const penrose = TileSet((seed) => RootPenroseRhomb(rhomb1(seed)));
+export default TileSet((seed) => root(rhomb1(seed)));

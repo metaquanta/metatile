@@ -1,7 +1,14 @@
-import { penrose } from "./tiling/penrose";
 import { ViewPort } from "./classes/ViewPort";
 import { Renderer } from "./renderer/Renderer";
-import { Rect } from "./classes/Polygon";
+import { V } from "./classes/V";
+import penrose from "./tiling/penrose";
+import viper from "./tiling/viper";
+import pinwheel5 from "./tiling/pinwheel5";
+import pinwheel10 from "./tiling/pinwheel10";
+import pinwheel13 from "./tiling/pinwheel13";
+import ammbee from "./tiling/ammann-beenker";
+
+const tileSets = [penrose, viper, pinwheel5, pinwheel10, pinwheel13, ammbee];
 
 let MqTilingRenderer: Renderer | undefined = undefined;
 window.requestAnimationFrame(() => {
@@ -10,8 +17,18 @@ window.requestAnimationFrame(() => {
   if (vp)
     MqTilingRenderer = Renderer(
       <HTMLCanvasElement>el.getElementsByTagName("canvas")[0],
-      Rect(500, 250, 2500, 750)
+      vp
     );
-  const t = penrose.tile();
-  if (MqTilingRenderer) MqTilingRenderer.setTileStream(penrose.tiling(t).cover);
+  if (MqTilingRenderer) {
+    const tileSet = tileSets[5];
+    const tile = tileSet.tileFromEdge(V(25, 0), V(1500, 1500));
+
+    MqTilingRenderer.setTileStream(
+      tileSet.tiling(tile).cover
+      //tile.parent().children()
+      //.flatMap((t) => t.children())
+      //.flatMap((t) => t.children())
+      //.flatMap((t) => t.children())
+    );
+  }
 });
