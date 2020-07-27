@@ -9,19 +9,12 @@ export type ViewPort = Rhomb & {
 };
 
 export const ViewPort = (outer: HTMLDivElement): ViewPort => {
-  // How is this supposed to be done in typescript?
-  const vp = outer as HTMLDivElement & { ___viewPort: ViewPort };
-
-  if (vp.___viewPort) {
-    return vp.___viewPort;
-  }
-
   const inner = <HTMLDivElement>outer.firstElementChild;
   const canvas = <HTMLCanvasElement>inner.firstElementChild;
 
   const getOuterSize = (): V => {
-    const width = vp.clientWidth;
-    const height = vp.clientHeight;
+    const width = outer.clientWidth;
+    const height = outer.clientHeight;
     console.log(`ViewPort:getOuterSize(): ${width}×${height}`);
     return V(width, height);
   };
@@ -84,7 +77,7 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
         origin.add(size),
         V(0, size.y).add(origin)
       ],
-      outerDiv: vp,
+      outerDiv: outer,
       toString: () =>
         `⦗↤${origin.x}, ↥${origin.y}, ↦${origin.x + size.x}, ↧${
           origin.y + size.y
@@ -97,7 +90,6 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   setInnerSize();
   setCanvasSize();
   setInnerPosition();
-  vp.___viewPort = getViewPort();
 
-  return vp.___viewPort;
+  return getViewPort();
 };

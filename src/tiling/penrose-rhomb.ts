@@ -33,7 +33,7 @@ function PenroseRhomb(
     rotationalSymmetry: 2,
     contains(p: Polygon | V, depth = 0) {
       if (!rhomb.contains(p)) return false;
-      const d = Math.min(depth, 4);
+      const d = Math.min(depth, 5);
       let rh = rhomb;
       for (let i = 0; i <= d; i++) {
         if (!rh.contains(p)) return false;
@@ -44,9 +44,7 @@ function PenroseRhomb(
     intersects(p: Polygon, depth = 0) {
       if (rhomb.intersects(p)) return true;
       if (depth <= 0) return false;
-      if (depth > 0 && this.children().some((c) => c.intersects(p)))
-        return true;
-      return this.parent().intersects(p, depth - 1);
+      return this.parent().intersects(p, Math.min(depth - 1, 5));
     },
     parent() {
       return parent(this);
