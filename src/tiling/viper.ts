@@ -11,17 +11,17 @@ const fromVec = (l: V) => {
   return TriangleTile(Triangle(r, l, r.invert()), parent, children);
 };
 
-const parent = (t: Triangle) => {
+const parent = (t: TriangleTile) => {
   const u = t.b.subtract(t.a);
   const v = t.b.subtract(t.c);
-  return Triangle(
-    t.c.add(u.scale(2)),
-    t.c.add(u.invert()),
-    t.a.add(v.scale(2))
+  return TriangleTile(
+    Triangle(t.c.add(u.scale(2)), t.c.add(u.invert()), t.a.add(v.scale(2))),
+    parent,
+    children
   );
 };
 
-const children = (t: Triangle) => {
+const children = (t: TriangleTile) => {
   //         1
   //       2(3)4
   //        5
@@ -39,7 +39,9 @@ const children = (t: Triangle) => {
   const c2 = Triangle(c9.b, c1.a, c1.a.subtract(v));
   const c3 = Triangle(c1.c, c2.c, c1.a);
   const c4 = Triangle(c2.c, c1.c, c5.b);
-  return [c3, c1, c2, c4, c5, c6, c7, c8, c9];
+  return [c3, c1, c2, c4, c5, c6, c7, c8, c9].map((t) =>
+    TriangleTile(t, parent, children)
+  );
 };
 
 export default TileSet(fromVec, "triangle");

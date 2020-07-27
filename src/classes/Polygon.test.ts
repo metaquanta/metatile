@@ -1,4 +1,4 @@
-import { intersects, Rect, Rhomb, Triangle, triangleContains } from "./Polygon";
+import { intersects, Rect, Rhomb, Triangle } from "./Polygon";
 import { TriangleTile } from "./Tile";
 import { V } from "./V";
 
@@ -157,8 +157,8 @@ test("Triangle.contains()", () => {
   const t2 = Triangle(V(650, 134), V(-25, 134), V(-25, 364));
   for (let i = 0; i < 1000; i++) {
     const v = V(Math.random() * 775, Math.random() * 230).add(V(-25, 134));
-    expect(triangleContains(t1, v) || triangleContains(t2, v)).toBeTruthy;
-    expect(triangleContains(t1, v) && triangleContains(t2, v)).toBeFalsy;
+    expect(t1.contains(v) || t2.contains(v)).toBeTruthy;
+    expect(t1.contains(v) && t2.contains(v)).toBeFalsy;
   }
 });
 

@@ -11,7 +11,8 @@
     "test": "jest"
   },
   "browserslist": [
-    "last 1 Chrome version"
+    "last 2 Chrome version",
+    "last 2 Firefox version"
   ],
   "eslintConfig": {
     "extends": [
@@ -30,19 +31,19 @@
       "js"
     ]
   },
-  "dependencies": {
-    "@types/jest": "^26.0.5",
-    "ts-jest": "^26.1.3"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@types/jest": "^26.0.5",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jest": "^23.18.0",
+    "jest": "^26.1.0",
     "parcel": "^1.12.4",
     "prettier": "2.0.5",
+    "ts-jest": "^26.1.3",
     "typescript": "^3.9.7"
   },
   "include": [
