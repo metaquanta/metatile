@@ -1,8 +1,10 @@
-import { Polygon, Rhomb, Triangle } from "./Polygon";
+import { isRect, Polygon, Rect, Rhomb, Triangle } from "./Polygon";
 import { V } from "./V";
 
 const s = V(31, 17);
 const t = V(97, 109);
+
+const VP_FUDGE = 100;
 
 export interface Tile extends Polygon {
   kind: string;
@@ -75,13 +77,14 @@ export function* coverWith<T extends Tile>(
   tile: T,
   mask: Polygon
 ): Generator<T> {
+  const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: T, d: number): Generator<T> {
     if (d < 0) {
       console.log(`!!!unreachable!!! d: ${d}`);
       return;
     }
     for (const t of tile.children()) {
-      if (t.intersects(mask, d)) {
+      if (t.intersects(bufferedMask, d)) {
         if (d === 1) yield t;
         else yield* descend(t, d - 1);
       }
@@ -95,16 +98,16 @@ export function* coverWith<T extends Tile>(
     }
     const parent = tile.parent();
     for (const t of parent.children()) {
-      if (!tile.equals(t) && t.intersects(mask, d)) {
+      if (!tile.equals(t) && t.intersects(bufferedMask, d)) {
         if (d === 0) yield t;
         else yield* descend(t, d);
       }
     }
-    if (!parent.contains(mask, d + 1)) {
+    if (!parent.contains(bufferedMask, d + 1)) {
       yield* ascend(parent, d + 1);
     }
   }
 
-  if (tile.intersects(mask, 0)) yield tile;
+  if (tile.intersects(bufferedMask, 0)) yield tile;
   yield* ascend(tile, 0);
 }

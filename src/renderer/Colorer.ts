@@ -3,28 +3,45 @@ import { V } from "../classes/V";
 
 export type Colorer = (t: Tile) => string;
 
-export const colorAngles = (
-  s: number,
-  l: number,
-  alpha = 1.0,
-  kinds: string[] = [""],
-  partMult = 1
-): ((t: Tile) => string) => (t) => {
-  console.log(`colorAngles(${kinds}, ${partMult})`);
+export const colorRotation = ({
+  saturation: s = 50,
+  lightness: l = 50,
+  alpha = 1,
+  protos = [],
+  protoSeparation = 1,
+  hueOffset = 0.01
+}: {
+  saturation?: number;
+  lightness?: number;
+  alpha?: number;
+  protos?: string[];
+  protoSeparation?: number;
+  hueOffset?: number;
+}): ((t: Tile) => string) => (t) => {
+  console.log(`colorAngles(${protos}, ${protoSeparation})`);
   const th = theta(t.vertices()[1].subtract(t.vertices()[0]));
-  const variant = Math.abs(kinds.indexOf(t.kind));
-  const numParts = kinds.length;
+  const variant = Math.abs(protos.indexOf(t.kind));
+  const numParts = protos.length;
   const angle =
-    ((th / Math.PI / 2) % (1 / t.rotationalSymmetry)) * t.rotationalSymmetry;
-  const slotSize = 360 / (numParts * partMult);
-  const a = (angle * slotSize + variant * partMult * slotSize + 360) % 360;
+    ((th / Math.PI / 2) % (1 / t.rotationalSymmetry)) * t.rotationalSymmetry +
+    hueOffset;
+  const slotSize = 360 / (numParts * protoSeparation);
+  const a =
+    (angle * slotSize + variant * protoSeparation * slotSize + 360) % 360;
   const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
   console.log(
-    `colorAngles [${angle}, ${variant * partMult}]: ${color}   [${
-      variant * partMult * slotSize
-    } - ${slotSize + variant * partMult * slotSize}]`
+    `colorAngles [${angle}, ${variant * protoSeparation}]: ${color}   [${
+      variant * protoSeparation * slotSize
+    } - ${slotSize + variant * protoSeparation * slotSize}]`
   );
   return color;
+};
+
+export const colorSet = (
+  colorByProto: Map<string, string>,
+  defaultColor = "blue"
+): ((t: Tile) => string) => (t) => {
+  return colorByProto.get(t.kind) || defaultColor;
 };
 
 export const colorStream: (
