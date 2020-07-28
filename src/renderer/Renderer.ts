@@ -1,6 +1,12 @@
-import { pathFromPolygon, Polygon } from "../classes/Polygon";
+import {
+  canvasPathFromPolygon,
+  Polygon,
+  svgPathAttributeFromPolygon,
+  svgPointsStringFromPolygon
+} from "../classes/Polygon";
 import { Tile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
+import { isCallable } from "../util";
 import { Colorer } from "./Colorer";
 
 export type Renderer = {
@@ -28,7 +34,8 @@ type PrivateRenderer = Renderer & {
   tileIterator: Iterator<Tile> | undefined;
   renderNext: () => boolean;
   clearCanvas: () => void;
-  ctx: CanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D | undefined;
+  svg: SVGElement | undefined;
   vp: ViewPort;
   stop: () => void;
   fillColorer: Colorer | undefined;
@@ -37,32 +44,38 @@ type PrivateRenderer = Renderer & {
   getStroke: (t: Tile) => string;
 };
 
-function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
-  return (f as () => T).call !== undefined;
+export function drawCanvas(
+  tile: Polygon,
+  strokeColor: string,
+  fillColor: string,
+  ctx: CanvasRenderingContext2D
+): void {
+  ctx.fillStyle = fillColor;
+  ctx.strokeStyle = strokeColor;
+  const p = canvasPathFromPolygon(tile);
+  ctx.stroke(p);
+  ctx.fill(p);
 }
 
-export default function draw(
+export function drawSvg(
   tile: Polygon,
-  context: CanvasRenderingContext2D
+  strokeColor: string,
+  fillColor: string,
+  element: SVGElement
 ): void {
-  const p = pathFromPolygon(tile);
-  context.stroke(p);
-  context.fill(p);
+  const p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+  ((p: SVGPolygonElement) => {
+    p.setAttribute("fill", fillColor);
+    p.setAttribute("stroke", strokeColor);
+    p.setAttribute("points", svgPointsStringFromPolygon(tile));
+  })(p);
+  element.appendChild(p);
 }
 
 export function Renderer(
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | SVGElement,
   viewPort: ViewPort
 ): Renderer {
-  const rrElem = canvas as HTMLCanvasElement & { ___renderer: PrivateRenderer };
-  if (rrElem.___renderer) {
-    if (rrElem.___renderer.vp === viewPort) {
-      return rrElem.___renderer;
-    } else {
-      rrElem.___renderer.stop();
-    }
-  }
-
   const looper: Looper = {
     stopped: true,
     speed: 250,
@@ -108,7 +121,10 @@ export function Renderer(
   const renderer: PrivateRenderer = {
     tiles: undefined,
     tileIterator: undefined,
-    ctx: <CanvasRenderingContext2D>canvas.getContext("2d"),
+    ctx: isCanvas(canvas)
+      ? (canvas as HTMLCanvasElement).getContext("2d") || undefined
+      : undefined,
+    svg: isSvg(canvas) ? (canvas as SVGElement) : undefined,
     vp: viewPort,
     fillColorer: undefined,
     strokeColorer: undefined,
@@ -150,10 +166,22 @@ export function Renderer(
           this.tileIterator = this.tiles[Symbol.iterator]();
         const { done: tilesDone, value: tilesValue } = this.tileIterator.next();
         if (!tilesDone && tilesValue) {
-          this.ctx.fillStyle = this.getFill(tilesValue);
-          this.ctx.strokeStyle = this.getStroke(tilesValue);
-          draw(tilesValue, this.ctx);
-          return true;
+          if (this.ctx) {
+            drawCanvas(
+              tilesValue,
+              this.getStroke(tilesValue),
+              this.getFill(tilesValue),
+              this.ctx
+            );
+            return true;
+          } else if (this.svg) {
+            drawSvg(
+              tilesValue,
+              this.getStroke(tilesValue),
+              this.getFill(tilesValue),
+              this.svg
+            );
+          }
         }
         if (tilesDone) {
           console.log(`DONE [${tilesDone}, ${tilesValue}]`);
@@ -164,7 +192,9 @@ export function Renderer(
       return false;
     },
     clearCanvas() {
-      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      if (this.ctx)
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      if (this.svg) this.svg.innerHTML = "";
       this.tileIterator = undefined;
     },
     getFill(t) {
@@ -179,12 +209,20 @@ export function Renderer(
       looper.stop();
     },
     drawTile(t: Tile) {
-      this.ctx.fillStyle = this.getFill(t);
-      this.ctx.strokeStyle = this.getStroke(t);
-      draw(t, this.ctx);
+      if (this.ctx) {
+        drawCanvas(t, this.getStroke(t), this.getFill(t), this.ctx);
+      } else if (this.svg) {
+        drawSvg(t, this.getStroke(t), this.getFill(t), this.svg);
+      }
     }
   };
-
-  rrElem.___renderer = renderer;
   return renderer;
+}
+
+function isCanvas(c: HTMLCanvasElement | SVGElement): boolean {
+  return (c as HTMLCanvasElement).getContext !== undefined;
+}
+
+function isSvg(c: HTMLCanvasElement | SVGElement): boolean {
+  return (c as HTMLCanvasElement).getContext === undefined;
 }

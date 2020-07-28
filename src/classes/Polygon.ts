@@ -12,6 +12,10 @@ export interface Polygon {
   toString: () => string;
 }
 
+export function isPolygon<T>(p: Polygon | T): boolean {
+  return (p as Polygon).vertices !== undefined;
+}
+
 export type Triangle = Polygon & {
   a: V;
   b: V;
@@ -25,10 +29,16 @@ export type Rhomb = Polygon & {
   d: V;
 };
 
-export type Rect = Rhomb;
+export type Rect = Polygon & {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  pad: (n: number) => Rect;
+};
 
-function isPolygon(p: Polygon | V): boolean {
-  return (p as Polygon).vertices !== undefined;
+export function isRect<T>(p: Rect | T): boolean {
+  return (p as Rect).bottom !== undefined;
 }
 
 export const Polygon = (vertices: V[]): Polygon => {
@@ -87,8 +97,16 @@ export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => ({
   toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
 });
 
-export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
-  Rhomb(V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf));
+export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
+  left: x0,
+  right: xf,
+  top: yf,
+  bottom: y0,
+  pad: (n: number) => Rect(x0 - n, y0 - n, xf + n, yf + n),
+  ...Polygon([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]),
+  translate: (v) => Rect(x0 + v.x, y0 + v.y, xf + v.x, yf + v.y),
+  toString: () => `⟮↤${x0}, ↥${y0}, ↦${xf}, ↧${yf}⟯`
+});
 
 export function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
@@ -141,7 +159,7 @@ function equals(p: Polygon, q: Polygon) {
     .every((v, i) => v.equals(pv[i]));
 }
 
-export function pathFromPolygon(poly: Polygon): Path2D {
+export function canvasPathFromPolygon(poly: Polygon): Path2D {
   const p = new Path2D();
   p.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
   poly
@@ -150,4 +168,23 @@ export function pathFromPolygon(poly: Polygon): Path2D {
     .forEach((v) => p.lineTo(v.x, v.y));
   p.closePath();
   return p;
+}
+
+export function svgPathAttributeFromPolygon(poly: Polygon): string {
+  return (
+    `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
+    poly
+      .vertices()
+      .slice(1)
+      .map((v) => `L ${v.x},${v.y}`)
+      .join(" \n") +
+    " z"
+  );
+}
+
+export function svgPointsStringFromPolygon(p: Polygon): string {
+  return p
+    .vertices()
+    .map((v) => `${v.x},${v.y}`)
+    .join(" ");
 }
