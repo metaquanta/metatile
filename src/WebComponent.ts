@@ -1,10 +1,11 @@
 import { V } from "./classes/V";
 import { ViewPort } from "./classes/ViewPort";
-import { colorAngles } from "./renderer/Colorer";
+import { colorRotation, colorSet } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import rules from "./tiling/rules";
+import { mapOf } from "./util";
 
-function getRenderer(root: ShadowRoot): Renderer {
+function getRenderer(root: Element): Renderer {
   root.innerHTML = `<style>
       :host {
         display: block;
@@ -13,22 +14,36 @@ function getRenderer(root: ShadowRoot): Renderer {
         width: 100%;
         height: 100%;
       }
+      svg {
+        width:1600px;
+        height:1600px;
+      }
     </style>`;
   const outerDiv = document.createElement("div");
+
   outerDiv.style.margin = "0px";
   outerDiv.style.width = "100%";
   outerDiv.style.height = "100%";
   const innerDiv = document.createElement("div");
+  const canvas = <SVGElement>(
+    document.createElementNS("https://www.w3.org/2000/svg", "svg")
+  );
+
   innerDiv.style.position = "fixed";
-  const canvas = document.createElement("canvas");
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
+
+  //canvas.setAttribute("style", "position:fixed;display:block;");
+
+  //canvas.setAttribute("width", "100%");
+  //canvas.setAttribute("height", "100%");
+  //canvas.setAttribute("viewBox", `0 0 1600px 1600px`);
   innerDiv.appendChild(canvas);
   outerDiv.appendChild(innerDiv);
+
   root.appendChild(outerDiv);
+
   const vp = ViewPort(outerDiv);
 
-  return Renderer(canvas, vp);
+  return Renderer(canvas as SVGElement, vp);
 }
 
 class WebComponent extends HTMLElement {
@@ -40,13 +55,27 @@ class WebComponent extends HTMLElement {
   }
 
   connectedCallback(): void {
-    const shadowRoot = this.attachShadow({ mode: "open" });
-    this.renderer = getRenderer(shadowRoot);
+    //const shadowRoot = this.attachShadow({ mode: "open" });
+    const root = document.getElementById("mqTiling") || undefined;
+    if (root !== undefined) {
+      this.renderer = getRenderer(root);
 
-    const tileSet = rules["Penrose-Rhomb"];
-    this.renderer.setFillColorer(colorAngles(50, 80, 1.0, tileSet.kinds, 2));
-    const tile = tileSet.tileFromEdge(V(14, 30), V(1500, 1500));
-    this.renderer.setTileStream(tileSet.tiling(tile).cover);
+      const tileSet = rules["Penrose-Rhomb"];
+      this.renderer.setFillColorer(
+        colorSet(
+          mapOf([tileSet.kinds[0], "aqua"], [tileSet.kinds[1], "aquamarine"]),
+          "black"
+        )
+        /*colorRotation({
+        protos: tileSet.kinds,
+        protoSeparation: 3,
+        hueOffset: 0.35,
+        lightness: 7
+      })*/
+      );
+      const tile = tileSet.tileFromEdge(V(25, 5), V(1500, 1500));
+      this.renderer.setTileStream(tileSet.tiling(tile).cover);
+    }
   }
 }
 

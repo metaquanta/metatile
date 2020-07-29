@@ -159,15 +159,23 @@ function equals(p: Polygon, q: Polygon) {
     .every((v, i) => v.equals(pv[i]));
 }
 
-export function canvasPathFromPolygon(poly: Polygon): Path2D {
-  const p = new Path2D();
-  p.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
+type Path = {
+  moveTo: (x: number, y: number) => void;
+  lineTo: (x: number, y: number) => void;
+  closePath: () => void;
+};
+
+export function canvasPathFromPolygon<P extends Path>(
+  poly: Polygon,
+  path: P
+): P {
+  path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
   poly
     .vertices()
     .slice(1)
-    .forEach((v) => p.lineTo(v.x, v.y));
-  p.closePath();
-  return p;
+    .forEach((v) => path.lineTo(v.x, v.y));
+  path.closePath();
+  return path;
 }
 
 export function svgPathAttributeFromPolygon(poly: Polygon): string {

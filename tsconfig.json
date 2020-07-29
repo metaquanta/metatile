@@ -76,5 +76,5 @@
     "noEmitOnError": true,
     "pretty": true
   },
-  "exclude": ["node_modules", "public", "dist"]
+  "exclude": ["node_modules", "public", "dist", "deno_dist", "./mod.ts"]
 }

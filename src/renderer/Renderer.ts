@@ -52,7 +52,7 @@ export function drawCanvas(
 ): void {
   ctx.fillStyle = fillColor;
   ctx.strokeStyle = strokeColor;
-  const p = canvasPathFromPolygon(tile);
+  const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
 }
@@ -65,6 +65,7 @@ export function drawSvg(
 ): void {
   const p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
   ((p: SVGPolygonElement) => {
+    p.setAttribute("stroke-linejoin", "round");
     p.setAttribute("fill", fillColor);
     p.setAttribute("stroke", strokeColor);
     p.setAttribute("points", svgPointsStringFromPolygon(tile));
