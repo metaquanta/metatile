@@ -18,7 +18,6 @@ export const colorRotation = ({
   protoSeparation?: number;
   hueOffset?: number;
 }): ((t: Tile) => string) => (t) => {
-  console.log(`colorAngles(${protos}, ${protoSeparation})`);
   const th = theta(t.vertices()[1].subtract(t.vertices()[0]));
   const variant = Math.abs(protos.indexOf(t.kind));
   const numParts = protos.length;
@@ -29,11 +28,6 @@ export const colorRotation = ({
   const a =
     (angle * slotSize + variant * protoSeparation * slotSize + 360) % 360;
   const color = `hsla(${a}, ${s}%, ${l}%, ${alpha})`;
-  console.log(
-    `colorAngles [${angle}, ${variant * protoSeparation}]: ${color}   [${
-      variant * protoSeparation * slotSize
-    } - ${slotSize + variant * protoSeparation * slotSize}]`
-  );
   return color;
 };
 
