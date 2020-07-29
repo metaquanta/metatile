@@ -4,3 +4,4 @@ dist
 .cache
 public
 yarn.lock
+deno_public
