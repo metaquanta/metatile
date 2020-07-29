@@ -43,9 +43,9 @@ class WebComponent extends HTMLElement {
     const shadowRoot = this.attachShadow({ mode: "open" });
     this.renderer = getRenderer(shadowRoot);
 
-    const tileSet = rules["Penrose-Rhomb"];
+    const tileSet = rules["Pinwheel"];
     this.renderer.setFillColorer(
-      colorRotation({ protos: tileSet.kinds, protoSeparation: 2 })
+      colorRotation({ protos: tileSet.kinds, hueOffset: 0.6 })
     );
     const tile = tileSet.tileFromEdge(V(14, 30), V(1500, 1500));
     this.renderer.drawTile(tile);
