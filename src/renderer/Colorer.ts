@@ -1,5 +1,5 @@
 import { Tile } from "../classes/Tile";
-import { V } from "../classes/V";
+import { theta } from "../util";
 
 export type Colorer = (t: Tile) => string;
 
@@ -45,13 +45,6 @@ export const colorSet = (
 ): ((t: Tile) => string) => (t) => {
   return colorByProto.get(t.kind) || defaultColor;
 };
-
-function theta(a: V): number {
-  return (
-    (Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0) + Math.PI * 2) %
-    (Math.PI * 2)
-  );
-}
 
 export function rybToRgb(theta: number): number {
   if (theta < 120) return theta / 2;

@@ -51,15 +51,3 @@ test("viper cover", () => {
   expect(t.parent().parent().contains(rect)).toBeFalsy;
   expect(t.parent().parent().parent().contains(rect)).toBeTruthy;
 });
-
-/*    t.parent()
-      .parent()
-      .children()
-      .slice(3,4)
-
-      t.parent()
-      .parent()
-      .children()
-      .slice(4, 5)
-      
-      */
