@@ -1,4 +1,5 @@
 import { V } from "../classes/V";
+import { vsEqual } from "../util";
 import penrose from "./penrose-rhomb";
 
 test("penrose parent inverts children", () => {
@@ -6,30 +7,25 @@ test("penrose parent inverts children", () => {
   const v = V(900, 200);
   const r = penrose.tileFromEdge(u, v);
   const s = r.parent().children()[0];
-  vecsEqual(r.a, s.a);
-  vecsEqual(r.b, s.b);
-  vecsEqual(r.c, s.c);
-  vecsEqual(r.d, s.d);
+  expect(vsEqual(r.a, s.a)).toBeTruthy();
+  expect(vsEqual(r.b, s.b)).toBeTruthy();
+  expect(vsEqual(r.c, s.c)).toBeTruthy();
+  expect(vsEqual(r.d, s.d)).toBeTruthy();
 });
 
 test("penrose romb1 children", () => {
   const r = penrose.tileFromEdge(V(400, 0), V(900, 200));
   const c = r.children();
-  vecsEqual(r.c, c[0].a);
-  vecsEqual(r.d, c[1].a);
-  vecsEqual(r.a, c[1].c);
-  vecsEqual(r.b, c[2].a);
+  expect(vsEqual(r.c, c[0].a)).toBeTruthy();
+  expect(vsEqual(r.d, c[1].a)).toBeTruthy();
+  expect(vsEqual(r.a, c[1].c)).toBeTruthy();
+  expect(vsEqual(r.b, c[2].a)).toBeTruthy();
 });
 
 test("penrose romb2 children", () => {
   const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[2];
   const c = r.children();
-  vecsEqual(r.a, c[0].c);
-  vecsEqual(r.d, c[0].a);
-  vecsEqual(r.c, c[1].a);
+  expect(vsEqual(r.a, c[0].c)).toBeTruthy();
+  expect(vsEqual(r.d, c[0].a)).toBeTruthy();
+  expect(vsEqual(r.c, c[1].a)).toBeTruthy();
 });
-
-const vecsEqual = (u: V, v: V) => {
-  expect(u.x).toBeCloseTo(v.x);
-  expect(u.y).toBeCloseTo(v.y);
-};
