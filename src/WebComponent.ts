@@ -1,6 +1,6 @@
 import { V } from "./classes/V";
 import { ViewPort } from "./classes/ViewPort";
-import { colorAngles } from "./renderer/Colorer";
+import { colorRotation } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import rules from "./tiling/rules";
 
@@ -44,8 +44,11 @@ class WebComponent extends HTMLElement {
     this.renderer = getRenderer(shadowRoot);
 
     const tileSet = rules["Penrose-Rhomb"];
-    this.renderer.setFillColorer(colorAngles(50, 80, 1.0, tileSet.kinds, 2));
+    this.renderer.setFillColorer(
+      colorRotation({ protos: tileSet.kinds, protoSeparation: 2 })
+    );
     const tile = tileSet.tileFromEdge(V(14, 30), V(1500, 1500));
+    this.renderer.drawTile(tile);
     this.renderer.setTileStream(tileSet.tiling(tile).cover);
   }
 }

@@ -5,12 +5,12 @@ export type ViewPort = Rect;
 
 export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   const inner = <HTMLDivElement>outer.firstElementChild;
-  const canvas = <HTMLOrSVGImageElement>inner.firstElementChild;
+  const canvas = <HTMLCanvasElement>inner.firstElementChild;
 
   const getOuterSize = (): V => {
     const width = outer.clientWidth;
     const height = outer.clientHeight;
-    console.log(`ViewPort:getOuterSize(): ${width}×${height}`);
+    console.debug(`ViewPort:getOuterSize(): ${width}×${height}`);
     return V(width, height);
   };
 
@@ -19,7 +19,9 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
     const size = getOuterSize();
     const width = Math.round((size.x - max) / 2);
     const height = Math.round((size.y - max) / 2);
-    console.log(`ViewPort:getInnerPosition(): ${width}×${height}, max=${max}`);
+    console.debug(
+      `ViewPort:getInnerPosition(): ${width}×${height}, max=${max}`
+    );
     return V(width, height);
   };
 
@@ -31,7 +33,7 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
 
   function getInnerSize(): number {
     const max = Math.round(Math.max(window.screen.height, window.screen.width));
-    console.log(
+    console.debug(
       `getInnerSize(): ${window.screen.width}×${window.screen.height}, max=${max}`
     );
     return max;
@@ -44,19 +46,13 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   }
 
   const getViewPortOrigin = () =>
-    //getInnerPosition().scale(window.devicePixelRatio).invert();
-    getInnerPosition().invert();
-  //const getViewPortSize = () => getOuterSize().scale(window.devicePixelRatio);
-  const getViewPortSize = () => getOuterSize();
+    getInnerPosition().scale(window.devicePixelRatio).invert();
+  const getViewPortSize = () => getOuterSize().scale(window.devicePixelRatio);
 
   function setCanvasSize() {
-    if (isSVGElement(canvas)) {
-      //const size = Math.round(getInnerSize() * window.devicePixelRatio);
-      const size = Math.round(getInnerSize());
-      canvas.setAttribute("height", "" + size);
-      canvas.setAttribute("width", "" + size);
-      canvas.setAttribute("viewPort", `0 0 ${size} ${size}`);
-    }
+    const size = Math.round(getInnerSize() * window.devicePixelRatio);
+    canvas.height = size;
+    canvas.width = size;
   }
 
   function getViewPort(): ViewPort & { outerDiv: HTMLDivElement } {
@@ -89,7 +85,3 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
 
   return getViewPort();
 };
-
-function isSVGElement(el: HTMLOrSVGImageElement): boolean {
-  return (el as HTMLElement).style === undefined;
-}

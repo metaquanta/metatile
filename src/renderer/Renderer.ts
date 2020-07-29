@@ -1,7 +1,6 @@
 import {
   canvasPathFromPolygon,
   Polygon,
-  svgPathAttributeFromPolygon,
   svgPointsStringFromPolygon
 } from "../classes/Polygon";
 import { Tile } from "../classes/Tile";
@@ -213,6 +212,8 @@ export function Renderer(
         drawCanvas(t, this.getStroke(t), this.getFill(t), this.ctx);
       } else if (this.svg) {
         drawSvg(t, this.getStroke(t), this.getFill(t), this.svg);
+      } else {
+        console.error("Renderer.drawTile() No canvas!");
       }
     }
   };
