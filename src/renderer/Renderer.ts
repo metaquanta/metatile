@@ -83,7 +83,7 @@ export function Renderer(
     cleanUp: undefined,
     cnt: 0,
     start(task, cleanUp) {
-      console.log(`Renderer:Looper.start() [${this.cnt}]`);
+      console.debug(`Renderer:Looper.start() [${this.cnt}]`);
       if (!this.stopped) {
         this.stop().then(() => this.start(task, cleanUp));
         return;
@@ -104,7 +104,7 @@ export function Renderer(
       window.requestAnimationFrame(() => this.iter && this.iter());
     },
     stop(): Promise<unknown> {
-      console.log(`Renderer:Looper.stop() [${this.cnt} ${this.stopped}]`);
+      console.debug(`Renderer:Looper.stop() [${this.cnt} ${this.stopped}]`);
       if (this.stopped) {
         return Promise.resolve();
       }
@@ -116,7 +116,7 @@ export function Renderer(
     }
   };
 
-  console.log(`Renderer() [${viewPort}]`);
+  console.debug(`Renderer() [${viewPort}]`);
   const renderer: PrivateRenderer = {
     tiles: undefined,
     tileIterator: undefined,
@@ -133,7 +133,7 @@ export function Renderer(
       } else {
         this.tiles = tiles as Iterable<Tile>;
       }
-      console.log(`Renderer.setTileStream() - tiles:${tiles}`);
+      console.debug(`Renderer.setTileStream() - tiles:${tiles}`);
       looper.start(
         () => this.renderNext(),
         () => this.clearCanvas()
@@ -142,7 +142,7 @@ export function Renderer(
     setFillColorer(c) {
       this.fillColorer = c;
       if (this.tiles) {
-        console.log(`Renderer.setFillColorer(${c}) - tiles:${this.tiles}`);
+        console.debug(`Renderer.setFillColorer(${c}) - tiles:${this.tiles}`);
         looper.start(
           () => this.renderNext(),
           () => this.clearCanvas()
@@ -152,7 +152,7 @@ export function Renderer(
     setStrokeColorer(c) {
       this.strokeColorer = c;
       if (this.tiles) {
-        console.log(`Renderer.setStrokeColorer(${c}) - tiles:${this.tiles}`);
+        console.debug(`Renderer.setStrokeColorer(${c}) - tiles:${this.tiles}`);
         looper.start(
           () => this.renderNext(),
           () => this.clearCanvas()
@@ -183,7 +183,9 @@ export function Renderer(
           }
         }
         if (tilesDone) {
-          console.log(`DONE [${tilesDone}, ${tilesValue}]`);
+          console.debug(
+            `Renderer.renderNext() - DONE! [${tilesDone}, ${tilesValue}]`
+          );
           looper.stop();
           return false;
         }

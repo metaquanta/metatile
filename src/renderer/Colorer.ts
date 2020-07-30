@@ -3,6 +3,15 @@ import { theta } from "../util";
 
 export type Colorer = (t: Tile) => string;
 
+export type ColorRotationParameters = {
+  saturation?: number;
+  lightness?: number;
+  alpha?: number;
+  protos?: string[];
+  hueSpan?: number;
+  hueOffset?: number;
+};
+
 export const colorRotation = ({
   saturation: s = 0.5,
   lightness: l = 0.5,
@@ -10,14 +19,7 @@ export const colorRotation = ({
   protos = [],
   hueSpan = 0.25,
   hueOffset = 0.01
-}: {
-  saturation?: number;
-  lightness?: number;
-  alpha?: number;
-  protos?: string[];
-  hueSpan?: number;
-  hueOffset?: number;
-}): ((t: Tile) => string) => {
+}: ColorRotationParameters): ((t: Tile) => string) => {
   const numParts = protos.length;
   const slotSize = 360 / numParts;
   const hueVariation = slotSize * hueSpan;
