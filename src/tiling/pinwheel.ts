@@ -22,7 +22,6 @@ const kinded = (t: Triangle, k: string) => ({ ...t, kind: k });
 const parentFromC = (t: TriangleTile): Triangle & { kind: string } => {
   const m = t.b.subtract(t.c);
   const s = t.b.subtract(t.a);
-  //console.log(m,s)
   return kinded(
     Triangle(t.a.add(m.scale(0.5)), t.b.add(s), t.a.subtract(m.scale(2))),
     t.kind
@@ -62,7 +61,6 @@ const generateFromA = (t: Triangle & { kind: string }) => {
     const eb = d.b.add(l);
     //const ea = eb.add(l.perp().invert());
     const ea = d.b.subtract(d.c).scale(0.5).add(d.b).add(d.b.subtract(d.a));
-    //console.log(l, l.perp());
     return Triangle(ea, eb, d.a);
   };
   const b = B(t);

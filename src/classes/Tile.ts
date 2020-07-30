@@ -15,25 +15,25 @@ export interface Tile extends Polygon {
   contains: (p: Polygon | V, depth?: number) => boolean;
 }
 
-export interface TileSet<T extends Tile> {
+export interface TileSet {
   kinds: string[];
-  tile: () => T;
-  tileFromEdge: (edge: V, pos?: V) => T;
-  tiling: (tile: T) => Tiling<T>;
+  tile: () => Tile;
+  tileFromEdge: (edge: V, pos?: V) => Tile;
+  tiling: (tile: Tile) => Tiling;
 }
 
-export interface Tiling<T extends Tile> {
-  cover: (mask: Polygon) => Generator<T>;
+export interface Tiling {
+  cover: (mask: Polygon) => Generator<Tile>;
 }
 
 export type TriangleTile = Tile & Triangle;
 
 export type RhombTile = Tile & Rhomb;
 
-export function TileSet<T extends Tile>(
-  f: (edge: V) => T,
+export function TileSet(
+  f: (edge: V) => Tile,
   kinds: string[] | string
-): TileSet<T> {
+): TileSet {
   return {
     kinds: typeof kinds == "string" ? [kinds] : kinds,
     tile: () => f(s).translate(t),
@@ -42,7 +42,7 @@ export function TileSet<T extends Tile>(
   };
 }
 
-export function Tiling<T extends Tile>(tile: T): Tiling<T> {
+export function Tiling<T extends Tile>(tile: T): Tiling {
   return {
     cover: (mask) => coverWith(tile, mask)
   };
@@ -80,7 +80,7 @@ export function* coverWith<T extends Tile>(
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: T, d: number): Generator<T> {
     if (d < 0) {
-      console.log(`!!!unreachable!!! d: ${d}`);
+      console.error(`!!!unreachable!!! d: ${d}`);
       return;
     }
     for (const t of tile.children()) {
@@ -93,7 +93,7 @@ export function* coverWith<T extends Tile>(
 
   function* ascend(tile: T, d: number): Generator<T> {
     if (d > 15) {
-      console.log(`!!!maximum depth exceeded!!! d: ${d}`);
+      console.error(`!!!maximum depth exceeded!!! d: ${d}`);
       return;
     }
     const parent = tile.parent();

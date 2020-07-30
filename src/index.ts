@@ -1,4 +1,4 @@
-import WebComponent from "./WebComponent";
+import Tiling from "./TilingComponent";
 
 const el = <HTMLDivElement>document.getElementsByTagName("div")[0];
-el.appendChild(new WebComponent());
+el.appendChild(new Tiling());

@@ -15,7 +15,6 @@ const kinded = (t: Triangle, i: number | string) => ({
 const parent = (t: TriangleTile) => {
   const m = t.c.subtract(t.b);
   const s = t.b.subtract(t.a);
-  //console.log(m,s)
   return kinded(
     Triangle(
       t.a.add(m.scale(1 / 3).invert()),
