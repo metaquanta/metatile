@@ -1,3 +1,4 @@
+import { ColorRotationParameters } from "../renderer/Colorer";
 import { isCallable } from "../util";
 import { isRect, Polygon, Rect, Rhomb, Triangle } from "./Polygon";
 import { V } from "./V";
@@ -21,6 +22,7 @@ export interface TileSet {
   tile: () => Tile;
   tileFromEdge: (edge: V, pos?: V) => Tile;
   tiling: (tile: Tile) => Tiling;
+  colorOptions?: ColorRotationParameters;
 }
 
 export interface Tiling {
@@ -33,13 +35,15 @@ export type RhombTile = Tile & Rhomb;
 
 export function TileSet(
   f: (edge: V, origin: V) => Tile,
-  kinds: string[] | string
+  kinds: string[] | string,
+  colorOptions?: ColorRotationParameters
 ): TileSet {
   return {
     kinds: typeof kinds == "string" ? [kinds] : kinds,
     tile: () => f(s, V(0, 0)).translate(t),
     tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
-    tiling: (tile) => Tiling(tile)
+    tiling: (tile) => Tiling(tile),
+    colorOptions
   };
 }
 
@@ -53,12 +57,13 @@ export function createTile<P extends Polygon>(
   kind: string,
   t: P,
   children: (t: Tile & P) => (Tile & P)[],
-  parent: (Tile & P) | ((t: Tile & P) => Tile & P)
+  parent: (Tile & P) | ((t: Tile & P) => Tile & P),
+  symmetry = 1
 ): Tile & P {
   return {
     ...t,
     kind,
-    rotationalSymmetry: 1,
+    rotationalSymmetry: symmetry,
     parent() {
       if (isCallable(parent))
         return (parent as (t: Tile & P) => Tile & P)(this as Tile & P);
