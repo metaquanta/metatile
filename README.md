@@ -2,6 +2,12 @@
 
 <img align="right" src="https://tilings.metaquanta.com/sample/penrose_cropped.png" width=400 alt="Penrose-Rhomb"/>
 
+<img align="right" src="https://tilings.metaquanta.com/sample/pinwheel_cropped.png" width=400 alt="Pinwheel"/>
+
+<img align="right" src="https://tilings.metaquanta.com/sample/fibonacci_cropped.png" width=400 alt="Fibonacci Variant"/>
+
+<img align="right" src="https://tilings.metaquanta.com/sample/ammann_cropped.png" width=400 alt="Ammann-Beenker"/>
+
 Draw substitution tilings in a web-component wrapped canvas.
 
 As a web-component, knobs are twisted via attributes on the HTML tag.
@@ -25,7 +31,6 @@ As a web-component, knobs are twisted via attributes on the HTML tag.
 
 There are also a few settings on the `colors` attribute that effect color selection. 
 
-<img align="right" src="https://tilings.metaquanta.com/sample/pinwheel_cropped.png" width=400 alt="Pinwheel"/>
 
 ```
 {
@@ -49,7 +54,5 @@ https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-var
 
 https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
 
-<img align="right" src="https://tilings.metaquanta.com/sample/fibonacci_cropped.png" width=400 alt="Fibonacci Variant"/>
-<img align="right" src="https://tilings.metaquanta.com/sample/ammann_cropped.png" width=400 alt="Ammann-Beenker"/>
 
 
