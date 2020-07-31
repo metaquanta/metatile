@@ -1,6 +1,6 @@
 import { vsEqual } from "../util";
 import { intersects, Rect, Rhomb, Triangle } from "./Polygon";
-import { TriangleTile } from "./Tile";
+import { createTriangleTile } from "./Tile";
 import { V } from "./V";
 
 test("Rect.translate()", () => {
@@ -90,7 +90,7 @@ test("Triangle.intersects()", () => {
     )
   ).toBeTruthy;
   expect(
-    TriangleTile(
+    createTriangleTile(
       Triangle(
         V(231.33628675421036, 799.5215543539744),
         V(178.66371324578964, 1522.4784456460256),

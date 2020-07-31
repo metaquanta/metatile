@@ -1,6 +1,6 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-13-tiles/
 
-import { TileSet, TriangleTile } from "../classes/Tile";
+import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 
@@ -69,6 +69,10 @@ const children = (t: TriangleTile): (Triangle & { kind: string })[] => {
 };
 
 const root = (l: V): TriangleTile =>
-  TriangleTile(Triangle(l.perp().scale(2 / 3), V(0, 0), l), parent, children);
+  createTriangleTile(
+    Triangle(l.perp().scale(2 / 3), V(0, 0), l),
+    parent,
+    children
+  );
 
 export default TileSet(root, ["triangle", "mirrored"]);

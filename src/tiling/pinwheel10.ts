@@ -2,7 +2,7 @@
 
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
-import { TileSet, TriangleTile } from "../classes/Tile";
+import { TileSet, TriangleTile, createTriangleTile } from "../classes/Tile";
 
 const kinds = ["triangle", "mirrored"];
 
@@ -59,7 +59,7 @@ const children = (t: TriangleTile) => {
 };
 
 const root = (l: V): TriangleTile =>
-  TriangleTile(
+  createTriangleTile(
     Triangle(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp()),
     parent,
     children
