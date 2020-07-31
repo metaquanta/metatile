@@ -1,13 +1,13 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel/
 
-import { TileSet, TriangleTile } from "../classes/Tile";
+import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 
 const kinds = ["triangle", "mirrored"];
 
 const root = (l: V): TriangleTile =>
-  TriangleTile(
+  createTriangleTile(
     Triangle(l, V(0, 0), l.perp().scale(2)),
     parentFromC,
     children,

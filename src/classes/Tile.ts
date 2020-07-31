@@ -1,3 +1,4 @@
+import { isCallable } from "../util";
 import { isRect, Polygon, Rect, Rhomb, Triangle } from "./Polygon";
 import { V } from "./V";
 
@@ -31,13 +32,13 @@ export type TriangleTile = Tile & Triangle;
 export type RhombTile = Tile & Rhomb;
 
 export function TileSet(
-  f: (edge: V) => Tile,
+  f: (edge: V, origin: V) => Tile,
   kinds: string[] | string
 ): TileSet {
   return {
     kinds: typeof kinds == "string" ? [kinds] : kinds,
-    tile: () => f(s).translate(t),
-    tileFromEdge: (u: V, v?: V) => f(u).translate(v || V(0, 0)),
+    tile: () => f(s, V(0, 0)).translate(t),
+    tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
     tiling: (tile) => Tiling(tile)
   };
 }
@@ -48,7 +49,42 @@ export function Tiling<T extends Tile>(tile: T): Tiling {
   };
 }
 
-export function TriangleTile(
+export function createTile<P extends Polygon>(
+  kind: string,
+  t: P,
+  children: (t: Tile & P) => (Tile & P)[],
+  parent: (Tile & P) | ((t: Tile & P) => Tile & P)
+): Tile & P {
+  return {
+    ...t,
+    kind,
+    rotationalSymmetry: 1,
+    parent() {
+      if (isCallable(parent))
+        return (parent as (t: Tile & P) => Tile & P)(this as Tile & P);
+      return this;
+    },
+    children() {
+      return children(this as Tile & P);
+    },
+    translate: (v: V) =>
+      createTile(
+        kind,
+        t.translate(v),
+        children,
+        !isCallable(parent)
+          ? (parent as Tile & P).translate(v)
+          : (parent as Tile & P)
+      ),
+    equals(p: Polygon) {
+      if ((p as Tile).kind === undefined) return false;
+      if ((p as Tile).kind === kind) return t.equals(p);
+      return false;
+    }
+  };
+}
+
+export function createTriangleTile(
   triangle: Triangle,
   parent: (t: TriangleTile) => Triangle & { kind: string },
   children: (t: TriangleTile) => (Triangle & { kind: string })[],
@@ -60,15 +96,15 @@ export function TriangleTile(
     rotationalSymmetry: 1,
     parent() {
       const p = parent(this);
-      return TriangleTile(p, parent, children, p.kind);
+      return createTriangleTile(p, parent, children, p.kind);
     },
     children() {
       return children(this).map((c) =>
-        TriangleTile(c, parent, children, c.kind)
+        createTriangleTile(c, parent, children, c.kind)
       );
     },
     translate(v) {
-      return TriangleTile(triangle.translate(v), parent, children);
+      return createTriangleTile(triangle.translate(v), parent, children);
     }
   };
 }
@@ -92,8 +128,8 @@ export function* coverWith<T extends Tile>(
   }
 
   function* ascend(tile: T, d: number): Generator<T> {
-    if (d > 15) {
-      console.error(`!!!maximum depth exceeded!!! d: ${d}`);
+    if (d > 30) {
+      console.error(`!!!maximum depth exceeded!!! d: ${d} [${tile}]`);
       return;
     }
     const parent = tile.parent();
@@ -102,12 +138,26 @@ export function* coverWith<T extends Tile>(
         if (d === 0) yield t;
         else yield* descend(t, d);
       }
+      console.debug(
+        `Tile:coverWith:ascend() - [${d}, ${tile.equals(t)}, ${t.intersects(
+          bufferedMask,
+          d
+        )}]`
+      );
     }
     if (!parent.contains(bufferedMask, d + 1)) {
       yield* ascend(parent, d + 1);
     }
+    console.debug(
+      `Tile:coverWith:ascend(${tile}, ${d}) - ${parent.contains(
+        bufferedMask,
+        d + 1
+      )}`
+    );
   }
 
-  if (tile.intersects(bufferedMask, 0)) yield tile;
+  //if (tile.intersects(bufferedMask, 0))
+  console.debug(tile);
+  yield tile;
   yield* ascend(tile, 0);
 }

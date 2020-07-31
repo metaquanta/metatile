@@ -1,6 +1,6 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/viper/
 
-import { TileSet, TriangleTile } from "../classes/Tile";
+import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 
@@ -8,13 +8,13 @@ const ISQRT15 = 1 / Math.sqrt(15);
 
 const fromVec = (l: V) => {
   const r = l.perp().scale(ISQRT15);
-  return TriangleTile(Triangle(r, l, r.invert()), parent, children);
+  return createTriangleTile(Triangle(r, l, r.invert()), parent, children);
 };
 
 const parent = (t: TriangleTile) => {
   const u = t.b.subtract(t.a);
   const v = t.b.subtract(t.c);
-  return TriangleTile(
+  return createTriangleTile(
     Triangle(t.c.add(u.scale(2)), t.c.add(u.invert()), t.a.add(v.scale(2))),
     parent,
     children
@@ -40,7 +40,7 @@ const children = (t: TriangleTile) => {
   const c3 = Triangle(c1.c, c2.c, c1.a);
   const c4 = Triangle(c2.c, c1.c, c5.b);
   return [c3, c1, c2, c4, c5, c6, c7, c8, c9].map((t) =>
-    TriangleTile(t, parent, children)
+    createTriangleTile(t, parent, children)
   );
 };
 
