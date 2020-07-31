@@ -33,12 +33,14 @@ function getRenderer(root: ShadowRoot): Renderer {
   return Renderer(canvas, vp);
 }
 
-function ruleForString(name: string): TileSet {
+function ruleForString(name: string | null): TileSet {
   switch (name) {
     case "Ammann-Beenker":
       return rules["Ammann-Beenker"];
     case "Penrose-Rhomb":
       return rules["Penrose-Rhomb"];
+    case "Fibonacci":
+      return rules["Fibonacci"];
     case "Viper":
       return rules["Viper"];
     case "Pinwheel":
@@ -47,11 +49,13 @@ function ruleForString(name: string): TileSet {
       return rules["Pinwheel10"];
     case "Pinwheel13":
       return rules["Pinwheel13"];
+    case "Cubic-Pinwheel":
+      return rules["Cubic-Pinwheel"];
   }
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
   );
-  return rules["Penrose-Rhomb"];
+  return rules["Cubic-Pinwheel"];
 }
 
 function parseVectorString(vs: string | undefined | null, def: V): V {
@@ -139,7 +143,7 @@ class Tiling extends HTMLElement {
   render(): void {
     console.debug(`TilingComponent.render()`);
     if (this.renderer === undefined) return;
-    const tileSet = ruleForString(this.getAttribute("rule") || "Penrose-Rhomb");
+    const tileSet = ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
       colorRotation({
         ...parseColorString(this.getAttribute("color")),
@@ -147,8 +151,8 @@ class Tiling extends HTMLElement {
       })
     );
     const tile = tileSet.tileFromEdge(
-      parseVectorString(this.getAttribute("v"), V(45, 30)),
-      parseVectorString(this.getAttribute("u"), V(1200, 600))
+      parseVectorString(this.getAttribute("v"), V(45, 15)),
+      parseVectorString(this.getAttribute("u"), V(1500, 1500))
     );
     this.renderer.drawTile(tile);
     this.renderer.setTileStream(tileSet.tiling(tile).cover);

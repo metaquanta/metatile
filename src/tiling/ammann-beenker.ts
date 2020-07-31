@@ -136,7 +136,8 @@ function RootAmmBeeRhomb(r1: Rhomb): RhombTile {
   );
 }
 
-export default TileSet((seed) => RootAmmBeeRhomb(root(seed)), [
-  "square",
-  "rhomb"
-]);
+export default TileSet(
+  (seed) => RootAmmBeeRhomb(root(seed)),
+  ["square", "rhomb"],
+  { hueSpan: 0.25, hueOffset: 0.65 }
+);

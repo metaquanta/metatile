@@ -1,5 +1,6 @@
 import ammannBeenker from "./ammann-beenker";
 import cubicPinwheel from "./cubic-pinwheel";
+import fibonacci from "./fibonacci";
 import penroseRhomb from "./penrose-rhomb";
 import pinwheel from "./pinwheel";
 import pinwheel10 from "./pinwheel10";
@@ -9,6 +10,7 @@ import viper from "./viper";
 export default {
   "Ammann-Beenker": ammannBeenker,
   "Cubic-Pinwheel": cubicPinwheel,
+  Fibonacci: fibonacci,
   "Penrose-Rhomb": penroseRhomb,
   Pinwheel: pinwheel,
   Pinwheel10: pinwheel10,

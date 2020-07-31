@@ -17,8 +17,8 @@ export const colorRotation = ({
   lightness: l = 0.5,
   alpha = 1,
   protos = [],
-  hueSpan = 0.25,
-  hueOffset = 0.01
+  hueSpan = 0.15,
+  hueOffset = 0.32
 }: ColorRotationParameters): ((t: Tile) => string) => {
   const numParts = protos.length;
   const slotSize = 360 / numParts;
