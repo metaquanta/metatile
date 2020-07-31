@@ -116,7 +116,8 @@ export function createTriangleTile(
 
 export function* coverWith<T extends Tile>(
   tile: T,
-  mask: Polygon
+  mask: Polygon,
+  options?: { drawAnscestors?: boolean }
 ): Generator<T> {
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: T, d: number): Generator<T> {
@@ -127,7 +128,10 @@ export function* coverWith<T extends Tile>(
     for (const t of tile.children()) {
       if (t.intersects(bufferedMask, d)) {
         if (d === 1) yield t;
-        else yield* descend(t, d - 1);
+        else {
+          if (options?.drawAnscestors) yield t;
+          yield* descend(t, d - 1);
+        }
       }
     }
   }
@@ -141,7 +145,10 @@ export function* coverWith<T extends Tile>(
     for (const t of parent.children()) {
       if (!tile.equals(t) && t.intersects(bufferedMask, d)) {
         if (d === 0) yield t;
-        else yield* descend(t, d);
+        else {
+          if (options?.drawAnscestors) yield t;
+          yield* descend(t, d);
+        }
       }
       console.debug(
         `Tile:coverWith:ascend() - [${d}, ${tile.equals(t)}, ${t.intersects(
@@ -161,8 +168,6 @@ export function* coverWith<T extends Tile>(
     );
   }
 
-  //if (tile.intersects(bufferedMask, 0))
-  console.debug(tile);
   yield tile;
   yield* ascend(tile, 0);
 }

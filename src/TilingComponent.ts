@@ -55,7 +55,7 @@ function ruleForString(name: string | null): TileSet {
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
   );
-  return rules["Cubic-Pinwheel"];
+  return rules["Fibonacci"];
 }
 
 function parseVectorString(vs: string | undefined | null, def: V): V {
@@ -151,7 +151,7 @@ class Tiling extends HTMLElement {
       })
     );
     const tile = tileSet.tileFromEdge(
-      parseVectorString(this.getAttribute("v"), V(45, 15)),
+      parseVectorString(this.getAttribute("v"), V(11, 17)),
       parseVectorString(this.getAttribute("u"), V(1500, 1500))
     );
     this.renderer.drawTile(tile);
