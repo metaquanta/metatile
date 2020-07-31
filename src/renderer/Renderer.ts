@@ -77,7 +77,7 @@ export function Renderer(
 ): Renderer {
   const looper: Looper = {
     stopped: true,
-    speed: 250,
+    speed: 5,
     resolveStopped: undefined,
     iter: undefined,
     cleanUp: undefined,
