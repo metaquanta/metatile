@@ -4,24 +4,24 @@ import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 import { TileSet, TriangleTile, createTriangleTile } from "../classes/Tile";
 
-const kinds = ["triangle", "mirrored"];
+const protos = ["triangle", "mirrored"];
 
-const kinded = (t: Triangle, i: number | string) => ({
+const protoed = (t: Triangle, i: number | string) => ({
   ...t,
-  kind: typeof i === "string" ? i : kinds[i % 2]
+  proto: typeof i === "string" ? i : protos[i % 2]
 });
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: TriangleTile) => {
   const m = t.c.subtract(t.b);
   const s = t.b.subtract(t.a);
-  return kinded(
+  return protoed(
     Triangle(
       t.a.add(m.scale(1 / 3).invert()),
       t.b.add(s.scale(2)),
       t.a.add(m.scale(3))
     ),
-    t.kind
+    t.proto
   );
 };
 
@@ -43,18 +43,18 @@ const children = (t: TriangleTile) => {
   const c4 = Triangle(c2.c, c5.c, c3.a);
   const c6 = c4.translate(c4.b.subtract(c4.a));
   const c7 = c2.translate(c2.c.subtract(c2.a));
-  const i = kinds.indexOf(t.kind);
+  const i = protos.indexOf(t.proto);
   return [
-    kinded(c5, i),
-    kinded(c1, i + 1),
-    kinded(c2, i + 1),
-    kinded(c3, i),
-    kinded(c4, i),
-    kinded(c6, i),
-    kinded(c7, i + 1),
-    kinded(c5.translate(c5.c.subtract(c5.b)), i),
-    kinded(c6.translate(c6.b.subtract(c6.c)), i),
-    kinded(c7.translate(c7.c.subtract(c7.a)), i + 1)
+    protoed(c5, i),
+    protoed(c1, i + 1),
+    protoed(c2, i + 1),
+    protoed(c3, i),
+    protoed(c4, i),
+    protoed(c6, i),
+    protoed(c7, i + 1),
+    protoed(c5.translate(c5.c.subtract(c5.b)), i),
+    protoed(c6.translate(c6.b.subtract(c6.c)), i),
+    protoed(c7.translate(c7.c.subtract(c7.a)), i + 1)
   ];
 };
 
@@ -65,4 +65,4 @@ const root = (l: V): TriangleTile =>
     children
   );
 
-export default TileSet(root, kinds);
+export default TileSet(root, protos);

@@ -123,7 +123,7 @@ function AmmBeeRhomb(
         );
     },
     translate: (v) => AmmBeeRhomb(rhomb.translate(v), parent, children, kind),
-    kind
+    proto: kind
   };
 }
 

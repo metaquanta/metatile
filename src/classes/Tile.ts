@@ -9,7 +9,7 @@ const t = V(97, 109);
 const VP_FUDGE = 100;
 
 export interface Tile extends Polygon {
-  kind: string;
+  proto: string;
   rotationalSymmetry: number;
   parent: () => this;
   children: () => this[];
@@ -18,7 +18,7 @@ export interface Tile extends Polygon {
 }
 
 export interface TileSet {
-  kinds: string[];
+  protos: string[];
   tile: () => Tile;
   tileFromEdge: (edge: V, pos?: V) => Tile;
   tiling: (tile: Tile) => Tiling;
@@ -35,11 +35,11 @@ export type RhombTile = Tile & Rhomb;
 
 export function TileSet(
   f: (edge: V, origin: V) => Tile,
-  kinds: string[] | string,
+  protos: string[] | string,
   colorOptions?: ColorRotationParameters
 ): TileSet {
   return {
-    kinds: typeof kinds == "string" ? [kinds] : kinds,
+    protos: typeof protos == "string" ? [protos] : protos,
     tile: () => f(s, V(0, 0)).translate(t),
     tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
     tiling: (tile) => Tiling(tile),
@@ -54,16 +54,16 @@ export function Tiling<T extends Tile>(tile: T): Tiling {
 }
 
 export function createTile<P extends Polygon>(
-  kind: string,
+  proto: string,
   t: P,
   children: (t: Tile & P) => (Tile & P)[],
   parent: (Tile & P) | ((t: Tile & P) => Tile & P),
-  symmetry = 1
+  rotationalSymmetry = 1
 ): Tile & P {
   return {
     ...t,
-    kind,
-    rotationalSymmetry: symmetry,
+    proto,
+    rotationalSymmetry,
     parent() {
       if (isCallable(parent))
         return (parent as (t: Tile & P) => Tile & P)(this as Tile & P);
@@ -74,7 +74,7 @@ export function createTile<P extends Polygon>(
     },
     translate: (v: V) =>
       createTile(
-        kind,
+        proto,
         t.translate(v),
         children,
         !isCallable(parent)
@@ -82,8 +82,8 @@ export function createTile<P extends Polygon>(
           : (parent as Tile & P)
       ),
     equals(p: Polygon) {
-      if ((p as Tile).kind === undefined) return false;
-      if ((p as Tile).kind === kind) return t.equals(p);
+      if ((p as Tile).proto === undefined) return false;
+      if ((p as Tile).proto === proto) return t.equals(p);
       return false;
     }
   };
@@ -91,21 +91,21 @@ export function createTile<P extends Polygon>(
 
 export function createTriangleTile(
   triangle: Triangle,
-  parent: (t: TriangleTile) => Triangle & { kind: string },
-  children: (t: TriangleTile) => (Triangle & { kind: string })[],
-  kind = "triangle"
+  parent: (t: TriangleTile) => Triangle & { proto: string },
+  children: (t: TriangleTile) => (Triangle & { proto: string })[],
+  proto = "triangle"
 ): TriangleTile {
   return {
     ...triangle,
-    kind,
+    proto,
     rotationalSymmetry: 1,
     parent() {
       const p = parent(this);
-      return createTriangleTile(p, parent, children, p.kind);
+      return createTriangleTile(p, parent, children, p.proto);
     },
     children() {
       return children(this).map((c) =>
-        createTriangleTile(c, parent, children, c.kind)
+        createTriangleTile(c, parent, children, c.proto)
       );
     },
     translate(v) {
@@ -117,7 +117,7 @@ export function createTriangleTile(
 export function* coverWith<T extends Tile>(
   tile: T,
   mask: Polygon,
-  options?: { drawAnscestors?: boolean }
+  options = { drawAncestors: true }
 ): Generator<T> {
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: T, d: number): Generator<T> {
@@ -129,7 +129,7 @@ export function* coverWith<T extends Tile>(
       if (t.intersects(bufferedMask, d)) {
         if (d === 1) yield t;
         else {
-          if (options?.drawAnscestors) yield t;
+          if (options?.drawAncestors) yield t;
           yield* descend(t, d - 1);
         }
       }
@@ -146,7 +146,7 @@ export function* coverWith<T extends Tile>(
       if (!tile.equals(t) && t.intersects(bufferedMask, d)) {
         if (d === 0) yield t;
         else {
-          if (options?.drawAnscestors) yield t;
+          if (options?.drawAncestors) yield t;
           yield* descend(t, d);
         }
       }
