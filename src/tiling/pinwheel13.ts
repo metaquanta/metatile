@@ -4,16 +4,16 @@ import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 
-const kinds = ["triangle", "mirrored"];
+const protos = ["triangle", "mirrored"];
 
-const kinded = (t: Triangle, i: number | string) => ({
+const protoed = (t: Triangle, i: number | string) => ({
   ...t,
-  kind: typeof i === "string" ? i : kinds[i % 2]
+  proto: typeof i === "string" ? i : protos[i % 2]
 });
 
 // A->B is S side, B->C is M side, C->A is L side.
 const parent = (t: TriangleTile) => {
-  return kinded(
+  return protoed(
     Triangle(
       t.c.add(t.b.subtract(t.a)).add(t.c.subtract(t.b).scale(4 / 3)),
       t.c.add(t.a.subtract(t.b).scale(2)),
@@ -23,7 +23,7 @@ const parent = (t: TriangleTile) => {
   );
 };
 
-const children = (t: TriangleTile): (Triangle & { kind: string })[] => {
+const children = (t: TriangleTile): (Triangle & { proto: string })[] => {
   // m1
   // 2  3  m4
   // m5  m6  7  8  m9
@@ -50,7 +50,7 @@ const children = (t: TriangleTile): (Triangle & { kind: string })[] => {
     t.a.add(s.scale(1 / 2))
   );
   const c11 = Triangle(c10.c, c10.b.add(s.scale(1 / 2)), c10.a);
-  const i = kinds.indexOf(t.kind);
+  const i = protos.indexOf(t.proto);
   return ([
     [c1, 1],
     [c2, 0],
@@ -65,7 +65,7 @@ const children = (t: TriangleTile): (Triangle & { kind: string })[] => {
     [c11, 0],
     [Triangle(c11.a, c11.b, t.b), 1],
     [Triangle(t.a, c10.b, c10.c), 1]
-  ] as [Triangle, number][]).map((t) => kinded(t[0], (t[1] + i) % 2));
+  ] as [Triangle, number][]).map((t) => protoed(t[0], (t[1] + i) % 2));
 };
 
 const root = (l: V): TriangleTile =>

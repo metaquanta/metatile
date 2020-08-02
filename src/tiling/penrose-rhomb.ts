@@ -29,7 +29,7 @@ function PenroseRhomb(
 ): PenroseRhomb {
   return {
     ...rhomb,
-    kind,
+    proto: kind,
     rotationalSymmetry: 2,
     contains(p: Polygon | V, depth = 0) {
       if (!rhomb.contains(p)) return false;

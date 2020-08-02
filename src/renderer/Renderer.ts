@@ -18,7 +18,9 @@ export type Renderer = {
 };
 
 type Looper = {
-  speed: number;
+  speedTiles: number;
+  speedMs: number;
+  lastMs: number;
   stopped: boolean;
   resolveStopped: (() => void) | undefined;
   start: (r: () => void, c: () => void) => void;
@@ -77,7 +79,9 @@ export function Renderer(
 ): Renderer {
   const looper: Looper = {
     stopped: true,
-    speed: 5,
+    speedTiles: 100,
+    speedMs: 100,
+    lastMs: Date.now(),
     resolveStopped: undefined,
     iter: undefined,
     cleanUp: undefined,
@@ -91,13 +95,25 @@ export function Renderer(
       this.stopped = false;
       if (this.cleanUp) this.cleanUp();
       this.cleanUp = cleanUp;
+      this.lastMs = Date.now();
       this.iter = () => {
         if (this.stopped) {
           if (this.resolveStopped) this.resolveStopped();
         } else {
-          for (let i = 0; i < this.speed && task(); i++) {
+          for (let i = 0; i < this.speedTiles && task(); i++) {
             this.cnt++;
           }
+          const ms = Date.now();
+          console.log(
+            `Renderer:Looper - ${this.speedTiles} tiles in ${
+              ms - this.lastMs
+            }ms. [${this.lastMs}, ${ms}]`
+          );
+          this.speedTiles = Math.max(
+            (this.speedMs / (ms - this.lastMs)) * this.speedTiles,
+            1
+          );
+          this.lastMs = Date.now();
           window.requestAnimationFrame(() => this.iter && this.iter());
         }
       };

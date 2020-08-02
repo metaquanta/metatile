@@ -17,7 +17,7 @@ export const colorRotation = ({
   lightness: l = 0.5,
   alpha = 0.1,
   protos = [],
-  hueSpan = 0.15,
+  hueSpan = 0,
   hueOffset = 0.32
 }: ColorRotationParameters): ((t: Tile) => string) => {
   const numParts = protos.length;
@@ -26,7 +26,7 @@ export const colorRotation = ({
   const colors = getColors(numParts, hueOffset * 360);
   return (t) => {
     const th = theta(t.vertices()[1].subtract(t.vertices()[0]));
-    const variant = Math.abs(protos.indexOf(t.kind));
+    const variant = Math.abs(protos.indexOf(t.proto));
     const angle =
       ((th / Math.PI / 2) % (1 / t.rotationalSymmetry)) * t.rotationalSymmetry;
     const angleHueVar = Math.abs(angle - 0.5) * hueVariation * 2;
@@ -45,7 +45,7 @@ export const colorSet = (
   colorByProto: Map<string, string>,
   defaultColor = "blue"
 ): ((t: Tile) => string) => (t) => {
-  return colorByProto.get(t.kind) || defaultColor;
+  return colorByProto.get(t.proto) || defaultColor;
 };
 
 export function rybToRgb(theta: number): number {

@@ -12,6 +12,8 @@ test("parent inverts children", () => {
     expect(vsEqual(r.a, s.a)).toBeTruthy();
     expect(vsEqual(r.b, s.b)).toBeTruthy();
     expect(vsEqual(r.c, s.c)).toBeTruthy();
+
+    expect(s.equals(r)).toBeTruthy();
   }
 
   {
@@ -19,6 +21,8 @@ test("parent inverts children", () => {
     expect(vsEqual(r.a, s.a)).toBeTruthy();
     expect(vsEqual(r.b, s.b)).toBeTruthy();
     expect(vsEqual(r.c, s.c)).toBeTruthy();
+
+    expect(s.equals(r)).toBeTruthy();
   }
 
   {
@@ -32,6 +36,8 @@ test("parent inverts children", () => {
     expect(vsEqual(r.a, s.a)).toBeTruthy();
     expect(vsEqual(r.b, s.b)).toBeTruthy();
     expect(vsEqual(r.c, s.c)).toBeTruthy();
+
+    expect(s.equals(r)).toBeTruthy();
   }
 
   {
@@ -47,5 +53,7 @@ test("parent inverts children", () => {
     expect(vsEqual(r.a, s.a)).toBeTruthy();
     expect(vsEqual(r.b, s.b)).toBeTruthy();
     expect(vsEqual(r.c, s.c)).toBeTruthy();
+
+    expect(s.equals(r)).toBeTruthy();
   }
 });

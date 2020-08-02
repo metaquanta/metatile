@@ -55,7 +55,7 @@ function ruleForString(name: string | null): TileSet {
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
   );
-  return rules["Fibonacci"];
+  return rules["Cubic-Pinwheel"];
 }
 
 function parseVectorString(vs: string | undefined | null, def: V): V {
@@ -147,14 +147,13 @@ class Tiling extends HTMLElement {
     this.renderer.setFillColorer(
       colorRotation({
         ...parseColorString(this.getAttribute("color")),
-        protos: tileSet.kinds
+        protos: tileSet.protos
       })
     );
     const tile = tileSet.tileFromEdge(
       parseVectorString(this.getAttribute("v"), V(11, 17)),
       parseVectorString(this.getAttribute("u"), V(1500, 1500))
     );
-    this.renderer.drawTile(tile);
     this.renderer.setTileStream(tileSet.tiling(tile).cover);
   }
 }
