@@ -15,11 +15,12 @@ export type ColorRotationParameters = {
 export const colorRotation = ({
   saturation: s = 0.5,
   lightness: l = 0.5,
-  alpha = 0.1,
+  alpha = 1,
   protos = [],
   hueSpan = 0,
   hueOffset = 0.32
 }: ColorRotationParameters): ((t: Tile) => string) => {
+  console.debug(`colorRotation(${s}, ${l}, ${hueSpan}, ${hueOffset})`);
   const numParts = protos.length;
   const slotSize = 360 / numParts;
   const hueVariation = slotSize * hueSpan;
