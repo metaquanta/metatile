@@ -1,6 +1,5 @@
 import { vsEqual } from "../util";
 import { intersects, Rect, Rhomb, Triangle } from "./Polygon";
-import { createTriangleTile } from "./Tile";
 import { V } from "./V";
 
 test("Rect.translate()", () => {

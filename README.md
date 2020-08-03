@@ -10,14 +10,13 @@ Draw substitution tilings in a web-component wrapped canvas.
 As a web-component, knobs are twisted via attributes on the HTML tag.
 
 ```
-<mq-tiling 
-    rule="Ammann-Beenker" 
-    v="100,5" 
+<mq-tiling
+    rule="Ammann-Beenker"
+    v="100,5"
     u="1500,1500"
 ></mq-tiling>
 
 ```
-
 
 `rule` is pretty straight-forward. (see tilings/rules.ts)
 
@@ -25,9 +24,7 @@ As a web-component, knobs are twisted via attributes on the HTML tag.
 
 `u` translates.
 
-
-There are also a few settings on the `colors` attribute that effect color selection. 
-
+There are also a few settings on the `colors` attribute that effect color selection.
 
 ```
 {
@@ -50,6 +47,3 @@ https://tilings.math.uni-bielefeld.de/substitution/pinwheel/
 https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-variant/
 
 https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
-
-
-
