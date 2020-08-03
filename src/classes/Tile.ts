@@ -117,7 +117,7 @@ export function createTriangleTile(
 export function* coverWith<T extends Tile>(
   tile: T,
   mask: Polygon,
-  options = { drawAncestors: true }
+  options = { drawAncestors: false }
 ): Generator<T> {
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: T, d: number): Generator<T> {

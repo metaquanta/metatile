@@ -34,24 +34,7 @@ function getRenderer(root: ShadowRoot): Renderer {
 }
 
 function ruleForString(name: string | null): TileSet {
-  switch (name) {
-    case "Ammann-Beenker":
-      return rules["Ammann-Beenker"];
-    case "Penrose-Rhomb":
-      return rules["Penrose-Rhomb"];
-    case "Fibonacci":
-      return rules["Fibonacci"];
-    case "Viper":
-      return rules["Viper"];
-    case "Pinwheel":
-      return rules["Pinwheel"];
-    case "Pinwheel10":
-      return rules["Pinwheel10"];
-    case "Pinwheel13":
-      return rules["Pinwheel13"];
-    case "Cubic-Pinwheel":
-      return rules["Cubic-Pinwheel"];
-  }
+  if (name && name in rules) return rules[name as keyof typeof rules];
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
   );
@@ -68,18 +51,6 @@ function parseVectorString(vs: string | undefined | null, def: V): V {
   return def;
 }
 
-function parseColorString(color: string | null): ColorRotationParameters {
-  if (color === null) return {};
-  try {
-    return JSON.parse(color);
-  } catch {
-    console.debug(
-      `TilingComponent:parseColorString() - failed to parse color: ${color}`
-    );
-  }
-  return {};
-}
-
 class Tiling extends HTMLElement {
   viewPort: ViewPort | undefined = undefined;
   renderer: Renderer | undefined = undefined;
@@ -89,7 +60,15 @@ class Tiling extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ["rule", "v", "u", "colors"];
+    return [
+      "rule",
+      "v",
+      "u",
+      "colorSaturation",
+      "colorLightness",
+      "colorHueSpan",
+      "colorHueOffset"
+    ];
   }
 
   set rule(rule: string) {
@@ -119,17 +98,66 @@ class Tiling extends HTMLElement {
     this.render();
   }
 
-  set colors(colors: string) {
-    if (colors) {
-      this.setAttribute("colors", colors);
+  set colorSaturation(colorSaturation: string) {
+    if (colorSaturation) {
+      this.setAttribute("colorSaturation", colorSaturation);
     } else {
-      this.removeAttribute("colors");
+      this.removeAttribute("colorSaturation");
+    }
+    this.render();
+  }
+  set colorLightness(colorLightness: string) {
+    if (colorLightness) {
+      this.setAttribute("colorLightness", colorLightness);
+    } else {
+      this.removeAttribute("colorLightness");
+    }
+    this.render();
+  }
+  set colorHueSpan(colorHueSpan: string) {
+    if (colorHueSpan) {
+      this.setAttribute("colorHueSpan", colorHueSpan);
+    } else {
+      this.removeAttribute("colorHueSpan");
+    }
+    this.render();
+  }
+  set colorHueOffset(colorHueOffset: string) {
+    if (colorHueOffset) {
+      this.setAttribute("colorHueOffset", colorHueOffset);
+    } else {
+      this.removeAttribute("colorHueOffset");
     }
     this.render();
   }
 
+  colorParameters(): ColorRotationParameters {
+    const parseFloat = (f: string | null | undefined) => {
+      if (f === undefined || f === null) return undefined;
+      const n = Number.parseFloat(f);
+      if (isNaN(n)) return undefined;
+      return n;
+    };
+    const p = {
+      saturation: parseFloat(this.getAttribute("colorSaturation")),
+      lightness: parseFloat(this.getAttribute("colorLightness")),
+      hueSpan: parseFloat(this.getAttribute("colorHueSpan")),
+      hueOffset: parseFloat(this.getAttribute("colorHueOffset"))
+    };
+    console.log(`colorParameters(): ${p} [${this.colorSaturation}]`);
+    return p;
+  }
+
   attributeChangedCallback(name: string): void {
-    if (name === "u" || name === "v" || name === "colors" || name === "rule") {
+    if (
+      name === "u" ||
+      name === "v" ||
+      name === "colorSaturation" ||
+      name === "colorLightness" ||
+      name === "colorHueSpan" ||
+      name === "colorHueOffset" ||
+      name === "rule"
+    ) {
       this.render();
     }
   }
@@ -146,7 +174,7 @@ class Tiling extends HTMLElement {
     const tileSet = ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
       colorRotation({
-        ...parseColorString(this.getAttribute("color")),
+        ...this.colorParameters(),
         protos: tileSet.protos
       })
     );
