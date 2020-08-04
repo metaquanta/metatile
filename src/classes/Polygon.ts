@@ -20,6 +20,7 @@ export type Triangle = Polygon & {
   a: V;
   b: V;
   c: V;
+  translate: (v: V) => Triangle;
 };
 
 export type Tetragon = Polygon & {
@@ -27,6 +28,7 @@ export type Tetragon = Polygon & {
   b: V;
   c: V;
   d: V;
+  translate: (v: V) => Tetragon;
 };
 
 export type Rhomb = Tetragon;
@@ -77,29 +79,126 @@ export const Polygon = (vertices: V[]): Polygon => {
   };
 };
 
-export const Triangle = (a: V, b: V, c: V): Triangle => ({
-  a,
-  b,
-  c,
-  ...Polygon([a, b, c]),
+// These don't implement the interfaces here to trick the polymorphic this
+// nonsense. They're still treated as though they do elsewhere.
+class _Polygon {
+  _vertices: V[];
+  constructor(vertices: V[]) {
+    this._vertices = vertices;
+  }
+
+  triangles() {
+    return this._vertices
+      .slice(2)
+      .map((_, i) =>
+        Triangle(
+          this._vertices[0],
+          this._vertices[i + 1],
+          this._vertices[i + 2]
+        )
+      );
+  }
+
+  vertices() {
+    return this._vertices;
+  }
+
+  sides() {
+    return this._vertices.length;
+  }
+
+  contains(p: V | Polygon): boolean {
+    return contains(this, p);
+  }
+
+  intersects(p: Polygon): boolean {
+    return intersects(this, p);
+  }
+
+  center() {
+    return this._vertices
+      .reduce((a, b) => a.add(b))
+      .scale(1 / this._vertices.length);
+  }
+
+  translate(v: V): Polygon {
+    return Polygon(this._vertices.map((u) => u.add(v)));
+  }
+
+  equals(p: Polygon): boolean {
+    return equals(this, p);
+  }
+
+  toString() {
+    if (this._vertices.length === 0) return "∅";
+    if (this._vertices.length === 1) return "⋅" + this._vertices[0];
+    return `⦗${this._vertices
+      .map((v) => v.toString())
+      .join(
+        this._vertices.length < 6
+          ? ["⭎", "⯅", "⯁", "⯂"][this._vertices.length - 2]
+          : "⬣"
+      )}⦘`;
+  }
+}
+
+export const Triangle = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
+
+class _Triangle extends _Polygon {
+  a: V;
+  b: V;
+  c: V;
+
+  constructor(a: V, b: V, c: V) {
+    super([a, b, c]);
+    this.a = a;
+    this.b = b;
+    this.c = c;
+  }
+
   triangles() {
     return [this];
-  },
-  translate: (v) => Triangle(a.add(v), b.add(v), c.add(v)),
-  toString: () => `⟮${a}▽${b}▼${c}⟯`
-});
+  }
 
-export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon => ({
-  a,
-  b,
-  c,
-  d,
-  ...Polygon([a, b, c, d]),
-  translate: (v) => Tetragon(a.add(v), b.add(v), c.add(v), d.add(v)),
-  toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
-});
+  translate(v: V): Triangle {
+    return new _Triangle(this.a.add(v), this.b.add(v), this.c.add(v));
+  }
+  toString() {
+    return `⟮${this.a}▽${this.b}▼${this.c}⟯`;
+  }
+}
 
-export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => Tetragon(a, b, c, d);
+export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
+  new _Tetragon(a, b, c, d);
+
+export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
+
+class _Tetragon extends _Polygon {
+  a: V;
+  b: V;
+  c: V;
+  d: V;
+
+  constructor(a: V, b: V, c: V, d: V) {
+    super([a, b, c]);
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+  }
+
+  translate(v: V): Tetragon {
+    return new _Tetragon(
+      this.a.add(v),
+      this.b.add(v),
+      this.c.add(v),
+      this.d.add(v)
+    );
+  }
+  toString() {
+    return `⟮${this.a}▱${this.b}▰${this.c}▱${this.d}⟯`;
+  }
+}
 
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
   left: x0,
