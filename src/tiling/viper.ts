@@ -1,27 +1,27 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/viper/
 
-import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
 import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
+import { singlePrototileRule } from "../classes/Rule";
 
 const ISQRT15 = 1 / Math.sqrt(15);
 
 const fromVec = (l: V) => {
   const r = l.perp().scale(ISQRT15);
-  return createTriangleTile(Triangle(r, l, r.invert()), parent, children);
+  return Triangle(r, l, r.invert());
 };
 
-const parent = (t: TriangleTile) => {
+const parent = (t: Triangle) => {
   const u = t.b.subtract(t.a);
   const v = t.b.subtract(t.c);
-  return createTriangleTile(
-    Triangle(t.c.add(u.scale(2)), t.c.add(u.invert()), t.a.add(v.scale(2))),
-    parent,
-    children
+  return Triangle(
+    t.c.add(u.scale(2)),
+    t.c.add(u.invert()),
+    t.a.add(v.scale(2))
   );
 };
 
-const children = (t: TriangleTile) => {
+const children = (t: Triangle) => {
   //         1
   //       2(3)4
   //        5
@@ -39,9 +39,7 @@ const children = (t: TriangleTile) => {
   const c2 = Triangle(c9.b, c1.a, c1.a.subtract(v));
   const c3 = Triangle(c1.c, c2.c, c1.a);
   const c4 = Triangle(c2.c, c1.c, c5.b);
-  return [c3, c1, c2, c4, c5, c6, c7, c8, c9].map((t) =>
-    createTriangleTile(t, parent, children)
-  );
+  return [c3, c1, c2, c4, c5, c6, c7, c8, c9];
 };
 
-export default TileSet(fromVec, "triangle");
+export default singlePrototileRule(fromVec, parent, children, 1);

@@ -1,47 +1,53 @@
-import { RhombTile } from "../classes/Tile";
+import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
-import { vsEqual } from "../util";
 import cubic from "./cubic-pinwheel";
 
 test("parent inverts children", () => {
   const u = V(400, 0);
   const v = V(900, 200);
-  const r = <RhombTile>cubic.tileFromEdge(u, v);
+  const r = cubic.tileFromEdge(u, v);
   {
-    const s = r.parent().children()[0];
-    expect(vsEqual(r.a, s.a)).toBeTruthy();
-    expect(vsEqual(r.b, s.b)).toBeTruthy();
-    expect(vsEqual(r.c, s.c)).toBeTruthy();
+    const p = r.polygon() as Triangle;
+    const t = r.parent().children()[0];
+    const s = t.polygon() as Triangle;
+    expect(p.a.equals(s.a)).toBeTruthy();
+    expect(p.b.equals(s.b)).toBeTruthy();
+    expect(p.c.equals(s.c)).toBeTruthy();
 
-    expect(s.equals(r)).toBeTruthy();
+    expect(t.equals(r)).toBeTruthy();
   }
 
   {
-    const s = r.parent().parent().children()[0].children()[0];
-    expect(vsEqual(r.a, s.a)).toBeTruthy();
-    expect(vsEqual(r.b, s.b)).toBeTruthy();
-    expect(vsEqual(r.c, s.c)).toBeTruthy();
+    const p = r.polygon() as Triangle;
+    const t = r.parent().parent().children()[0].children()[0];
+    const s = t.polygon() as Triangle;
+    expect(p.a.equals(s.a)).toBeTruthy();
+    expect(p.b.equals(s.b)).toBeTruthy();
+    expect(p.c.equals(s.c)).toBeTruthy();
 
-    expect(s.equals(r)).toBeTruthy();
+    expect(t.equals(r)).toBeTruthy();
   }
 
   {
-    const s = r
+    const p = r.polygon() as Triangle;
+    const t = r
       .parent()
       .parent()
       .parent()
       .children()[0]
       .children()[0]
       .children()[0];
-    expect(vsEqual(r.a, s.a)).toBeTruthy();
-    expect(vsEqual(r.b, s.b)).toBeTruthy();
-    expect(vsEqual(r.c, s.c)).toBeTruthy();
+    const s = t.polygon() as Triangle;
+    expect(p.a.equals(s.a)).toBeTruthy();
+    expect(p.b.equals(s.b)).toBeTruthy();
+    expect(p.c.equals(s.c)).toBeTruthy();
 
-    expect(s.equals(r)).toBeTruthy();
+    expect(t.equals(r)).toBeTruthy();
   }
 
   {
-    const s = r
+    const p = r.polygon() as Triangle;
+    const t = r
       .parent()
       .parent()
       .parent()
@@ -50,10 +56,11 @@ test("parent inverts children", () => {
       .children()[0]
       .children()[0]
       .children()[0];
-    expect(vsEqual(r.a, s.a)).toBeTruthy();
-    expect(vsEqual(r.b, s.b)).toBeTruthy();
-    expect(vsEqual(r.c, s.c)).toBeTruthy();
+    const s = t.polygon() as Triangle;
+    expect(p.a.equals(s.a)).toBeTruthy();
+    expect(p.b.equals(s.b)).toBeTruthy();
+    expect(p.c.equals(s.c)).toBeTruthy();
 
-    expect(s.equals(r)).toBeTruthy();
+    expect(t.equals(r)).toBeTruthy();
   }
 });

@@ -1,11 +1,11 @@
 import ammannBeenker from "./ammann-beenker";
-import cubicPinwheel from "./cubic-pinwheel";
-import fibonacci from "./fibonacci";
+import cubicPinwheel from "../tiling/cubic-pinwheel";
+import fibonacci from "../tiling/fibonacci";
 import penroseRhomb from "./penrose-rhomb";
-import pinwheel from "./pinwheel";
-import pinwheel10 from "./pinwheel10";
-import pinwheel13 from "./pinwheel13";
-import viper from "./viper";
+import pinwheel from "../tiling/pinwheel";
+import pinwheel10 from "../tiling/pinwheel10";
+import pinwheel13 from "../tiling/pinwheel13";
+import viper from "../tiling/viper";
 
 export default {
   "Ammann-Beenker": ammannBeenker,

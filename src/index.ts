@@ -79,7 +79,7 @@ function randomRule(): string {
       return "Cubic-Pinwheel";
   }
   console.error(`randomRule() - UNREACHABLE!!! [${r}]`);
-  return "";
+  throw new Error(`!!!Unreachable reached!!!`);
 }
 
 function getRandomParameters(params: Parameters): Parameters {

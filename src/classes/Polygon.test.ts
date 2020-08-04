@@ -1,5 +1,4 @@
-import { vsEqual } from "../util";
-import { intersects, Rect, Rhomb, Triangle } from "./Polygon";
+import { Rect, Tetragon, Triangle } from "./Polygon";
 import { V } from "./V";
 
 test("Rect.translate()", () => {
@@ -14,10 +13,10 @@ test("Rect.translate()", () => {
   const j = V(136 + 23, 5 + 75);
   const k = V(136 + 23, 36 + 75);
   const l = V(5 + 23, 36 + 75);
-  expect(vsEqual(a, i)).toBeTruthy;
-  expect(vsEqual(b, j)).toBeTruthy;
-  expect(vsEqual(c, k)).toBeTruthy;
-  expect(vsEqual(d, l)).toBeTruthy;
+  expect(a.equals(i)).toBeTruthy;
+  expect(b.equals(j)).toBeTruthy;
+  expect(c.equals(k)).toBeTruthy;
+  expect(d.equals(l)).toBeTruthy;
 });
 
 test("Rect.vertices()", () => {
@@ -30,10 +29,10 @@ test("Rect.vertices()", () => {
   const j = V(136, 5);
   const k = V(136, 36);
   const l = V(5, 36);
-  expect(vsEqual(a, i)).toBeTruthy;
-  expect(vsEqual(b, j)).toBeTruthy;
-  expect(vsEqual(c, k)).toBeTruthy;
-  expect(vsEqual(d, l)).toBeTruthy;
+  expect(a.equals(i)).toBeTruthy;
+  expect(b.equals(j)).toBeTruthy;
+  expect(c.equals(k)).toBeTruthy;
+  expect(d.equals(l)).toBeTruthy;
 });
 
 test("Rect.covers()", () => {
@@ -74,10 +73,10 @@ test("Triangle.intersects()", () => {
     const b = V(Math.random() * 775, Math.random() * 230).add(V(-25, 134));
     const a = V(Math.random() * 775, Math.random() * 230).add(V(-25, 134));
     const sp = Triangle(c, b, a);
-    expect(intersects(tp, t1) || intersects(t2, tp)).toBeTruthy;
-    expect(intersects(sp, tp) == intersects(tp, sp)).toBeTruthy;
-    expect(intersects(tp, t1) == t1.intersects(tp)).toBeTruthy;
-    expect(intersects(sp, t2) == t2.intersects(sp)).toBeTruthy;
+    expect(tp.intersects(t1) || t2.intersects(tp)).toBeTruthy;
+    expect(sp.intersects(tp) == tp.intersects(sp)).toBeTruthy;
+    expect(tp.intersects(t1) == t1.intersects(tp)).toBeTruthy;
+    expect(sp.intersects(t2) == t2.intersects(sp)).toBeTruthy;
   }
   expect(
     Triangle(
@@ -85,7 +84,7 @@ test("Triangle.intersects()", () => {
       V(178.66371324578964, 1522.4784456460256),
       V(-125.2477849343422, 864.3911657654808)
     ).intersects(
-      Rhomb(V(200, 1000), V(2500, 1000), V(2500, 2000), V(200, 2000))
+      Tetragon(V(200, 1000), V(2500, 1000), V(2500, 2000), V(200, 2000))
     )
   ).toBeTruthy;
   expect(

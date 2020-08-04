@@ -1,29 +1,19 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-13-tiles/
 
-import { TileSet, createTriangleTile, TriangleTile } from "../classes/Tile";
-import { Triangle } from "../classes/Polygon";
+import { Tile, Prototile, reflect } from "../classes/Tile";
+import { Polygon, Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
-
-const protos = ["triangle", "mirrored"];
-
-const protoed = (t: Triangle, i: number | string) => ({
-  ...t,
-  proto: typeof i === "string" ? i : protos[i % 2]
-});
+import { Rule } from "../classes/Rule";
 
 // A->B is S side, B->C is M side, C->A is L side.
-const parent = (t: TriangleTile) => {
-  return protoed(
-    Triangle(
-      t.c.add(t.b.subtract(t.a)).add(t.c.subtract(t.b).scale(4 / 3)),
-      t.c.add(t.a.subtract(t.b).scale(2)),
-      t.b.add(t.b.subtract(t.a)).add(t.b.subtract(t.c).scale(2))
-    ),
-    "triangle"
+const parent = (t: Triangle) =>
+  Triangle(
+    t.c.add(t.b.subtract(t.a)).add(t.c.subtract(t.b).scale(4 / 3)),
+    t.c.add(t.a.subtract(t.b).scale(2)),
+    t.b.add(t.b.subtract(t.a)).add(t.b.subtract(t.c).scale(2))
   );
-};
 
-const children = (t: TriangleTile): (Triangle & { proto: string })[] => {
+const children = (t: Triangle, create: (p: Polygon) => Tile): Tile[] => {
   // m1
   // 2  3  m4
   // m5  m6  7  8  m9
@@ -50,29 +40,34 @@ const children = (t: TriangleTile): (Triangle & { proto: string })[] => {
     t.a.add(s.scale(1 / 2))
   );
   const c11 = Triangle(c10.c, c10.b.add(s.scale(1 / 2)), c10.a);
-  const i = protos.indexOf(t.proto);
-  return ([
-    [c1, 1],
-    [c2, 0],
-    [c3, 0],
-    [c4, 1],
-    [c5, 1],
-    [c6, 1],
-    [c7, 0],
-    [c3.translate(m.scale(1 / 3)), 0],
-    [c1.translate(m.scale(2 / 3)), 1],
-    [c10, 0],
-    [c11, 0],
-    [Triangle(c11.a, c11.b, t.b), 1],
-    [Triangle(t.a, c10.b, c10.c), 1]
-  ] as [Triangle, number][]).map((t) => protoed(t[0], (t[1] + i) % 2));
+
+  return [
+    reflect(create(c1)),
+    create(c2),
+    create(c3),
+    reflect(create(c4)),
+    reflect(create(c5)),
+    reflect(create(c6)),
+    create(c7), //
+    create(c3.translate(m.scale(1 / 3))),
+    reflect(create(c1.translate(m.scale(2 / 3)))),
+    create(c10), //
+    create(c11),
+    reflect(create(Triangle(c11.a, c11.b, t.b))),
+    reflect(create(Triangle(t.a, c10.b, c10.c)))
+  ];
 };
 
-const root = (l: V): TriangleTile =>
-  createTriangleTile(
-    Triangle(l.perp().scale(2 / 3), V(0, 0), l),
-    parent,
-    children
-  );
+const root = (l: V): Triangle => Triangle(l.perp().scale(2 / 3), V(0, 0), l);
 
-export default TileSet(root, ["triangle", "mirrored"]);
+const prototile: Prototile = Prototile<Triangle>(
+  (t) => prototile.create(parent(t)),
+  (t) => children(t, (p) => prototile.create(p)),
+  1,
+  false
+);
+
+export default Rule(
+  (l: V, u: V): Tile => prototile.create(root(l).translate(u)),
+  [prototile]
+);

@@ -1,8 +1,8 @@
-import { TileSet } from "./classes/Tile";
 import { V } from "./classes/V";
 import { ViewPort } from "./classes/ViewPort";
 import { colorRotation, ColorRotationParameters } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
+import { Rule } from "./classes/Rule";
 import rules from "./tiling/rules";
 
 function getRenderer(root: ShadowRoot): Renderer {
@@ -33,7 +33,7 @@ function getRenderer(root: ShadowRoot): Renderer {
   return Renderer(canvas, vp);
 }
 
-function ruleForString(name: string | null): TileSet {
+function ruleForString(name: string | null): Rule {
   if (name && name in rules) return rules[name as keyof typeof rules];
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
@@ -48,6 +48,9 @@ function parseVectorString(vs: string | undefined | null, def: V): V {
   if (components.length === 2) {
     return V(components[0], components[1]);
   }
+  console.debug(
+    `TilingComponent:parseVectorString(${vs}) failed. Using default.`
+  );
   return def;
 }
 
