@@ -1,15 +1,31 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
 
-import { RhombTile, TileSet } from "../classes/Tile";
-import { Polygon, Rhomb } from "../classes/Polygon";
+import {
+  nonVolumeHierarchical,
+  oneWayPrototile,
+  Prototile,
+  Tile
+} from "../classes/Tile";
+import { Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
+import { Rule } from "../classes/Rule";
 
 const SQRT2 = Math.sqrt(2);
 
-const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
+const squareChildren = (
+  sq: Rhomb,
+  createSquare: (p: Rhomb) => Tile,
+  createRhomb: (p: Rhomb) => Tile
+): Tile[] => {
   const r = sq.translate(sq.a.invert());
   const unit_d = r.c.scale(1 / (2 + SQRT2));
-  const inner_sq = firstChild(sq);
+  const unit_d2 = r.d.subtract(r.b).scale(1 / (2 + SQRT2));
+  const inner_sq = Rhomb(
+    unit_d.scale(1 + SQRT2),
+    unit_d2.scale(1 + SQRT2).add(r.b),
+    unit_d,
+    unit_d2.add(r.b)
+  ).translate(sq.a);
   const a = r.b.scale(1 / (1 + SQRT2)).add(sq.a);
   const b = r.c
     .subtract(r.b)
@@ -22,37 +38,26 @@ const squareChildren = (sq: Rhomb): [Rhomb[], Rhomb[]] => {
     .add(r.d)
     .add(sq.a);
   const d = r.d.scale(1 / (1 + SQRT2)).add(sq.a);
-  return [
-    [
-      inner_sq,
-      Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d)),
-      Rhomb(sq.c, inner_sq.a, b, b.add(unit_d))
 
-      //Rhomb(sq.c, c.add(unit_d), c, inner_sq.a)
-      //Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b)
-    ],
-    [
-      Rhomb(sq.a, a, inner_sq.d, inner_sq.c),
-      Rhomb(sq.b, b, inner_sq.a, inner_sq.d),
-      Rhomb(sq.d, inner_sq.b, inner_sq.a, c),
-      Rhomb(sq.a, inner_sq.c, inner_sq.b, d)
-    ]
+  //Rhomb(sq.c, c.add(unit_d), c, inner_sq.a)
+  //Rhomb(sq.d, sq.d.subtract(unit_d), d, inner_sq.b)
+  return [
+    createSquare(inner_sq),
+    createSquare(Rhomb(sq.b, inner_sq.d, a, sq.b.subtract(unit_d))),
+    createSquare(Rhomb(sq.c, inner_sq.a, b, b.add(unit_d))),
+
+    createRhomb(Rhomb(sq.a, a, inner_sq.d, inner_sq.c)),
+    createRhomb(Rhomb(sq.b, b, inner_sq.a, inner_sq.d)),
+    createRhomb(Rhomb(sq.d, inner_sq.b, inner_sq.a, c)),
+    createRhomb(Rhomb(sq.a, inner_sq.c, inner_sq.b, d))
   ];
 };
 
-const firstChild = (sq: Rhomb) => {
-  const r = sq.translate(sq.a.invert());
-  const unit_d = r.c.scale(1 / (2 + SQRT2));
-  const unit_d2 = r.d.subtract(r.b).scale(1 / (2 + SQRT2));
-  return Rhomb(
-    unit_d.scale(1 + SQRT2),
-    unit_d2.scale(1 + SQRT2).add(r.b),
-    unit_d,
-    unit_d2.add(r.b)
-  ).translate(sq.a);
-};
-
-const rhombChildren = (rh: Rhomb): [Rhomb[], Rhomb[]] => {
+const rhombChildren = (
+  rh: Rhomb,
+  createSquare: (p: Rhomb) => Tile,
+  createRhomb: (p: Rhomb) => Tile
+): Tile[] => {
   const r = rh.translate(rh.a.invert());
   const u = r.b.scale(1 / (1 + SQRT2));
   const v = r.d.scale(1 / (1 + SQRT2));
@@ -64,15 +69,15 @@ const rhombChildren = (rh: Rhomb): [Rhomb[], Rhomb[]] => {
     r.c.subtract(v)
   ).translate(rh.a);
   const rh3 = Rhomb(rh.b, rh2.c, rh.d, rh1.c);
-  return [
-    [
-      Rhomb(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b)),
-      Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))
 
-      //Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
-      //Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)
-    ],
-    [rh1, rh2, rh3]
+  //Rhomb(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
+  //Rhomb(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)
+  return [
+    createSquare(Rhomb(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b))),
+    createSquare(Rhomb(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))),
+    createRhomb(rh1),
+    createRhomb(rh2),
+    createRhomb(rh3)
   ];
 };
 
@@ -92,52 +97,39 @@ const root = (p: V): Rhomb => {
   return Rhomb(V(0, 0), p, q.add(p), q);
 };
 
-function AmmBeeRhomb(
-  rhomb: Rhomb,
-  parent: (r: Rhomb) => RhombTile,
-  children: (r: Rhomb) => [Rhomb[], Rhomb[]],
-  kind: string
-): RhombTile {
-  return {
-    ...rhomb,
-    rotationalSymmetry: kind == "square" ? 4 : 2,
-    contains(p: Polygon | V, depth = 0) {
-      if (depth === 0) return rhomb.contains(p);
-      return rhomb.contains(p) && firstChild(rhomb).contains(p);
-    },
-    intersects(p: Polygon, depth = 0) {
-      if (depth < 0) return rhomb.intersects(p);
-      return rhomb.intersects(p) || this.parent().intersects(p, depth - 1);
-    },
-    parent() {
-      return parent(this);
-    },
-    children() {
-      const [fatChildren, thinChildren] = children(this);
-      return fatChildren
-        .map((c) => AmmBeeRhomb(c, () => this, squareChildren, "square"))
-        .concat(
-          thinChildren.map((c) =>
-            AmmBeeRhomb(c, () => this, rhombChildren, "rhomb")
-          )
-        );
-    },
-    translate: (v) => AmmBeeRhomb(rhomb.translate(v), parent, children, kind),
-    proto: kind
-  };
-}
+const rhomb: Prototile = nonVolumeHierarchical(
+  oneWayPrototile<Rhomb>(
+    (t) =>
+      rhombChildren(
+        t,
+        (t) => square.create(t),
+        (t) => rhomb.create(t)
+      ),
+    2,
+    true
+  ),
+  4,
+  2
+);
 
-function RootAmmBeeRhomb(r1: Rhomb): RhombTile {
-  return AmmBeeRhomb(
-    r1,
-    (r) => RootAmmBeeRhomb(parent(r)),
-    squareChildren,
-    "square"
-  );
-}
+const square: Prototile = nonVolumeHierarchical(
+  Prototile<Rhomb>(
+    (t) => square.create(parent(t)),
+    (t) =>
+      squareChildren(
+        t,
+        (t) => square.create(t),
+        (t) => rhomb.create(t)
+      ),
+    4,
+    true
+  ),
+  4,
+  2
+);
 
-export default TileSet(
-  (seed) => RootAmmBeeRhomb(root(seed)),
-  ["square", "rhomb"],
+export default Rule(
+  (l, v) => square.create(root(l).translate(v)),
+  [square, rhomb],
   { hueSpan: 0.25, hueOffset: 0.65 }
 );

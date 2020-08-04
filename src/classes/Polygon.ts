@@ -22,12 +22,14 @@ export type Triangle = Polygon & {
   c: V;
 };
 
-export type Rhomb = Polygon & {
+export type Tetragon = Polygon & {
   a: V;
   b: V;
   c: V;
   d: V;
 };
+
+export type Rhomb = Tetragon;
 
 export type Rect = Polygon & {
   left: number;
@@ -87,15 +89,17 @@ export const Triangle = (a: V, b: V, c: V): Triangle => ({
   toString: () => `⟮${a}▽${b}▼${c}⟯`
 });
 
-export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => ({
+export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon => ({
   a,
   b,
   c,
   d,
   ...Polygon([a, b, c, d]),
-  translate: (v) => Rhomb(a.add(v), b.add(v), c.add(v), d.add(v)),
+  translate: (v) => Tetragon(a.add(v), b.add(v), c.add(v), d.add(v)),
   toString: () => `⟮${a}▱${b}▰${c}▱${d}⟯`
 });
+
+export const Rhomb = (a: V, b: V, c: V, d: V): Rhomb => Tetragon(a, b, c, d);
 
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
   left: x0,
@@ -108,7 +112,7 @@ export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
   toString: () => `⟮↤${x0}, ↥${y0}, ↦${xf}, ↧${yf}⟯`
 });
 
-export function contains(p: Polygon, q: Polygon | V): boolean {
+function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
     return (q as Polygon).vertices().every((v) => contains(p, v));
   }
@@ -134,7 +138,7 @@ const triangleContains = (t: Polygon, p: V): boolean => {
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
 
-export function intersects(p: Polygon, q: Polygon): boolean {
+function intersects(p: Polygon, q: Polygon): boolean {
   // ...or, their bounding boxes intersect. Add only necessary complexity.
   const pxM = Math.max(...p.vertices().map((p) => p.x));
   const pxm = Math.min(...p.vertices().map((p) => p.x));

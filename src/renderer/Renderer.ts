@@ -79,8 +79,8 @@ export function Renderer(
 ): Renderer {
   const looper: Looper = {
     stopped: true,
-    speedTiles: 100,
-    speedMs: 100,
+    speedTiles: 50,
+    speedMs: 50, // Apparently, Chrome calls a requestAnimationFrame() over 50ms a "violation". (sometimes)
     lastMs: Date.now(),
     resolveStopped: undefined,
     iter: undefined,
@@ -183,7 +183,7 @@ export function Renderer(
         if (!tilesDone && tilesValue) {
           if (this.ctx) {
             drawCanvas(
-              tilesValue,
+              tilesValue.polygon(),
               this.getStroke(tilesValue),
               this.getFill(tilesValue),
               this.ctx
@@ -191,7 +191,7 @@ export function Renderer(
             return true;
           } else if (this.svg) {
             drawSvg(
-              tilesValue,
+              tilesValue.polygon(),
               this.getStroke(tilesValue),
               this.getFill(tilesValue),
               this.svg
@@ -227,9 +227,9 @@ export function Renderer(
     },
     drawTile(t: Tile) {
       if (this.ctx) {
-        drawCanvas(t, this.getStroke(t), this.getFill(t), this.ctx);
+        drawCanvas(t.polygon(), this.getStroke(t), this.getFill(t), this.ctx);
       } else if (this.svg) {
-        drawSvg(t, this.getStroke(t), this.getFill(t), this.svg);
+        drawSvg(t.polygon(), this.getStroke(t), this.getFill(t), this.svg);
       } else {
         console.error("Renderer.drawTile() No canvas!");
       }

@@ -1,173 +1,227 @@
-import { ColorRotationParameters } from "../renderer/Colorer";
-import { isCallable } from "../util";
-import { isRect, Polygon, Rect, Rhomb, Triangle } from "./Polygon";
-import { V } from "./V";
+import { Polygon } from "./Polygon";
 
-const s = V(31, 17);
-const t = V(97, 109);
+export interface Prototile {
+  rotationalSymmetryOrder: number;
+  reflectionSymmetry: boolean;
+  coveringGenerations?: number; // See N.V.H. below
+  parent?: (t: Tile) => Tile;
+  children: (t: Tile) => Tile[];
+  create: (polygon: Polygon, parent?: Tile) => Tile;
+}
 
-const VP_FUDGE = 100;
-
-export interface Tile extends Polygon {
-  proto: string;
-  rotationalSymmetry: number;
-  parent: () => this;
-  children: () => this[];
+export interface Tile {
+  proto: Prototile;
+  parent: () => Tile;
+  setParent: (p: Tile) => Tile;
+  children: () => Tile[];
   intersects: (p: Polygon, depth?: number) => boolean;
-  contains: (p: Polygon | V, depth?: number) => boolean;
+  contains: (p: Polygon, depth?: number) => boolean;
+  polygon: () => Polygon;
+  equals: (t: this) => boolean;
+  reflect: () => Tile;
+  reflected: boolean;
 }
 
-export interface TileSet {
-  protos: string[];
-  tile: () => Tile;
-  tileFromEdge: (edge: V, pos?: V) => Tile;
-  tiling: (tile: Tile) => Tiling;
-  colorOptions?: ColorRotationParameters;
-}
-
-export interface Tiling {
-  cover: (mask: Polygon) => Generator<Tile>;
-}
-
-export type TriangleTile = Tile & Triangle;
-
-export type RhombTile = Tile & Rhomb;
-
-export function TileSet(
-  f: (edge: V, origin: V) => Tile,
-  protos: string[] | string,
-  colorOptions?: ColorRotationParameters
-): TileSet {
+export function singlePrototile<P extends Polygon>(
+  parent: (t: P) => P,
+  children: (t: P) => P[],
+  rotationalSymmetryOrder: number
+): Prototile {
   return {
-    protos: typeof protos == "string" ? [protos] : protos,
-    tile: () => f(s, V(0, 0)).translate(t),
-    tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
-    tiling: (tile) => Tiling(tile),
-    colorOptions
-  };
-}
-
-export function Tiling<T extends Tile>(tile: T): Tiling {
-  return {
-    cover: (mask) => coverWith(tile, mask)
-  };
-}
-
-export function createTile<P extends Polygon>(
-  proto: string,
-  t: P,
-  children: (t: Tile & P) => (Tile & P)[],
-  parent: (Tile & P) | ((t: Tile & P) => Tile & P),
-  rotationalSymmetry = 1
-): Tile & P {
-  return {
-    ...t,
-    proto,
-    rotationalSymmetry,
-    parent() {
-      if (isCallable(parent))
-        return (parent as (t: Tile & P) => Tile & P)(this as Tile & P);
-      return this;
+    rotationalSymmetryOrder: rotationalSymmetryOrder,
+    reflectionSymmetry: true,
+    parent(t) {
+      return this.create(parent(t.polygon() as P));
     },
-    children() {
-      return children(this as Tile & P);
+    children(t) {
+      return children(t.polygon() as P).map((p) => this.create(p, t));
     },
-    translate: (v: V) =>
-      createTile(
-        proto,
-        t.translate(v),
-        children,
-        !isCallable(parent)
-          ? (parent as Tile & P).translate(v)
-          : (parent as Tile & P)
-      ),
-    equals(p: Polygon) {
-      if ((p as Tile).proto === undefined) return false;
-      if ((p as Tile).proto === proto) return t.equals(p);
-      return false;
+    create(p, t?): Tile {
+      return new _Tile(p, this, t);
     }
   };
 }
 
-export function createTriangleTile(
-  triangle: Triangle,
-  parent: (t: TriangleTile) => Triangle & { proto: string },
-  children: (t: TriangleTile) => (Triangle & { proto: string })[],
-  proto = "triangle"
-): TriangleTile {
+export function Prototile<P extends Polygon>(
+  parent: (t: P) => Tile,
+  children: (t: P) => Tile[],
+  rotationalSymmetryOrder: number,
+  reflectionSymmetry: boolean
+): Prototile {
   return {
-    ...triangle,
-    proto,
-    rotationalSymmetry: 1,
-    parent() {
-      const p = parent(this);
-      return createTriangleTile(p, parent, children, p.proto);
+    rotationalSymmetryOrder: rotationalSymmetryOrder,
+    reflectionSymmetry: reflectionSymmetry,
+    parent(t) {
+      return parent(t.polygon() as P);
     },
-    children() {
-      return children(this).map((c) =>
-        createTriangleTile(c, parent, children, c.proto)
-      );
+    children(t) {
+      return children(t.polygon() as P).map((c) => c.setParent(t));
     },
-    translate(v) {
-      return createTriangleTile(triangle.translate(v), parent, children);
+    create(p): Tile {
+      return new _Tile(p, this);
     }
   };
 }
 
-export function* coverWith<T extends Tile>(
-  tile: T,
-  mask: Polygon,
-  options = { drawAncestors: false }
-): Generator<T> {
-  const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
-  function* descend(tile: T, d: number): Generator<T> {
-    if (d < 0) {
-      console.error(`!!!unreachable!!! d: ${d}`);
-      return;
+export function oneWayPrototile<P extends Polygon>(
+  children: (t: P) => Tile[],
+  rotationalSymmetryOrder: number,
+  reflectionSymmetry: boolean
+): Prototile {
+  return {
+    rotationalSymmetryOrder: rotationalSymmetryOrder,
+    reflectionSymmetry: reflectionSymmetry,
+    children(t) {
+      return children(t.polygon() as P).map((c) => c.setParent(t));
+    },
+    create(p): Tile {
+      return new _Tile(p, this);
     }
-    for (const t of tile.children()) {
-      if (t.intersects(bufferedMask, d)) {
-        if (d === 1) yield t;
-        else {
-          if (options?.drawAncestors) yield t;
-          yield* descend(t, d - 1);
-        }
-      }
+  };
+}
+
+// Non-volume-hierarchical. A.K.A. N.V.H.
+export function nonVolumeHierarchical(
+  proto: Prototile,
+  // NVH implies t's descendents don't cover t, coveringGenerations is the min.
+  // levels above t with leaves that cover t.
+  // Once a covering tile is found, apply .parent() this many more times.
+  // 4 for Penrose Rhombs.
+  coveringGenerations: number,
+  // NVH implies t doesn't cover t's descendents, intersectingGenerations is
+  // the min.levels about t that covers all of t's leaves.
+  // If t intersects the viewport, t', t'', ...t^n are assumed to also.
+  intersectingGenerations: number
+): Prototile {
+  return {
+    ...proto,
+    coveringGenerations,
+    create(p): Tile {
+      return new _NvhTile(p, this, intersectingGenerations);
     }
+  };
+}
+
+export function reflect(t: Tile): Tile {
+  return t.reflect();
+}
+
+class _Tile implements Tile {
+  _polygon: Polygon;
+  _parent?: Tile;
+  proto: Prototile;
+  reflected: boolean;
+  constructor(
+    p: Polygon,
+    proto: Prototile,
+    parent?: Tile,
+    reflected?: boolean
+  ) {
+    this._polygon = p;
+    this._parent = parent;
+    this.proto = proto;
+    // If reflected is set, assume it's meant. Otherwise, inherit from parent.
+    this.reflected =
+      reflected === undefined
+        ? parent !== undefined && parent.reflected
+        : reflected;
   }
 
-  function* ascend(tile: T, d: number): Generator<T> {
-    if (d > 30) {
-      console.error(`!!!maximum depth exceeded!!! d: ${d} [${tile}]`);
-      return;
-    }
-    const parent = tile.parent();
-    for (const t of parent.children()) {
-      if (!tile.equals(t) && t.intersects(bufferedMask, d)) {
-        if (d === 0) yield t;
-        else {
-          if (options?.drawAncestors) yield t;
-          yield* descend(t, d);
-        }
-      }
-      console.debug(
-        `Tile:coverWith:ascend() - [${d}, ${tile.equals(t)}, ${t.intersects(
-          bufferedMask,
-          d
-        )}]`
-      );
-    }
-    if (!parent.contains(bufferedMask, d + 1)) {
-      yield* ascend(parent, d + 1);
-    }
-    console.debug(
-      `Tile:coverWith:ascend(${tile}, ${d}) - ${parent.contains(
-        bufferedMask,
-        d + 1
-      )}`
+  reflect(): Tile {
+    // Flip reflected if relevant.
+    // This may unreflect it if it was already reflected due to parent.
+    return new _Tile(this._polygon, this.proto, this._parent, !this.reflected);
+  }
+
+  setParent(p: Tile): Tile {
+    return new _Tile(this._polygon, this.proto, p, this.reflected);
+  }
+
+  parent(): Tile {
+    if (this._parent !== undefined) return this._parent;
+    if (this.proto.parent !== undefined) return this.proto.parent(this);
+    console.trace("!!!Unreachable reached!!!");
+    throw new Error(`tile.paren() not supported on ${this}`);
+  }
+
+  children(): Tile[] {
+    return this.proto.children(this);
+  }
+
+  polygon() {
+    return this._polygon;
+  }
+
+  intersects(p: Polygon) {
+    return this._polygon.intersects(p);
+  }
+
+  contains(p: Polygon) {
+    return this._polygon.contains(p);
+  }
+
+  equals(t: Tile) {
+    return t.proto === this.proto && this._polygon.equals(t.polygon());
+  }
+
+  toString() {
+    return `Tile(${this._polygon}) [${this.proto}]`;
+  }
+}
+
+class _NvhTile extends _Tile {
+  intersectingGenerations: number;
+
+  intersectsMemo: boolean[];
+
+  constructor(
+    p: Polygon,
+    proto: Prototile,
+    intersectingGenerations: number,
+    parent?: Tile,
+    reflected?: boolean
+  ) {
+    super(p, proto, parent, reflected);
+    this.intersectingGenerations = intersectingGenerations;
+    this.intersectsMemo = [];
+    if (parent) this._parent = parent;
+  }
+
+  setParent(p: Tile): Tile {
+    return new _NvhTile(
+      this._polygon,
+      this.proto,
+      this.intersectingGenerations,
+      p,
+      this.reflected
     );
   }
 
-  yield tile;
-  yield* ascend(tile, 0);
+  reflect(): Tile {
+    // Flip reflected if relevant.
+    // This may unreflect it if it was already reflected due to parent.
+    return new _NvhTile(
+      this._polygon,
+      this.proto,
+      this.intersectingGenerations,
+      this._parent,
+      !this.reflected
+    );
+  }
+
+  _intersects(p: Polygon, depth: number): boolean {
+    if (depth === 0) return this._polygon.intersects(p);
+    if (this._parent === undefined) return true;
+    return this._polygon.intersects(p) || this._parent.intersects(p, depth - 1);
+  }
+
+  intersects(p: Polygon, depth?: number): boolean {
+    if (depth === undefined)
+      return this.intersects(p, this.intersectingGenerations);
+    //TODO/fixme - assume p is always the one viewport.
+    if (this.intersectsMemo[depth] === undefined) {
+      this.intersectsMemo[depth] = this._intersects(p, depth);
+    }
+    return this.intersectsMemo[depth];
+  }
 }

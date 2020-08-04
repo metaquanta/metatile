@@ -1,34 +1,30 @@
-import { RhombTile } from "../classes/Tile";
+import { Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
-import { vsEqual } from "../util";
 import penrose from "./penrose-rhomb";
 
 test("penrose parent inverts children", () => {
   const u = V(400, 0);
   const v = V(900, 200);
-  const r = <RhombTile>penrose.tileFromEdge(u, v);
+  const r = penrose.tileFromEdge(u, v);
   const s = r.parent().children()[0];
-  expect(vsEqual(r.a, s.a)).toBeTruthy();
-  expect(vsEqual(r.b, s.b)).toBeTruthy();
-  expect(vsEqual(r.c, s.c)).toBeTruthy();
-  expect(vsEqual(r.d, s.d)).toBeTruthy();
+  expect(r.equals(s)).toBeTruthy();
 });
 
 test("penrose romb1 children", () => {
-  const r = <RhombTile>penrose.tileFromEdge(V(400, 0), V(900, 200));
-  const c = r.children();
-  expect(vsEqual(r.c, c[0].a)).toBeTruthy();
-  expect(vsEqual(r.d, c[1].a)).toBeTruthy();
-  expect(vsEqual(r.a, c[1].c)).toBeTruthy();
-  expect(vsEqual(r.b, c[2].a)).toBeTruthy();
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200));
+  const p = r.polygon() as Rhomb;
+  const c = r.children().map((c) => c.polygon() as Rhomb);
+  expect(p.c.equals(c[0].a)).toBeTruthy();
+  expect(p.d.equals(c[1].a)).toBeTruthy();
+  expect(p.a.equals(c[1].c)).toBeTruthy();
+  expect(p.b.equals(c[2].a)).toBeTruthy();
 });
 
 test("penrose romb2 children", () => {
-  const r = <RhombTile>(
-    penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[2]
-  );
-  const c = r.children();
-  expect(vsEqual(r.a, c[0].c)).toBeTruthy();
-  expect(vsEqual(r.d, c[0].a)).toBeTruthy();
-  expect(vsEqual(r.c, c[1].a)).toBeTruthy();
+  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[2];
+  const p = r.polygon() as Rhomb;
+  const c = r.children().map((c) => c.polygon() as Rhomb);
+  expect(p.a.equals(c[0].c)).toBeTruthy();
+  expect(p.d.equals(c[0].a)).toBeTruthy();
+  expect(p.c.equals(c[1].a)).toBeTruthy();
 });

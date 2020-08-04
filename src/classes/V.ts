@@ -9,7 +9,7 @@ export interface V {
   scale: (a: number) => V;
   perp: () => V;
   dot: (u: V) => number;
-  magnitude: () => number;
+  norm: () => number;
   equals: (u: V) => boolean;
   toString: () => string;
 }
@@ -39,8 +39,8 @@ class _V implements V {
   dot(u: V) {
     return this.x * u.x + this.y * u.y;
   }
-  magnitude() {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+  norm() {
+    return (this.x ** 2 + this.y ** 2) ** (1 / 2);
   }
   equals(u: V) {
     return Math.abs(this.x - u.x) < EPS && Math.abs(this.y - u.y) < EPS;
@@ -51,3 +51,10 @@ class _V implements V {
 }
 
 export const V = (x: number, y: number): V => new _V(x, y);
+
+export function theta(a: V): number {
+  return (
+    (Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0) + Math.PI * 2) %
+    (Math.PI * 2)
+  );
+}

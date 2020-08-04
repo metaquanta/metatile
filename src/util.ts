@@ -1,15 +1,9 @@
 import { V } from "./classes/V";
 
-const EPS = 0.00001;
-
 export function mapOf<K, V>(...entries: [K, V][]): Map<K, V> {
   const m = new Map<K, V>();
   entries.forEach((pair) => m.set(pair[0], pair[1]));
   return m;
-}
-
-export function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
-  return (f as () => T).call !== undefined;
 }
 
 export function theta(a: V): number {
@@ -19,6 +13,10 @@ export function theta(a: V): number {
   );
 }
 
-export function vsEqual(u: V, v: V): boolean {
-  return Math.abs(u.x - v.x) < EPS && Math.abs(u.y - v.y) < EPS;
+export function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
+  return (f as () => T).call !== undefined;
+}
+
+export function isArray<T, V>(a: V | Array<T>): boolean {
+  return (a as Array<T>).entries !== undefined;
 }
