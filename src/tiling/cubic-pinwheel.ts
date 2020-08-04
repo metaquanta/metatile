@@ -15,7 +15,7 @@ const c =
     (1 / 2);
 const isoSide = c ** 6;
 const scaSides = [c ** 2, c ** 6];
-const isoHeight = (1 / 4 + c ** 6) ** (1 / 2);
+export const isoHeight = (1 / 4 + c ** 6) ** (1 / 2);
 
 const iso1: Prototile = Prototile<Triangle>(
   (t) =>
@@ -29,14 +29,20 @@ const iso1: Prototile = Prototile<Triangle>(
         t.a
       )
     ),
-  (t) => [iso2.create(t)],
+  (t) => {
+    testIso(t, "2");
+    return [iso2.create(t)];
+  },
   1,
   true
 );
 
 const iso2: Prototile = Prototile<Triangle>(
   (t) => iso1.create(t),
-  (t) => [iso3.create(t)],
+  (t) => {
+    testIso(t, "3");
+    return [iso3.create(t)];
+  },
   1,
   true
 );
@@ -48,10 +54,9 @@ const iso3: Prototile = Prototile<Triangle>(
       .subtract(t.c)
       .scale(1 / isoSide)
       .add(t.c);
-    return [
-      iso1.create(Triangle(t.c, t.a, p)),
-      reflect(sca2.create(Triangle(t.a, p, t.b)))
-    ];
+    const t1 = Triangle(t.c, t.a, p);
+    testIso(t1, "iso3=>iso1");
+    return [iso1.create(t1), reflect(sca2.create(Triangle(t.a, p, t.b)))];
   },
   1,
   true
@@ -79,15 +84,57 @@ const sca3: Prototile = oneWayPrototile(
       .subtract(t.c)
       .scale(scaSides[0] / scaSides[1])
       .add(t.c);
+    const t1 = Triangle(p1, t.b, p2);
+    testIso(t1, "sca3=>iso1");
     return [
       reflect(sca1.create(Triangle(t.a, p1, t.b))),
-      iso1.create(Triangle(p1, t.b, p2)),
+      iso1.create(t1),
       reflect(sca2.create(Triangle(t.b, p2, t.c)))
     ];
   },
   1,
   false
 );
+
+const fmt = new Intl.NumberFormat("en-US", {
+  style: "percent",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const cfmt = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const testIso = (iso: Triangle, n: string) => {
+  const l = iso.c.subtract(iso.a);
+  const k = iso.a.subtract(iso.c);
+
+  const error = Math.min(
+    Math.abs(
+      l
+        .perp()
+        .scale(isoHeight)
+        .add(l.scale(1 / 2))
+        .add(iso.a)
+        .subtract(iso.b)
+        .norm()
+    ),
+    Math.abs(
+      k
+        .perp()
+        .scale(isoHeight)
+        .add(k.scale(1 / 2))
+        .add(iso.c)
+        .subtract(iso.b)
+        .norm()
+    )
+  );
+
+  const r = error / l.scale(isoHeight).norm();
+  console.debug(`${n} eps: ${fmt.format(r)} (${cfmt.format(error)})`);
+};
 
 export default Rule(
   (l, v) =>

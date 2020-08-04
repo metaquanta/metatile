@@ -220,7 +220,7 @@ export function Renderer(
         : "rgba(255, 192, 203, 0.3)"; //todo
     },
     getStroke(t) {
-      return this.strokeColorer ? this.strokeColorer(t) : "black";
+      return this.strokeColorer ? this.strokeColorer(t) : "rgba(0,0,0,0.1)";
     },
     stop() {
       looper.stop();

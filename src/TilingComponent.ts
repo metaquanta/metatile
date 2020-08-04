@@ -1,6 +1,10 @@
 import { V } from "./classes/V";
 import { ViewPort } from "./classes/ViewPort";
-import { colorRotation, ColorRotationParameters } from "./renderer/Colorer";
+import {
+  colorRotation,
+  ColorRotationParameters,
+  errorColorer
+} from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import { Rule } from "./classes/Rule";
 import rules from "./tiling/rules";
@@ -176,11 +180,13 @@ class Tiling extends HTMLElement {
     if (this.renderer === undefined) return;
     const tileSet = ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
-      colorRotation({
+      errorColorer(tileSet.protos.slice(0, 3))
+      /*colorRotation({
         ...this.colorParameters(),
         protos: tileSet.protos
-      })
+      })*/
     );
+
     const tile = tileSet.tileFromEdge(
       parseVectorString(this.getAttribute("v"), V(11, 17)),
       parseVectorString(this.getAttribute("u"), V(1500, 1500))

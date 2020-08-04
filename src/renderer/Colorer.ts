@@ -1,5 +1,7 @@
+import { Triangle } from "../classes/Polygon";
 import { Tile, Prototile } from "../classes/Tile";
 import { theta } from "../classes/V";
+import { isoHeight } from "../tiling/cubic-pinwheel";
 
 export type Colorer = (t: Tile) => string;
 
@@ -15,7 +17,7 @@ export type ColorRotationParameters = {
 export const colorRotation = ({
   saturation: s = 0.5,
   lightness: l = 0.5,
-  alpha = 1,
+  alpha = 0.2,
   protos = [],
   hueSpan = 0,
   hueOffset = 0.32
@@ -46,6 +48,55 @@ export const colorRotation = ({
     const color = `hsla(${hueRgb}, ${s * 100}%, ${
       (l - angleLightVar) * 100
     }%, ${alpha})`;
+    return color;
+  };
+};
+
+const fmt = new Intl.NumberFormat("en-US", {
+  /*notation: "scientific"*/ style: "percent",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const cfmt = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+export const errorColorer = (
+  protos: Prototile[] = []
+): ((t: Tile) => string) => {
+  //console.debug(`colorRotation(${s}, ${l}, ${hueSpan}, ${hueOffset})`);
+  return (t) => {
+    if (protos.indexOf(t.proto) >= 0) {
+      const p = t.polygon() as Triangle;
+      const l = p.c.subtract(p.a);
+      const tf = l
+        .perp()
+        .scale(isoHeight)
+        .add(l.scale(1 / 2));
+      const e = tf.add(p.a);
+      const eps = Math.abs(e.subtract(p.b).norm());
+      const tfp = l
+        .perp()
+        .scale(-1 * isoHeight)
+        .add(l.scale(1 / 2));
+      const ep = tfp.add(p.a);
+      const epsp = Math.abs(ep.subtract(p.b).norm());
+      const error = Math.min(eps, epsp);
+      const r = error / tf.norm();
+      if (r > 1) {
+        console.log(`!!Error: ${r}  (${eps}, ${epsp})`);
+      }
+      console.debug(
+        `Error: ${fmt.format(error / tf.norm())} (${cfmt.format(error)})`
+      );
+
+      const color = `hsla(0, 75%, 50%, ${r / 2})`;
+      console.debug(color);
+      return color;
+    }
+    const color = `hsla(0, 75%, 50%, 0.00)`;
     return color;
   };
 };
