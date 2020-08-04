@@ -180,7 +180,7 @@ class _Tetragon extends _Polygon {
   d: V;
 
   constructor(a: V, b: V, c: V, d: V) {
-    super([a, b, c]);
+    super([a, b, c, d]);
     this.a = a;
     this.b = b;
     this.c = c;
