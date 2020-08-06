@@ -1,20 +1,31 @@
 import {
   canvasPathFromPolygon,
-  Polygon,
-  svgPointsStringFromPolygon
+  Polygon
 } from "../classes/Polygon";
-import { Tile } from "../classes/Tile";
+import { Prototile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
 import { isCallable } from "../util";
 import { Colorer } from "./Colorer";
 
 export type Renderer = {
   setTileStream: (
-    tiles: ((vp: Polygon) => Iterable<Tile>) | Iterable<Tile>
+    tiles:
+      | ((
+          vp: Polygon
+        ) => Iterable<{
+          polygon: () => Polygon;
+          proto: Prototile;
+          reflected: boolean;
+        }>)
+      | Iterable<{ polygon: () => Polygon }>
   ) => void;
   setFillColorer: (c: Colorer) => void;
   setStrokeColorer: (c: Colorer) => void;
-  drawTile: (t: Tile) => void;
+  drawTile: (t: {
+    polygon: () => Polygon;
+    proto: Prototile;
+    reflected: boolean;
+  }) => void;
 };
 
 type Looper = {
@@ -31,8 +42,12 @@ type Looper = {
 };
 
 type PrivateRenderer = Renderer & {
-  tiles: Iterable<Tile> | undefined;
-  tileIterator: Iterator<Tile> | undefined;
+  tiles:
+    | Iterable<{ polygon: () => Polygon; proto: Prototile; reflected: boolean }>
+    | undefined;
+  tileIterator:
+    | Iterator<{ polygon: () => Polygon; proto: Prototile; reflected: boolean }>
+    | undefined;
   renderNext: () => boolean;
   clearCanvas: () => void;
   ctx: CanvasRenderingContext2D | undefined;
@@ -41,8 +56,16 @@ type PrivateRenderer = Renderer & {
   stop: () => void;
   fillColorer: Colorer | undefined;
   strokeColorer: Colorer | undefined;
-  getFill: (t: Tile) => string;
-  getStroke: (t: Tile) => string;
+  getFill: (t: {
+    polygon: () => Polygon;
+    proto: Prototile;
+    reflected: boolean;
+  }) => string;
+  getStroke: (t: {
+    polygon: () => Polygon;
+    proto: Prototile;
+    reflected: boolean;
+  }) => string;
 };
 
 export function drawCanvas(
@@ -53,24 +76,9 @@ export function drawCanvas(
 ): void {
   ctx.fillStyle = fillColor;
   ctx.strokeStyle = strokeColor;
-  const p = canvasPathFromPolygon(tile);
+  const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
-}
-
-export function drawSvg(
-  tile: Polygon,
-  strokeColor: string,
-  fillColor: string,
-  element: SVGElement
-): void {
-  const p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-  ((p: SVGPolygonElement) => {
-    p.setAttribute("fill", fillColor);
-    p.setAttribute("stroke", strokeColor);
-    p.setAttribute("points", svgPointsStringFromPolygon(tile));
-  })(p);
-  element.appendChild(p);
 }
 
 export function Renderer(
@@ -80,7 +88,9 @@ export function Renderer(
   const looper: Looper = {
     stopped: true,
     speedTiles: 50,
-    speedMs: 50, // Apparently, Chrome calls a requestAnimationFrame() over 50ms a "violation". (sometimes)
+    // Apparently, Chrome calls a requestAnimationFrame() over 50ms a
+    // "violation". (sometimes)
+    speedMs: 50,
     lastMs: Date.now(),
     resolveStopped: undefined,
     iter: undefined,
@@ -100,14 +110,15 @@ export function Renderer(
         if (this.stopped) {
           if (this.resolveStopped) this.resolveStopped();
         } else {
-          for (let i = 0; i < this.speedTiles && task(); i++) {
+          let i = 0;
+          for (; i < this.speedTiles && task(); i++) {
             this.cnt++;
           }
           const ms = Date.now();
           console.log(
-            `Renderer:Looper - ${this.speedTiles} tiles in ${
-              ms - this.lastMs
-            }ms. [${this.lastMs}, ${ms}]`
+            `Renderer:Looper - ${i} tiles in ${ms - this.lastMs}ms. [${
+              this.lastMs
+            }, ${ms}]`
           );
           this.speedTiles = Math.max(
             (this.speedMs / (ms - this.lastMs)) * this.speedTiles,
@@ -145,9 +156,19 @@ export function Renderer(
     strokeColorer: undefined,
     setTileStream(tiles) {
       if (isCallable(tiles)) {
-        this.tiles = (tiles as (vp: Polygon) => Iterable<Tile>)(this.vp);
+        this.tiles = (tiles as (
+          vp: Polygon
+        ) => Iterable<{
+          polygon: () => Polygon;
+          proto: Prototile;
+          reflected: boolean;
+        }>)(this.vp);
       } else {
-        this.tiles = tiles as Iterable<Tile>;
+        this.tiles = tiles as Iterable<{
+          polygon: () => Polygon;
+          proto: Prototile;
+          reflected: boolean;
+        }>;
       }
       console.debug(`Renderer.setTileStream() - tiles:${tiles}`);
       looper.start(
@@ -189,13 +210,6 @@ export function Renderer(
               this.ctx
             );
             return true;
-          } else if (this.svg) {
-            drawSvg(
-              tilesValue.polygon(),
-              this.getStroke(tilesValue),
-              this.getFill(tilesValue),
-              this.svg
-            );
           }
         }
         if (tilesDone) {
@@ -225,11 +239,13 @@ export function Renderer(
     stop() {
       looper.stop();
     },
-    drawTile(t: Tile) {
+    drawTile(t: {
+      polygon: () => Polygon;
+      proto: Prototile;
+      reflected: boolean;
+    }) {
       if (this.ctx) {
         drawCanvas(t.polygon(), this.getStroke(t), this.getFill(t), this.ctx);
-      } else if (this.svg) {
-        drawSvg(t.polygon(), this.getStroke(t), this.getFill(t), this.svg);
       } else {
         console.error("Renderer.drawTile() No canvas!");
       }

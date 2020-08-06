@@ -1,4 +1,4 @@
-import { V } from "./V";
+import { V, M } from "./V";
 
 export interface Polygon {
   vertices: () => V[];
@@ -7,6 +7,7 @@ export interface Polygon {
   contains: (p: V | Polygon) => boolean;
   intersects: (p: Polygon) => boolean;
   center: () => V;
+  boundingBox: () => Rect;
   translate: (v: V) => this;
   equals: (p: Polygon) => boolean;
   toString: () => string;
@@ -45,38 +46,14 @@ export function isRect<T>(p: Rect | T): boolean {
   return (p as Rect).bottom !== undefined;
 }
 
-export const Polygon = (vertices: V[]): Polygon => {
-  const triangles = () =>
-    vertices
-      .slice(2)
-      .map((_, i) => Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
-  return {
-    vertices: () => vertices,
-    triangles,
-    sides: () => vertices.length,
-    contains(p) {
-      return contains(this, p);
-    },
-    intersects(p) {
-      return intersects(this, p);
-    },
-    center() {
-      return vertices.reduce((a, b) => a.add(b)).scale(1 / vertices.length);
-    },
-    translate: (v) => Polygon(vertices.map((u) => u.add(v))),
-    equals(p) {
-      return equals(this, p);
-    },
-    toString: () => {
-      if (vertices.length === 0) return "∅";
-      if (vertices.length === 1) return "⋅" + vertices[0];
-      return `⦗${vertices
-        .map((v) => v.toString())
-        .join(
-          vertices.length < 6 ? ["⭎", "⯅", "⯁", "⯂"][vertices.length - 2] : "⬣"
-        )}⦘`;
-    }
-  };
+export interface AffineTransform {
+  translation: V;
+  linearTransform: M;
+  transform(p: Polygon): Polygon;
+}
+
+export function Polygon(vertices: V[]): Polygon {
+  return new _Polygon(vertices);
 };
 
 // These don't implement the interfaces here to trick the polymorphic this
@@ -129,6 +106,10 @@ class _Polygon {
     return equals(this, p);
   }
 
+  boundingBox(): Rect {
+    return boundingBox(this);
+  }
+
   toString() {
     if (this._vertices.length === 0) return "∅";
     if (this._vertices.length === 1) return "⋅" + this._vertices[0];
@@ -141,8 +122,6 @@ class _Polygon {
       )}⦘`;
   }
 }
-
-export const Triangle = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
 
 class _Triangle extends _Polygon {
   a: V;
@@ -167,11 +146,6 @@ class _Triangle extends _Polygon {
     return `⟮${this.a}▽${this.b}▼${this.c}⟯`;
   }
 }
-
-export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
-  new _Tetragon(a, b, c, d);
-
-export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
 
 class _Tetragon extends _Polygon {
   a: V;
@@ -200,16 +174,34 @@ class _Tetragon extends _Polygon {
   }
 }
 
+export const Triangle = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
+
+export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
+  new _Tetragon(a, b, c, d);
+
+export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
+
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
   left: x0,
   right: xf,
-  top: yf,
-  bottom: y0,
+  top: yf, // by computer graphics conventions, this is the bottom
+  bottom: y0, // by computer graphics conventions, this is the top
   pad: (n: number) => Rect(x0 - n, y0 - n, xf + n, yf + n),
   ...Polygon([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]),
   translate: (v) => Rect(x0 + v.x, y0 + v.y, xf + v.x, yf + v.y),
-  toString: () => `⟮↤${x0}, ↥${y0}, ↦${xf}, ↧${yf}⟯`
+  toString: () => `⟮↤${x0}, ↧${y0}, ↦${xf}, ↥${yf}⟯`
 });
+
+export function AffineTransform(linearTransform: M, translation: V) {
+  return {
+    linearTransform,
+    translation,
+    transform: (p: Polygon) =>
+      Polygon(
+        p.vertices().map((v) => linearTransform.multiply(translation.add(v)))
+      )
+  };
+}
 
 function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
@@ -218,7 +210,7 @@ function contains(p: Polygon, q: Polygon | V): boolean {
   return p.triangles().some((t) => triangleContains(t, q as V));
 }
 
-const triangleContains = (t: Polygon, p: V): boolean => {
+function triangleContains(t: Polygon, p: V): boolean {
   const [ta, tb, tc] = t.vertices();
   const c = tc.subtract(ta);
   const b = tb.subtract(ta);
@@ -237,17 +229,25 @@ const triangleContains = (t: Polygon, p: V): boolean => {
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
 };
 
+function boundingBox(p: Polygon): Rect {
+  return Rect(
+    Math.min(...p.vertices().map((p) => p.x)),
+    Math.min(...p.vertices().map((p) => p.y)),
+    Math.max(...p.vertices().map((p) => p.x)),
+    Math.max(...p.vertices().map((p) => p.y))
+  );
+}
+
 function intersects(p: Polygon, q: Polygon): boolean {
   // ...or, their bounding boxes intersect. Add only necessary complexity.
-  const pxM = Math.max(...p.vertices().map((p) => p.x));
-  const pxm = Math.min(...p.vertices().map((p) => p.x));
-  const pyM = Math.max(...p.vertices().map((p) => p.y));
-  const pym = Math.min(...p.vertices().map((p) => p.y));
-  const qxM = Math.max(...q.vertices().map((p) => p.x));
-  const qxm = Math.min(...q.vertices().map((p) => p.x));
-  const qyM = Math.max(...q.vertices().map((p) => p.y));
-  const qym = Math.min(...q.vertices().map((p) => p.y));
-  return !(pxM < qxm || pxm > qxM || pyM < qym || pym > qyM);
+  const pbb = boundingBox(p);
+  const qbb = boundingBox(q);
+  return !(
+    pbb.right < qbb.left ||
+    pbb.left > qbb.right ||
+    pbb.top < qbb.bottom ||
+    pbb.bottom > qbb.top
+  );
 }
 
 function equals(p: Polygon, q: Polygon) {
@@ -262,18 +262,23 @@ function equals(p: Polygon, q: Polygon) {
     .every((v, i) => v.equals(pv[i]));
 }
 
-export function canvasPathFromPolygon(poly: Polygon): Path2D {
-  const p = new Path2D();
-  p.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
+export function canvasPathFromPolygon<
+  T extends {
+    moveTo: (x: number, y: number) => void;
+    lineTo: (x: number, y: number) => void;
+    closePath: () => void;
+  }
+>(poly: Polygon, path: T): T {
+  path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
   poly
     .vertices()
     .slice(1)
-    .forEach((v) => p.lineTo(v.x, v.y));
-  p.closePath();
-  return p;
+    .forEach((v) => path.lineTo(v.x, v.y));
+  path.closePath();
+  return path;
 }
 
-export function svgPathAttributeFromPolygon(poly: Polygon): string {
+export function svgPathFromPolygon(poly: Polygon): string {
   return (
     `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
     poly
@@ -285,7 +290,7 @@ export function svgPathAttributeFromPolygon(poly: Polygon): string {
   );
 }
 
-export function svgPointsStringFromPolygon(p: Polygon): string {
+export function svgPointsFromPolygon(p: Polygon): string {
   return p
     .vertices()
     .map((v) => `${v.x},${v.y}`)

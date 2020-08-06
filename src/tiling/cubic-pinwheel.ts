@@ -15,6 +15,7 @@ const c =
     (1 / 2);
 const isoSide = c ** 6;
 const scaSides = [c ** 2, c ** 6];
+//TODO!!! This is wrong. The children aren't this tall.
 const isoHeight = (1 / 4 + c ** 6) ** (1 / 2);
 
 const iso1: Prototile = Prototile<Triangle>(

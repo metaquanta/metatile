@@ -1,12 +1,12 @@
 import ammannBeenker from "./ammann-beenker";
 import cubicPinwheel from "../tiling/cubic-pinwheel";
 import fibonacci from "../tiling/fibonacci";
+import penroseKiteDart from "./penrose-kite-dart";
 import penroseRhomb from "./penrose-rhomb";
 import pinwheel from "../tiling/pinwheel";
 import pinwheel10 from "../tiling/pinwheel10";
 import pinwheel13 from "../tiling/pinwheel13";
 import viper from "../tiling/viper";
-import penroseKiteDart from "./penrose-kite-dart";
 
 export default {
   "Ammann-Beenker": ammannBeenker,

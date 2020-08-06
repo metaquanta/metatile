@@ -1,7 +1,12 @@
-import { Tile, Prototile } from "../classes/Tile";
+import { Polygon } from "../classes/Polygon";
+import { Prototile } from "../classes/Tile";
 import { theta } from "../classes/V";
 
-export type Colorer = (t: Tile) => string;
+export type Colorer = (t: {
+  proto: Prototile;
+  polygon: () => Polygon;
+  reflected: boolean;
+}) => string;
 
 export type ColorRotationParameters = {
   saturation?: number;
@@ -19,7 +24,11 @@ export const colorRotation = ({
   protos = [],
   hueSpan = 0,
   hueOffset = 0.32
-}: ColorRotationParameters): ((t: Tile) => string) => {
+}: ColorRotationParameters): ((t: {
+  proto: Prototile;
+  polygon: () => Polygon;
+  reflected: boolean;
+}) => string) => {
   //console.debug(`colorRotation(${s}, ${l}, ${hueSpan}, ${hueOffset})`);
   const numParts = protos.length * 2;
   const slotSize = 360 / numParts;

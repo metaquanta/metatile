@@ -79,7 +79,8 @@ const kite: Prototile = Prototile<Tetragon>(
     );
   },
   1,
-  true
+  true,
+  "kite"
 );
 
 const dart: Prototile = oneWayPrototile<Tetragon>(
@@ -90,7 +91,8 @@ const dart: Prototile = oneWayPrototile<Tetragon>(
       (t) => dart.create(t)
     ),
   1,
-  true
+  true,
+  "dart"
 );
 
 export default Rule((l, v) => kite.create(kitePolygon(l).translate(v)), [
