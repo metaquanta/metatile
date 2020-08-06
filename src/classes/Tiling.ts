@@ -16,7 +16,7 @@ export interface Tiling {
 export function* coverWith(
   tile: Tile,
   mask: Polygon,
-  options = { drawAncestors: false }
+  options = { drawAncestors: false, maxStackDepth: 100 }
 ): Generator<Tile> {
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: Tile, d: number): Generator<Tile> {
@@ -40,7 +40,7 @@ export function* coverWith(
 
   function* ascend(tile: Tile, d: number, nvhExtra?: number): Generator<Tile> {
     console.debug(`Tiling:cover:ascend(${tile}, ${d}, ${nvhExtra})`);
-    if (d > 30) {
+    if (d > options.maxStackDepth) {
       console.trace(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
       throw new Error(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
     }

@@ -7,6 +7,8 @@ export interface Prototile {
   parent?: (t: Tile) => Tile;
   children: (t: Tile) => Tile[];
   create: (polygon: Polygon, parent?: Tile) => Tile;
+  name?: string;
+  toString: () => string;
 }
 
 export interface Tile {
@@ -46,11 +48,13 @@ export function Prototile<P extends Polygon>(
   parent: (t: P) => Tile,
   children: (t: P) => Tile[],
   rotationalSymmetryOrder: number,
-  reflectionSymmetry: boolean
+  reflectionSymmetry: boolean,
+  name?: string
 ): Prototile {
   return {
     rotationalSymmetryOrder: rotationalSymmetryOrder,
     reflectionSymmetry: reflectionSymmetry,
+    name,
     parent(t) {
       return parent(t.polygon() as P);
     },
@@ -59,6 +63,9 @@ export function Prototile<P extends Polygon>(
     },
     create(p): Tile {
       return new _Tile(p, this);
+    },
+    toString() {
+      return `Prototile(□,□,${rotationalSymmetryOrder},${reflectionSymmetry},${name})`;
     }
   };
 }
@@ -66,16 +73,21 @@ export function Prototile<P extends Polygon>(
 export function oneWayPrototile<P extends Polygon>(
   children: (t: P) => Tile[],
   rotationalSymmetryOrder: number,
-  reflectionSymmetry: boolean
+  reflectionSymmetry: boolean,
+  name?: string
 ): Prototile {
   return {
     rotationalSymmetryOrder: rotationalSymmetryOrder,
     reflectionSymmetry: reflectionSymmetry,
+    name,
     children(t) {
       return children(t.polygon() as P).map((c) => c.setParent(t));
     },
     create(p): Tile {
       return new _Tile(p, this);
+    },
+    toString() {
+      return `Prototile(□,□,${rotationalSymmetryOrder},${reflectionSymmetry},${name})`;
     }
   };
 }
