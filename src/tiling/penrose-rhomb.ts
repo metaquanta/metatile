@@ -13,7 +13,7 @@ import { Rule } from "../classes/Rule";
 const SIN15 = Math.sin(Math.PI / 5);
 const COS15 = Math.cos(Math.PI / 5);
 
-const IF = (1 + Math.sqrt(5)) / 2;
+const IF = (1 + 5 ** (1 / 2)) / 2;
 const DF = 1 / IF;
 
 const M = [V(COS15, -1 * SIN15), V(SIN15, COS15)];

@@ -1,6 +1,12 @@
 import { Rect } from "../classes/Polygon";
 import { V } from "../classes/V";
 import viper from "./viper";
+import {
+  similarChildren,
+  inflationFactor,
+  canCoverArbitraryVp,
+  isVolumeHeirarchical
+} from "./rule-sanity-check";
 
 test("viper children intersect", () => {
   const rect = Rect(2000, 1000, 2500, 2000);
@@ -36,4 +42,16 @@ test("viper cover", () => {
   const t = viper.tileFromEdge(V(700, 51), V(905, 1212));
   expect(t.parent().parent().contains(rect)).toBeFalsy;
   expect(t.parent().parent().parent().contains(rect)).toBeTruthy;
+});
+
+test("viper sanity", () => {
+  const t = viper.tile();
+  const children = similarChildren(t);
+  // All children are similar
+  expect(children.length).toEqual(9);
+  // 3
+  expect(Math.abs(inflationFactor(t, children[5]) - 3)).toBeLessThan(0.0000001);
+
+  expect(canCoverArbitraryVp(viper)).toBeTruthy;
+  expect(isVolumeHeirarchical(viper)).toBeTruthy;
 });

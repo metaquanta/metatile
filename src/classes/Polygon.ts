@@ -3,10 +3,12 @@ import { V, M } from "./V";
 export interface Polygon {
   vertices: () => V[];
   triangles: () => Triangle[];
+  edges: () => [V, V][];
   sides: () => number;
   contains: (p: V | Polygon) => boolean;
   intersects: (p: Polygon) => boolean;
   center: () => V;
+  area: () => number;
   boundingBox: () => Rect;
   translate: (v: V) => this;
   equals: (p: Polygon) => boolean;
@@ -54,7 +56,7 @@ export interface AffineTransform {
 
 export function Polygon(vertices: V[]): Polygon {
   return new _Polygon(vertices);
-};
+}
 
 // These don't implement the interfaces here to trick the polymorphic this
 // nonsense. They're still treated as though they do elsewhere.
@@ -76,12 +78,23 @@ class _Polygon {
       );
   }
 
+  edges(): [V, V][] {
+    return this._vertices.map((_, i) => [
+      this._vertices[i],
+      this._vertices[(i + 1) % this._vertices.length]
+    ]);
+  }
+
   vertices() {
     return this._vertices;
   }
 
   sides() {
     return this._vertices.length;
+  }
+
+  area() {
+    return area(this);
   }
 
   contains(p: V | Polygon): boolean {
@@ -174,6 +187,33 @@ class _Tetragon extends _Polygon {
   }
 }
 
+class _Rect extends _Polygon {
+  left: number;
+  right: number;
+  top: number; // by computer graphics conventions, this is the bottom
+  bottom: number; // by computer graphics conventions, this is the top
+  constructor(x0: number, y0: number, xf: number, yf: number) {
+    super([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]);
+    this.left = x0;
+    this.right = xf;
+    this.top = yf;
+    this.bottom = y0;
+  }
+
+  pad(n: number) {
+    return new _Rect(
+      this.left - n,
+      this.bottom - n,
+      this.right + n,
+      this.top + n
+    );
+  }
+
+  toString() {
+    return `⟮↤${this.left}, ↧${this.bottom}, ↦${this.right}, ↥${this.top}⟯`;
+  }
+}
+
 export const Triangle = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
 
 export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
@@ -181,24 +221,19 @@ export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
 
 export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
 
-export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect => ({
-  left: x0,
-  right: xf,
-  top: yf, // by computer graphics conventions, this is the bottom
-  bottom: y0, // by computer graphics conventions, this is the top
-  pad: (n: number) => Rect(x0 - n, y0 - n, xf + n, yf + n),
-  ...Polygon([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]),
-  translate: (v) => Rect(x0 + v.x, y0 + v.y, xf + v.x, yf + v.y),
-  toString: () => `⟮↤${x0}, ↧${y0}, ↦${xf}, ↥${yf}⟯`
-});
+export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
+  new _Rect(x0, y0, xf, yf);
 
-export function AffineTransform(linearTransform: M, translation: V) {
+export function AffineTransform(
+  linearTransform: M,
+  translation: V
+): AffineTransform {
   return {
     linearTransform,
     translation,
     transform: (p: Polygon) =>
       Polygon(
-        p.vertices().map((v) => linearTransform.multiply(translation.add(v)))
+        p.vertices().map((v) => linearTransform.multiply(v).add(translation))
       )
   };
 }
@@ -227,7 +262,16 @@ function triangleContains(t: Polygon, p: V): boolean {
   const e2 = (s0 * s4 - s1 * s2) * x;
 
   return e1 >= 0 && e2 >= 0 && e1 + e2 < 1;
-};
+}
+
+function area(p: Polygon): number {
+  return Math.abs(
+    p
+      .edges()
+      .map(([u, v]) => ((u.y + v.y) / 2) * (v.x - u.x))
+      .reduce((l, r) => l + r)
+  );
+}
 
 function boundingBox(p: Polygon): Rect {
   return Rect(
