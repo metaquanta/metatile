@@ -70,6 +70,13 @@ export function theta(a: V): number {
   );
 }
 
+export function midpoint(u: V, v: V): V {
+  return v
+    .subtract(u)
+    .scale(1 / 2)
+    .add(u);
+}
+
 export const M = (m11: number, m21: number, m12: number, m22: number): M => {
   return {
     m11,
