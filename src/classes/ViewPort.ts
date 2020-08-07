@@ -58,8 +58,10 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   function getViewPort(): ViewPort & { outerDiv: HTMLDivElement } {
     const origin = getViewPortOrigin();
     const size = getViewPortSize();
+    const rect = Rect(origin.x, origin.y, origin.x + size.x, origin.y + size.y);
     return {
-      ...Rect(origin.x, origin.y, origin.x + size.x, origin.y + size.y),
+      ...rect,
+      pad: (n) => rect.pad(n),
       translate() {
         return this;
       },
