@@ -91,13 +91,13 @@ export const M = (m11: number, m21: number, m12: number, m22: number): M => {
   };
 };
 
-export const rotationM = (theta: number) => {
+export const rotationM = (theta: number): M => {
   const cos = Math.cos(theta);
   const sin = Math.sin(theta);
   return M(cos, -1 * sin, sin, cos);
 };
 
-export const scalingM = (a: number) => {
+export const scalingM = (a: number): M => {
   return M(a, 0, 0, a);
 };
 

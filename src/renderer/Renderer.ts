@@ -1,7 +1,4 @@
-import {
-  canvasPathFromPolygon,
-  Polygon
-} from "../classes/Polygon";
+import { canvasPathFromPolygon, Polygon } from "../classes/Polygon";
 import { Prototile } from "../classes/Tile";
 import { ViewPort } from "../classes/ViewPort";
 import { isCallable } from "../util";

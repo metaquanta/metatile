@@ -4,7 +4,7 @@ import { Triangle } from "../classes/Polygon";
 import { V } from "../classes/V";
 import { singlePrototileRule } from "../classes/Rule";
 
-const ISQRT15 = 1 / Math.sqrt(15);
+const ISQRT15 = 15 ** (-1 / 2);
 
 const fromVec = (l: V) => {
   const r = l.perp().scale(ISQRT15);

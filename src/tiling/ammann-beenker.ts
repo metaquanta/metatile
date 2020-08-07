@@ -10,7 +10,7 @@ import { Rhomb } from "../classes/Polygon";
 import { V } from "../classes/V";
 import { Rule } from "../classes/Rule";
 
-const SQRT2 = Math.sqrt(2);
+const SQRT2 = 2 ** (1 / 2);
 
 const squareChildren = (
   sq: Rhomb,
