@@ -1,17 +1,19 @@
 import ammannBeenker from "./ammann-beenker";
-import cubicPinwheel from "../tiling/cubic-pinwheel";
-import fibonacci from "../tiling/fibonacci";
+import cubicPinwheel from "./cubic-pinwheel";
+import fibonacci from "./fibonacci";
+import minitangram from "./minitangram";
 import penroseKiteDart from "./penrose-kite-dart";
 import penroseRhomb from "./penrose-rhomb";
-import pinwheel from "../tiling/pinwheel";
-import pinwheel10 from "../tiling/pinwheel10";
-import pinwheel13 from "../tiling/pinwheel13";
-import viper from "../tiling/viper";
+import pinwheel from "./pinwheel";
+import pinwheel10 from "./pinwheel10";
+import pinwheel13 from "./pinwheel13";
+import viper from "./viper";
 
 export default {
   "Ammann-Beenker": ammannBeenker,
   "Cubic-Pinwheel": cubicPinwheel,
   Fibonacci: fibonacci,
+  MiniTangram: minitangram,
   "Penrose-Kite-Dart": penroseKiteDart,
   "Penrose-Rhomb": penroseRhomb,
   Pinwheel: pinwheel,
