@@ -273,6 +273,16 @@ function area(p: Polygon): number {
   );
 }
 
+// Yup, I realized my area alg can determine chirality.
+export function chirality(p: Polygon) {
+  return (
+    p
+      .edges()
+      .map(([u, v]) => ((u.y + v.y) / 2) * (v.x - u.x))
+      .reduce((l, r) => l + r) > 0
+  );
+}
+
 function boundingBox(p: Polygon): Rect {
   return Rect(
     Math.min(...p.vertices().map((p) => p.x)),
