@@ -3,7 +3,6 @@
 import { Tetragon, Triangle } from "../classes/Polygon";
 import { RuleBuilder, PrototileBuilder } from "./PrototileBuilder";
 import { midpoint, V } from "../classes/V";
-import { reflect } from "../classes/Tile";
 
 export default RuleBuilder()
   .protoTile<Tetragon>(
@@ -26,7 +25,7 @@ export default RuleBuilder()
         triangleConsumer(Triangle(a, square.b, b));
         triangleConsumer(Triangle(c, square.d, d));
         pgramConsumer(Tetragon(square.a, a, b, center));
-        reflect(pgramConsumer(Tetragon(square.a, d, c, center)));
+        pgramConsumer(Tetragon(square.a, d, c, center));
       }
     )
   )

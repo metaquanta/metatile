@@ -1,5 +1,5 @@
-import { Polygon } from "../classes/Polygon";
-import { Tile, Prototile, oneWayPrototile } from "../classes/Tile";
+import { Polygon, chirality } from "../classes/Polygon";
+import { Tile, Prototile, oneWayPrototile, reflect } from "../classes/Tile";
 import { Rule } from "../classes/Rule";
 import { V } from "../classes/V";
 
@@ -76,7 +76,7 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
     if (this._substitution === undefined)
       throw new Error("Prototile missing children method.");
     this._substitution(p as T, ...consumers);
-    return children;
+    return children.map((c) => (chirality(c.polygon()) ? reflect(c) : c));
   }
 
   _getParentTile(p: T, creators: ((p: Polygon) => Tile)[]): Tile {

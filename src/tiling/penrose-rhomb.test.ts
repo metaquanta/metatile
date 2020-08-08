@@ -1,4 +1,4 @@
-import { Rhomb } from "../classes/Polygon";
+import { Rhomb, Polygon, chirality } from "../classes/Polygon";
 import { V } from "../classes/V";
 import penrose from "./penrose-rhomb";
 import {
@@ -50,4 +50,15 @@ test("penrose romb sanity", () => {
 
   expect(canCoverArbitraryVp(penrose)).toBeTruthy;
   expect(isVolumeHeirarchical(penrose)).toBeFalsy;
+});
+
+test("penrose romb chirality", () => {
+  expect(
+    penrose
+      .tile()
+      .children()
+      .flatMap((c) => c.children())
+      .flatMap((c) => c.children())
+      .every((c) => !chirality(c.polygon()))
+  ).toBeTruthy();
 });
