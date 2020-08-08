@@ -49,7 +49,10 @@ export default RuleBuilder()
     PrototileBuilder<Tetragon>({
       name: "dart",
       rotationalSymmetryOrder: 2,
-      reflectionSymmetry: true
+      reflectionSymmetry: true,
+      volumeHierarchic: false,
+      coveringGenerations: 3,
+      intersectingGenerations: 3
     }).substitution((d: Tetragon, kite, dart) => {
       //const dd = d.a.subtract(d.c).add(d.b);
       const eb = d.a.subtract(d.c).add(d.d);
