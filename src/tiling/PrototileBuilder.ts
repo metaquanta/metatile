@@ -1,7 +1,14 @@
 import { Polygon, chirality } from "../classes/Polygon";
-import { Tile, Prototile, oneWayPrototile, reflect } from "../classes/Tile";
+import {
+  Tile,
+  Prototile,
+  oneWayPrototile,
+  reflect,
+  nonVolumeHierarchical
+} from "../classes/Tile";
 import { Rule } from "../classes/Rule";
 import { V } from "../classes/V";
+import { ColorRotationParameters } from "../renderer/Colorer";
 
 export interface PrototileBuilder<T extends Polygon> {
   substitution: (
@@ -19,16 +26,36 @@ export interface RuleBuilder {
   build: () => Rule;
 }
 
+const defaultPrototileParams = {
+  name: "tile",
+  rotationalSymmetryOrder: 1,
+  reflectionSymmetry: false,
+  volumeHierarchic: true
+};
+
 export function PrototileBuilder<T extends Polygon>(params: {
-  name: string;
-  rotationalSymmetryOrder: number;
-  reflectionSymmetry: boolean;
+  name?: string;
+  rotationalSymmetryOrder?: number;
+  reflectionSymmetry?: boolean;
+  volumeHierarchic?: boolean;
+  // N.V.H - Non-Volume-Hierarchic:
+  // NVH implies t's descendents don't cover t, coveringGenerations is the min.
+  // levels above t with leaves that cover t.
+  // Once a covering tile is found, apply .parent() this many more times.
+  // 4 for Penrose Rhombs.
+  coveringGenerations?: number;
+  // NVH implies t doesn't cover t's descendents, intersectingGenerations is
+  // the min.levels about t that covers all of t's leaves.
+  // If t intersects the viewport, t', t'', ...t^n are assumed to also.
+  intersectingGenerations?: number;
 }): PrototileBuilder<T> {
-  return new _PrototileBuilder<T>(params);
+  return new _PrototileBuilder<T>({ ...defaultPrototileParams, ...params });
 }
 
-export function RuleBuilder(): RuleBuilder {
-  return new _RuleBuilder();
+export function RuleBuilder(params?: {
+  colors?: ColorRotationParameters;
+}): RuleBuilder {
+  return new _RuleBuilder({ colors: params?.colors });
 }
 
 class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
@@ -40,15 +67,24 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
   name: string;
   rotationalSymmetryOrder: number;
   reflectionSymmetry: boolean;
+  volumeHierarchic: boolean;
+  coveringGenerations?: number;
+  intersectingGenerations?: number;
 
   constructor(params: {
     name: string;
     rotationalSymmetryOrder: number;
     reflectionSymmetry: boolean;
+    volumeHierarchic: boolean;
+    coveringGenerations?: number;
+    intersectingGenerations?: number;
   }) {
     this.name = params.name;
     this.rotationalSymmetryOrder = params.rotationalSymmetryOrder;
     this.reflectionSymmetry = params.reflectionSymmetry;
+    this.volumeHierarchic = params.volumeHierarchic;
+    this.coveringGenerations = params.coveringGenerations;
+    this.intersectingGenerations = params.intersectingGenerations;
   }
 
   substitution(f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void) {
@@ -102,20 +138,36 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
         this.name
       );
     }
-    return Prototile(
-      (p: Polygon) => this._getParentTile(p as T, creators),
-      (p: Polygon) => this._getChildrenTiles(p, creators),
-      this.rotationalSymmetryOrder,
-      this.reflectionSymmetry,
-      this.name
-    );
+    if (this.volumeHierarchic) {
+      return Prototile(
+        (p: Polygon) => this._getParentTile(p as T, creators),
+        (p: Polygon) => this._getChildrenTiles(p, creators),
+        this.rotationalSymmetryOrder,
+        this.reflectionSymmetry,
+        this.name
+      );
+    } else {
+      return nonVolumeHierarchical(
+        Prototile(
+          (p: Polygon) => this._getParentTile(p as T, creators),
+          (p: Polygon) => this._getChildrenTiles(p, creators),
+          this.rotationalSymmetryOrder,
+          this.reflectionSymmetry,
+          this.name
+        ),
+        this.coveringGenerations || 2,
+        this.intersectingGenerations || 2
+      );
+    }
   }
 }
 
 class _RuleBuilder implements RuleBuilder {
   protos: _PrototileBuilder<any>[];
+  colors?: { hueSpan?: number; hueOffset?: number };
 
-  constructor() {
+  constructor(params?: { colors?: ColorRotationParameters }) {
+    this.colors = params?.colors;
     this.protos = [];
   }
 
@@ -144,6 +196,6 @@ class _RuleBuilder implements RuleBuilder {
 
     builtProtos = this.protos.map((proto) => proto.build(creators));
 
-    return Rule(tile, builtProtos);
+    return Rule(tile, builtProtos, this.colors);
   }
 }
