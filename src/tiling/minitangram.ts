@@ -5,7 +5,7 @@ import { RuleBuilder, PrototileBuilder } from "./PrototileBuilder";
 import { midpoint, V } from "../classes/V";
 
 export default RuleBuilder()
-  .protoTile<Tetragon>(
+  .protoTile(
     PrototileBuilder<Tetragon>({
       name: "square",
       rotationalSymmetryOrder: 4,
@@ -29,7 +29,7 @@ export default RuleBuilder()
       }
     )
   )
-  .protoTile<Triangle>(
+  .protoTile(
     PrototileBuilder<Triangle>({
       name: "triangle",
       rotationalSymmetryOrder: 1,
@@ -49,7 +49,7 @@ export default RuleBuilder()
       }
     )
   )
-  .protoTile<Tetragon>(
+  .protoTile(
     PrototileBuilder<Tetragon>({
       name: "parallelogram",
       rotationalSymmetryOrder: 1,

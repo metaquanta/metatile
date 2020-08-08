@@ -16,7 +16,7 @@ export interface Tiling {
 export function* coverWith(
   tile: Tile,
   mask: Polygon,
-  options = { drawAncestors: false, maxStackDepth: 100 }
+  options = { drawAncestors: true, maxStackDepth: 100 }
 ): Generator<Tile> {
   const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: Tile, d: number): Generator<Tile> {
