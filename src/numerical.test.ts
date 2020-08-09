@@ -1,4 +1,5 @@
 import { invertFunction } from "./numerical";
+import { gcd } from "./util";
 
 export const f = (theta: number) =>
   Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2);
@@ -21,4 +22,10 @@ test("invert() inverts non-trivial", () => {
   // theta ~= 0.674889
   expect(g(1 / 2) - 0.674889).toBeLessThan(0.000001);
   expect(Math.abs(g(1 / 3) - Math.PI / 4)).toBeLessThan(0.00000001);
+});
+
+test("gcd", () => {
+  expect(gcd(13, 20)).toEqual(1);
+  expect(gcd(5, 1000)).toEqual(5);
+  expect(gcd(128, 4352323) === 2).toBeFalsy;
 });
