@@ -5,7 +5,7 @@ import { theta } from "../classes/V";
 export type Colorer = (t: {
   proto: Prototile;
   polygon: () => Polygon;
-  reflected: boolean;
+  reflected: () => boolean;
 }) => string;
 
 export type ColorRotationParameters = {
@@ -20,14 +20,14 @@ export type ColorRotationParameters = {
 export const colorRotation = ({
   saturation: s = 0.5,
   lightness: l = 0.5,
-  alpha = 0.2,
+  alpha = 1,
   protos = [],
   hueSpan = 0,
-  hueOffset = 0.32
+  hueOffset = 0.05
 }: ColorRotationParameters): ((t: {
   proto: Prototile;
   polygon: () => Polygon;
-  reflected: boolean;
+  reflected: () => boolean;
 }) => string) => {
   //console.debug(`colorRotation(${s}, ${l}, ${hueSpan}, ${hueOffset})`);
   const numParts = protos.length * 2;
@@ -39,8 +39,7 @@ export const colorRotation = ({
       t.polygon().vertices()[1].subtract(t.polygon().vertices()[0])
     );
     const variant =
-      Math.abs(protos.indexOf(t.proto)) * 2 +
-      (!t.proto.reflectionSymmetry && t.reflected ? 1 : 0);
+      Math.abs(protos.indexOf(t.proto)) * 2 + (t.reflected() ? 1 : 0);
     const angle =
       ((th / Math.PI / 2) % (1 / t.proto.rotationalSymmetryOrder)) *
       t.proto.rotationalSymmetryOrder;

@@ -4,25 +4,21 @@ import { ViewPort } from "../classes/ViewPort";
 import { isCallable } from "../util";
 import { Colorer } from "./Colorer";
 
+type Tile = {
+  polygon: () => Polygon;
+  proto: Prototile;
+  reflected: () => boolean;
+};
+
 export type Renderer = {
   setTileStream: (
     tiles:
-      | ((
-          vp: Polygon
-        ) => Iterable<{
-          polygon: () => Polygon;
-          proto: Prototile;
-          reflected: boolean;
-        }>)
+      | ((vp: Polygon) => Iterable<Tile>)
       | Iterable<{ polygon: () => Polygon }>
   ) => void;
   setFillColorer: (c: Colorer) => void;
   setStrokeColorer: (c: Colorer) => void;
-  drawTile: (t: {
-    polygon: () => Polygon;
-    proto: Prototile;
-    reflected: boolean;
-  }) => void;
+  drawTile: (t: Tile) => void;
 };
 
 type Looper = {
@@ -39,12 +35,8 @@ type Looper = {
 };
 
 type PrivateRenderer = Renderer & {
-  tiles:
-    | Iterable<{ polygon: () => Polygon; proto: Prototile; reflected: boolean }>
-    | undefined;
-  tileIterator:
-    | Iterator<{ polygon: () => Polygon; proto: Prototile; reflected: boolean }>
-    | undefined;
+  tiles: Iterable<Tile> | undefined;
+  tileIterator: Iterator<Tile> | undefined;
   renderNext: () => boolean;
   clearCanvas: () => void;
   ctx: CanvasRenderingContext2D | undefined;
@@ -53,16 +45,8 @@ type PrivateRenderer = Renderer & {
   stop: () => void;
   fillColorer: Colorer | undefined;
   strokeColorer: Colorer | undefined;
-  getFill: (t: {
-    polygon: () => Polygon;
-    proto: Prototile;
-    reflected: boolean;
-  }) => string;
-  getStroke: (t: {
-    polygon: () => Polygon;
-    proto: Prototile;
-    reflected: boolean;
-  }) => string;
+  getFill: (t: Tile) => string;
+  getStroke: (t: Tile) => string;
 };
 
 export function drawCanvas(
@@ -152,19 +136,9 @@ export function Renderer(
     strokeColorer: undefined,
     setTileStream(tiles) {
       if (isCallable(tiles)) {
-        this.tiles = (tiles as (
-          vp: Polygon
-        ) => Iterable<{
-          polygon: () => Polygon;
-          proto: Prototile;
-          reflected: boolean;
-        }>)(this.vp);
+        this.tiles = (tiles as (vp: Polygon) => Iterable<Tile>)(this.vp);
       } else {
-        this.tiles = tiles as Iterable<{
-          polygon: () => Polygon;
-          proto: Prototile;
-          reflected: boolean;
-        }>;
+        this.tiles = tiles as Iterable<Tile>;
       }
       console.debug(`Renderer.setTileStream() - tiles:${tiles}`);
       looper.start(
@@ -235,11 +209,7 @@ export function Renderer(
     stop() {
       looper.stop();
     },
-    drawTile(t: {
-      polygon: () => Polygon;
-      proto: Prototile;
-      reflected: boolean;
-    }) {
+    drawTile(t: Tile) {
       if (this.ctx) {
         drawCanvas(t.polygon(), this.getStroke(t), this.getFill(t), this.ctx);
       } else {
