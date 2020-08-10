@@ -1,5 +1,4 @@
 import ammannBeenker from "./ammann-beenker";
-import cubicPinwheel from "./cubic-pinwheel";
 import fibonacci from "./fibonacci";
 import minitangram from "./minitangram";
 import penroseKiteDart from "./penrose-kite-dart";
@@ -11,7 +10,6 @@ import viper from "./viper";
 
 export default {
   "Ammann-Beenker": ammannBeenker,
-  "Cubic-Pinwheel": cubicPinwheel,
   Fibonacci: fibonacci,
   MiniTangram: minitangram,
   "Penrose-Kite-Dart": penroseKiteDart,
