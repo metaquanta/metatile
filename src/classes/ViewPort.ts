@@ -33,9 +33,9 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
 
   function getInnerSize(): number {
     const max = Math.round(Math.max(window.screen.height, window.screen.width));
-    console.debug(
+    /*console.debug(
       `ViewPort:getInnerSize(): ${window.screen.width}×${window.screen.height}, max=${max}`
-    );
+    );*/
     return max;
   }
 
