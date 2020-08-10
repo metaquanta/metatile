@@ -112,14 +112,13 @@ export function Renderer(
             this.cnt++;
           }
           const ms = Date.now();
-          console.log(
+          /*console.log(
             `Renderer:Looper - ${i} tiles in ${ms - this.lastMs}ms. [${
               this.lastMs
             }, ${ms}]`
-          );
-          this.speedTiles = Math.max(
+          )*/ this.speedTiles = Math.max(
             (this.speedMs / (ms - this.lastMs)) * this.speedTiles,
-            1
+            10 // It can get stuck too low and become /really/ slow
           );
           this.lastMs = Date.now();
           window.requestAnimationFrame(() => this.iter && this.iter());

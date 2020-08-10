@@ -1,6 +1,6 @@
 import { Polygon } from "./Polygon";
 import { Prototile, singlePrototile, Tile } from "./Tile";
-import { Tiling } from "./Tiling";
+import { Tiling, TilingOptions } from "./Tiling";
 import { V } from "./V";
 import { ColorRotationParameters } from "../renderer/Colorer";
 
@@ -11,7 +11,7 @@ export interface Rule {
   protos: Prototile[];
   tile: () => Tile;
   tileFromEdge: (edge: V, pos?: V) => Tile;
-  tiling: (tile: Tile) => Tiling;
+  tiling: (tile: Tile, options: TilingOptions) => Tiling;
   colorOptions?: ColorRotationParameters;
 }
 
@@ -24,7 +24,7 @@ export function Rule(
     protos: prototiles,
     tile: () => f(s, t),
     tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
-    tiling: (tile) => Tiling(tile),
+    tiling: (tile, options) => Tiling(tile, options),
     colorOptions
   };
 }

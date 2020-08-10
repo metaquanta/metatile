@@ -8,6 +8,8 @@ type Parameters = {
   colorLightness?: string;
   colorHueSpan?: string;
   colorHueOffset?: string;
+  colorAlpha?: string;
+  tilingIncludeAncestors?: string;
 };
 
 let params = getUrlParameters();
@@ -38,7 +40,9 @@ function getUrlParameters(): Parameters {
     colorSaturation: params.get("colorSaturation") || undefined,
     colorLightness: params.get("colorLightness") || undefined,
     colorHueSpan: params.get("colorHueSpan") || undefined,
-    colorHueOffset: params.get("colorHueOffset") || undefined
+    colorHueOffset: params.get("colorHueOffset") || undefined,
+    colorAlpha: params.get("colorAlpha") || undefined,
+    tilingIncludeAncestors: params.get("tilingIncludeAncestors") || undefined
   };
 }
 
@@ -59,7 +63,7 @@ function rU() {
 }
 
 function randomRule(): string {
-  const r = round(random(1000)) % 8;
+  const r = round(random(1000)) % 9;
   switch (r) {
     case 0:
       return "Ammann-Beenker";
@@ -76,7 +80,9 @@ function randomRule(): string {
     case 6:
       return "Pinwheel13";
     case 7:
-      return "Cubic-Pinwheel";
+      return "MiniTangram";
+    case 8:
+      return "Penrose-Kite-Dart";
   }
   console.error(`randomRule() - UNREACHABLE!!! [${r}]`);
   throw new Error(`!!!Unreachable reached!!!`);
@@ -90,7 +96,8 @@ function getRandomParameters(params: Parameters): Parameters {
     colorSaturation: params.colorSaturation || "" + round(random(), 2),
     colorLightness: params.colorLightness || "" + round(random(0.75) + 0.25, 2),
     colorHueSpan: params.colorHueSpan || "" + round(random(), 2),
-    colorHueOffset: params.colorHueOffset || "" + round(random(), 2)
+    colorHueOffset: params.colorHueOffset || "" + round(random(), 2),
+    colorAlpha: params.colorAlpha || "1.0"
   };
 }
 function setParameters(params: Parameters) {
@@ -106,5 +113,7 @@ function setParameters(params: Parameters) {
     location.searchParams.set("colorHueSpan", params.colorHueSpan);
   if (params.colorHueOffset)
     location.searchParams.set("colorHueOffset", params.colorHueOffset);
+  if (params.colorAlpha)
+    location.searchParams.set("colorAlpha", params.colorAlpha);
   window.history.pushState({}, window.document.title, location.toString());
 }

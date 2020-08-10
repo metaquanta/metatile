@@ -4,6 +4,7 @@ import { colorRotation, ColorRotationParameters } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import { Rule } from "./classes/Rule";
 import rules from "./tiling/rules";
+import { TilingOptions } from "./classes/Tiling";
 
 function getRenderer(root: ShadowRoot): Renderer {
   root.innerHTML = `<style>
@@ -38,11 +39,11 @@ function ruleForString(name: string | null): Rule {
   console.debug(
     `TilingComponent:ruleForString() - "${name}" not found. Using default.`
   );
-  return rules["Cubic-Pinwheel"];
+  return rules["Penrose-Rhomb"];
 }
 
-function parseVectorString(vs: string | undefined | null, def: V): V {
-  console.debug(`TilingComponent:parseVectorString(${vs}, ${def})`);
+function parseVector(vs: string | undefined | null, def: V): V {
+  //console.debug(`TilingComponent:parseVector(${vs}, ${def})`);
   if (vs === undefined || vs === null) return def;
   const components = vs.split(",").map((s) => Number.parseFloat(s));
   if (components.length === 2) {
@@ -54,6 +55,43 @@ function parseVectorString(vs: string | undefined | null, def: V): V {
   return def;
 }
 
+function parseFloat(f: string | null | undefined): number | undefined {
+  if (f === undefined || f === null) return undefined;
+  const n = Number.parseFloat(f);
+  if (isNaN(n)) return undefined;
+  return n;
+}
+
+function parseBool(b: string | null | undefined): boolean | undefined {
+  const truthStrings = ["true", "True", "yes", "Yes", "y", "Y", "1"];
+  const falseStrings = ["false", "False", "no", "No", "n", "N", "0"];
+  if (b === undefined || b === null) return undefined;
+  if (truthStrings.indexOf(b) >= 0) return true;
+  if (falseStrings.indexOf(b) >= 0) return false;
+  return undefined;
+}
+
+function _attribute(comp: Tiling, attribute: string, value: string): void {
+  if (value !== "") {
+    comp.setAttribute(attribute, value);
+  } else {
+    comp.removeAttribute(attribute);
+  }
+  comp.render();
+}
+
+const observedAttributes = [
+  "rule",
+  "v",
+  "u",
+  "colorSaturation",
+  "colorLightness",
+  "colorHueSpan",
+  "colorHueOffset",
+  "colorAlpha",
+  "tilingIncludeAncestors"
+];
+
 class Tiling extends HTMLElement {
   viewPort: ViewPort | undefined = undefined;
   renderer: Renderer | undefined = undefined;
@@ -63,104 +101,57 @@ class Tiling extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return [
-      "rule",
-      "v",
-      "u",
-      "colorSaturation",
-      "colorLightness",
-      "colorHueSpan",
-      "colorHueOffset"
-    ];
+    return observedAttributes;
   }
 
   set rule(rule: string) {
-    if (rule) {
-      this.setAttribute("rule", rule);
-    } else {
-      this.removeAttribute("rule");
-    }
-    this.render();
+    _attribute(this, "rule", rule);
   }
-
   set v(v: string) {
-    if (v) {
-      this.setAttribute("v", v);
-    } else {
-      this.removeAttribute("v");
-    }
-    this.render();
+    _attribute(this, "v", v);
   }
-
   set u(u: string) {
-    if (u) {
-      this.setAttribute("u", u);
-    } else {
-      this.removeAttribute("u");
-    }
-    this.render();
+    _attribute(this, "u", u);
   }
-
   set colorSaturation(colorSaturation: string) {
-    if (colorSaturation) {
-      this.setAttribute("colorSaturation", colorSaturation);
-    } else {
-      this.removeAttribute("colorSaturation");
-    }
-    this.render();
+    _attribute(this, "colorSaturation", colorSaturation);
   }
   set colorLightness(colorLightness: string) {
-    if (colorLightness) {
-      this.setAttribute("colorLightness", colorLightness);
-    } else {
-      this.removeAttribute("colorLightness");
-    }
-    this.render();
+    _attribute(this, "colorLightness", colorLightness);
   }
   set colorHueSpan(colorHueSpan: string) {
-    if (colorHueSpan) {
-      this.setAttribute("colorHueSpan", colorHueSpan);
-    } else {
-      this.removeAttribute("colorHueSpan");
-    }
-    this.render();
+    _attribute(this, "colorHueSpan", colorHueSpan);
   }
   set colorHueOffset(colorHueOffset: string) {
-    if (colorHueOffset) {
-      this.setAttribute("colorHueOffset", colorHueOffset);
-    } else {
-      this.removeAttribute("colorHueOffset");
-    }
-    this.render();
+    _attribute(this, "colorHueOffset", colorHueOffset);
+  }
+  set colorAlpha(colorAlpha: string) {
+    _attribute(this, "colorAlpha", colorAlpha);
+  }
+  set tilingIncludeAncestors(tilingIncludeAncestors: string) {
+    _attribute(this, "tilingIncludeAncestors", tilingIncludeAncestors);
   }
 
   colorParameters(): ColorRotationParameters {
-    const parseFloat = (f: string | null | undefined) => {
-      if (f === undefined || f === null) return undefined;
-      const n = Number.parseFloat(f);
-      if (isNaN(n)) return undefined;
-      return n;
-    };
     const p = {
       saturation: parseFloat(this.getAttribute("colorSaturation")),
       lightness: parseFloat(this.getAttribute("colorLightness")),
       hueSpan: parseFloat(this.getAttribute("colorHueSpan")),
-      hueOffset: parseFloat(this.getAttribute("colorHueOffset"))
+      hueOffset: parseFloat(this.getAttribute("colorHueOffset")),
+      alpha: parseFloat(this.getAttribute("colorAlpha"))
     };
-    console.log(`colorParameters(): ${p} [${this.colorSaturation}]`);
+    //console.debug(`colorParameters(): ${p} [${this.colorSaturation}]`);
     return p;
   }
 
+  tilingOptions(): TilingOptions {
+    return {
+      includeAncestors: parseBool(this.getAttribute("tilingIncludeAncestors"))
+    };
+  }
+
   attributeChangedCallback(name: string): void {
-    if (
-      name === "u" ||
-      name === "v" ||
-      name === "colorSaturation" ||
-      name === "colorLightness" ||
-      name === "colorHueSpan" ||
-      name === "colorHueOffset" ||
-      name === "rule"
-    ) {
+    if (observedAttributes.indexOf(name) >= 0) {
       this.render();
     }
   }
@@ -172,20 +163,20 @@ class Tiling extends HTMLElement {
   }
 
   render(): void {
-    console.debug(`TilingComponent.render()`);
     if (this.renderer === undefined) return;
-    const tileSet = ruleForString(this.getAttribute("rule"));
+
+    const rule = ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
       colorRotation({
         ...this.colorParameters(),
-        protos: tileSet.protos
+        protos: rule.protos
       })
     );
-    const tile = tileSet.tileFromEdge(
-      parseVectorString(this.getAttribute("v"), V(11, 17)),
-      parseVectorString(this.getAttribute("u"), V(1500, 1500))
+    const tile = rule.tileFromEdge(
+      parseVector(this.getAttribute("v"), V(11, 17)),
+      parseVector(this.getAttribute("u"), V(1500, 1500))
     );
-    this.renderer.setTileStream(tileSet.tiling(tile).cover);
+    this.renderer.setTileStream(rule.tiling(tile, this.tilingOptions()).cover);
   }
 }
 
