@@ -34,20 +34,18 @@ export default RuleBuilder()
       name: "triangle",
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: true
-    }).substitution(
-      (triangle: Triangle, squareConsumer, triangleConsumer, _) => {
-        //  a
-        //  |\
-        //b --- c
-        const a = midpoint(triangle.a, triangle.b);
-        const b = midpoint(triangle.b, triangle.c);
-        const c = midpoint(triangle.c, triangle.a);
+    }).substitution((triangle: Triangle, squareConsumer, triangleConsumer) => {
+      //  a
+      //  |\
+      //b --- c
+      const a = midpoint(triangle.a, triangle.b);
+      const b = midpoint(triangle.b, triangle.c);
+      const c = midpoint(triangle.c, triangle.a);
 
-        squareConsumer(Tetragon(triangle.b, b, c, a));
-        triangleConsumer(Triangle(triangle.a, a, c));
-        triangleConsumer(Triangle(c, b, triangle.c));
-      }
-    )
+      squareConsumer(Tetragon(triangle.b, b, c, a));
+      triangleConsumer(Triangle(triangle.a, a, c));
+      triangleConsumer(Triangle(c, b, triangle.c));
+    })
   )
   .protoTile(
     PrototileBuilder<Tetragon>({

@@ -1,11 +1,6 @@
 import { invertFunction } from "./numerical";
 import { gcd } from "./util";
 
-export const f = (theta: number) =>
-  Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2);
-
-const domain: [number, number] = [0, Math.PI / 2];
-
 test("invert() inverts trivial", () => {
   const eps = 0.000001;
   const f = (x: number) => x;
@@ -15,7 +10,12 @@ test("invert() inverts trivial", () => {
 });
 
 test("invert() inverts non-trivial", () => {
-  const g = invertFunction(f, domain);
+  const domain: [number, number] = [0, Math.PI / 2];
+  const g = invertFunction(
+    (theta: number) =>
+      Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2),
+    domain
+  );
   // T(2): a = sqrt(5) - 2, b = 2(sqrt(5) - 2)^(1/2), c = 1, theta ~= 0.238317
   expect(g(2) - 0.238317).toBeLessThan(0.000001);
   // T(1/2): a = (2(17^(1/2) - 1))^(1/2), b = 17^(1/2) - 1, c = 4,

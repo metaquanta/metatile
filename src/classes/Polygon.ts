@@ -274,7 +274,7 @@ function area(p: Polygon): number {
 }
 
 // Yup, I realized my area alg can determine chirality.
-export function chirality(p: Polygon) {
+export function chirality(p: Polygon): boolean {
   return (
     p
       .edges()
