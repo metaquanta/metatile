@@ -3,7 +3,6 @@ import {
   Tile,
   Prototile,
   oneWayPrototile,
-  reflect,
   nonVolumeHierarchical
 } from "../classes/Tile";
 import { Rule } from "../classes/Rule";
@@ -112,7 +111,7 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
     if (this._substitution === undefined)
       throw new Error("Prototile missing children method.");
     this._substitution(p as T, ...consumers);
-    return children.map((c) => (chirality(c.polygon()) ? reflect(c) : c));
+    return children;
   }
 
   _getParentTile(p: T, creators: ((p: Polygon) => Tile)[]): Tile {

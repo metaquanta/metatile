@@ -140,7 +140,7 @@ class Tiling extends HTMLElement {
       hueOffset: parseFloat(this.getAttribute("colorHueOffset")),
       alpha: parseFloat(this.getAttribute("colorAlpha"))
     };
-    //console.debug(`colorParameters(): ${p} [${this.colorSaturation}]`);
+    console.debug(`colorParameters(): `, p);
     return p;
   }
 

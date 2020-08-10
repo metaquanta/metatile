@@ -1,5 +1,4 @@
-import { Polygon } from "./Polygon";
-import { Prototile, singlePrototile, Tile } from "./Tile";
+import { Prototile, Tile } from "./Tile";
 import { Tiling, TilingOptions } from "./Tiling";
 import { V } from "./V";
 import { ColorRotationParameters } from "../renderer/Colorer";
@@ -25,23 +24,6 @@ export function Rule(
     tile: () => f(s, t),
     tileFromEdge: (u: V, v: V = V(0, 0)) => f(u, v),
     tiling: (tile, options) => Tiling(tile, options),
-    colorOptions
-  };
-}
-
-export function singlePrototileRule<P extends Polygon>(
-  f: (edge: V, origin: V) => P,
-  parent: (t: P) => P,
-  children: (t: P) => P[],
-  rotationalSymmetry = 1,
-  colorOptions?: ColorRotationParameters
-): Rule {
-  const proto = singlePrototile(parent, children, rotationalSymmetry);
-  return {
-    protos: [proto],
-    tile: () => proto.create(f(s, t)),
-    tileFromEdge: (u: V, v: V = V(0, 0)) => proto.create(f(u, v)),
-    tiling: (tile) => Tiling(tile),
     colorOptions
   };
 }

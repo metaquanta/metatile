@@ -1,4 +1,4 @@
-import { Polygon } from "./Polygon";
+import { Polygon, chirality } from "./Polygon";
 
 export interface Prototile {
   rotationalSymmetryOrder: number;
@@ -20,28 +20,7 @@ export interface Tile {
   contains: (p: Polygon, depth?: number) => boolean;
   polygon: () => Polygon;
   equals: (t: this) => boolean;
-  reflect: () => Tile;
-  reflected: boolean;
-}
-
-export function singlePrototile<P extends Polygon>(
-  parent: (t: P) => P,
-  children: (t: P) => P[],
-  rotationalSymmetryOrder: number
-): Prototile {
-  return {
-    rotationalSymmetryOrder: rotationalSymmetryOrder,
-    reflectionSymmetry: true,
-    parent(t) {
-      return this.create(parent(t.polygon() as P));
-    },
-    children(t) {
-      return children(t.polygon() as P).map((p) => this.create(p, t));
-    },
-    create(p, t?): Tile {
-      return new _Tile(p, this, t);
-    }
-  };
+  reflected: () => boolean;
 }
 
 export function Prototile<P extends Polygon>(
@@ -114,39 +93,18 @@ export function nonVolumeHierarchical(
   };
 }
 
-export function reflect(t: Tile): Tile {
-  return t.reflect();
-}
-
 class _Tile implements Tile {
   _polygon: Polygon;
   _parent?: Tile;
   proto: Prototile;
-  reflected: boolean;
-  constructor(
-    p: Polygon,
-    proto: Prototile,
-    parent?: Tile,
-    reflected?: boolean
-  ) {
+  constructor(p: Polygon, proto: Prototile, parent?: Tile) {
     this._polygon = p;
     this._parent = parent;
     this.proto = proto;
-    // If reflected is set, assume it's meant. Otherwise, inherit from parent.
-    this.reflected =
-      reflected === undefined
-        ? parent !== undefined && parent.reflected
-        : reflected;
-  }
-
-  reflect(): Tile {
-    // Flip reflected if relevant.
-    // This may unreflect it if it was already reflected due to parent.
-    return new _Tile(this._polygon, this.proto, this._parent, !this.reflected);
   }
 
   setParent(p: Tile): Tile {
-    return new _Tile(this._polygon, this.proto, p, this.reflected);
+    return new _Tile(this._polygon, this.proto, p);
   }
 
   parent(): Tile {
@@ -154,6 +112,10 @@ class _Tile implements Tile {
     if (this.proto.parent !== undefined) return this.proto.parent(this);
     console.trace("!!!Unreachable reached!!!");
     throw new Error(`tile.paren() not supported on ${this}`);
+  }
+
+  reflected(): boolean {
+    return !this.proto.reflectionSymmetry && chirality(this.polygon());
   }
 
   children(): Tile[] {
@@ -190,10 +152,9 @@ class _NvhTile extends _Tile {
     p: Polygon,
     proto: Prototile,
     intersectingGenerations: number,
-    parent?: Tile,
-    reflected?: boolean
+    parent?: Tile
   ) {
-    super(p, proto, parent, reflected);
+    super(p, proto, parent);
     this.intersectingGenerations = intersectingGenerations;
     this.intersectsMemo = [];
     if (parent) this._parent = parent;
@@ -204,20 +165,7 @@ class _NvhTile extends _Tile {
       this._polygon,
       this.proto,
       this.intersectingGenerations,
-      p,
-      this.reflected
-    );
-  }
-
-  reflect(): Tile {
-    // Flip reflected if relevant.
-    // This may unreflect it if it was already reflected due to parent.
-    return new _NvhTile(
-      this._polygon,
-      this.proto,
-      this.intersectingGenerations,
-      this._parent,
-      !this.reflected
+      p
     );
   }
 

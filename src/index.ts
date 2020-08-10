@@ -96,8 +96,7 @@ function getRandomParameters(params: Parameters): Parameters {
     colorSaturation: params.colorSaturation || "" + round(random(), 2),
     colorLightness: params.colorLightness || "" + round(random(0.75) + 0.25, 2),
     colorHueSpan: params.colorHueSpan || "" + round(random(), 2),
-    colorHueOffset: params.colorHueOffset || "" + round(random(), 2),
-    colorAlpha: params.colorAlpha || "1.0"
+    colorHueOffset: params.colorHueOffset || "" + round(random(), 2)
   };
 }
 function setParameters(params: Parameters) {
@@ -115,5 +114,10 @@ function setParameters(params: Parameters) {
     location.searchParams.set("colorHueOffset", params.colorHueOffset);
   if (params.colorAlpha)
     location.searchParams.set("colorAlpha", params.colorAlpha);
-  window.history.pushState({}, window.document.title, location.toString());
+  window.history.pushState(
+    {},
+    window.document.title,
+    // Use actual ',' characters in the vectors.
+    location.toString().replace(/%2C/g, ",")
+  );
 }
