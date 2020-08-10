@@ -20,6 +20,21 @@ export function gcd(a: number, b: number): number {
   return gcd(b, r);
 }
 
+export function indexOf<T>(a: T[], p: (e: T) => boolean): number {
+  for (let i = 0; i < a.length; i++) {
+    if (p(a[i])) return i;
+  }
+  return -1;
+}
+
+export function first<T>(a: Iterable<T>, p: (e: T) => boolean): T | undefined {
+  for (const e of a) {
+    if (p(e)) return e;
+  }
+
+  return undefined;
+}
+
 export function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
   return (f as () => T).call !== undefined;
 }

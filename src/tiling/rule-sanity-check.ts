@@ -75,7 +75,7 @@ export function canCoverArbitraryVp(r: Rule): boolean {
 
 const EPS = 0.0001;
 
-export function isVolumeHeirarchical(r: Rule): boolean {
+export function isVolumeHierarchic(r: Rule): boolean {
   const t = r.tile();
   const p = t.polygon();
   const children = t.children().map((c) => c.polygon());
@@ -90,6 +90,7 @@ export function isVolumeHeirarchical(r: Rule): boolean {
   if (
     children
       .flatMap((c) => c.vertices())
+      // TODO
       // remove points on the parent poly. (what about new points?)
       .filter((v) => p.vertices().indexOf(v) === -1)
       // and points contained within the parent poly.
