@@ -5,7 +5,7 @@ import {
   similarChildren,
   inflationFactor,
   canCoverArbitraryVp,
-  isVolumeHeirarchical
+  isVolumeHierarchic
 } from "./rule-sanity-check";
 
 test("penrose parent inverts children", () => {
@@ -49,7 +49,7 @@ test("penrose romb sanity", () => {
   );
 
   expect(canCoverArbitraryVp(penrose)).toBeTruthy;
-  expect(isVolumeHeirarchical(penrose)).toBeFalsy;
+  expect(isVolumeHierarchic(penrose)).toBeFalsy;
 });
 
 test("penrose romb chirality", () => {

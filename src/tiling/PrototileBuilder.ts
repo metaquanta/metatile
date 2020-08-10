@@ -1,29 +1,28 @@
-import { Polygon, chirality } from "../classes/Polygon";
-import {
-  Tile,
-  Prototile,
-  oneWayPrototile,
-  nonVolumeHierarchical
-} from "../classes/Tile";
+import { Polygon } from "../classes/Polygon";
+import { Tile, Prototile } from "../classes/Tile";
 import { Rule } from "../classes/Rule";
 import { V } from "../classes/V";
 import { ColorRotationParameters } from "../renderer/Colorer";
 
 export interface PrototileBuilder<T extends Polygon> {
-  substitution: (
+  readonly substitution: (
     f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void
   ) => this;
-
-  parent: (f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void) => this;
-
-  tile: (f: (l: V, p: V) => T) => this;
+  readonly parent: (
+    f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void
+  ) => this;
+  readonly tile: (f: (l: V, p: V) => T) => this;
 }
 
 export interface RuleBuilder {
-  protoTile: <T extends Polygon>(p: PrototileBuilder<T>) => this;
-
-  build: () => Rule;
+  readonly protoTile: <T extends Polygon>(p: PrototileBuilder<T>) => this;
+  readonly build: () => Rule;
 }
+
+export type Substitution<T extends Polygon> = (
+  c: T,
+  ...consumers: ((p: Polygon) => Tile)[]
+) => void;
 
 const defaultPrototileParams = {
   name: "tile",
@@ -44,7 +43,7 @@ export function PrototileBuilder<T extends Polygon>(params: {
   // 4 for Penrose Rhombs.
   coveringGenerations?: number;
   // NVH implies t doesn't cover t's descendents, intersectingGenerations is
-  // the min.levels about t that covers all of t's leaves.
+  // the min.levels above t that covers all of t's leaves.
   // If t intersects the viewport, t', t'', ...t^n are assumed to also.
   intersectingGenerations?: number;
 }): PrototileBuilder<T> {
@@ -58,17 +57,15 @@ export function RuleBuilder(params?: {
 }
 
 class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
-  _substitution:
-    | ((p: T, ...consumers: ((p: Polygon) => Tile)[]) => void)
-    | undefined;
-  _parent: ((c: T, ...consumers: ((p: Polygon) => Tile)[]) => void) | undefined;
-  _tile: ((l: V, p: V) => T) | undefined;
-  name: string;
-  rotationalSymmetryOrder: number;
-  reflectionSymmetry: boolean;
-  volumeHierarchic: boolean;
-  coveringGenerations?: number;
-  intersectingGenerations?: number;
+  #substitution: Substitution<T> | undefined;
+  #parent: Substitution<T> | undefined;
+  #tile: ((l: V, p: V) => T) | undefined;
+  readonly name: string;
+  readonly rotationalSymmetryOrder: number;
+  readonly reflectionSymmetry: boolean;
+  readonly volumeHierarchic: boolean;
+  readonly coveringGenerations?: number;
+  readonly intersectingGenerations?: number;
 
   constructor(params: {
     name: string;
@@ -86,85 +83,78 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
     this.intersectingGenerations = params.intersectingGenerations;
   }
 
-  substitution(f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void) {
-    this._substitution = f;
+  substitution(f: Substitution<T>) {
+    this.#substitution = f;
     return this;
   }
 
-  parent(f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void) {
-    this._parent = f;
+  parent(f: Substitution<T>) {
+    this.#parent = f;
     return this;
   }
 
   tile(f: (l: V, p: V) => T) {
-    this._tile = f;
+    this.#tile = f;
     return this;
   }
 
-  _getChildrenTiles(p: Polygon, creators: ((p: Polygon) => Tile)[]): Tile[] {
-    const children: Tile[] = [];
-    const consumers = creators.map((f) => (p: Polygon) => {
-      const child = f(p);
-      children.push(child);
-      return child;
-    });
-    if (this._substitution === undefined)
-      throw new Error("Prototile missing children method.");
-    this._substitution(p as T, ...consumers);
-    return children;
-  }
-
-  _getParentTile(p: T, creators: ((p: Polygon) => Tile)[]): Tile {
-    let parent: Tile | undefined = undefined;
-    const consumers = creators.map((f) => (p: Polygon) => {
-      parent = f(p);
-      return parent;
-    });
-    if (this._parent === undefined)
-      throw new Error("Prototile missing parent method.");
-    this._parent(p, ...consumers);
-    if (parent === undefined)
-      throw new Error("Prototile parent method failed to create parent.");
-    return parent;
-  }
-
   build(creators: ((p: Polygon) => Tile)[]): Prototile {
-    if (this._parent === undefined) {
-      return oneWayPrototile(
-        (p: Polygon) => this._getChildrenTiles(p, creators),
-        this.rotationalSymmetryOrder,
-        this.reflectionSymmetry,
-        this.name
-      );
-    }
-    if (this.volumeHierarchic) {
-      return Prototile(
-        (p: Polygon) => this._getParentTile(p as T, creators),
-        (p: Polygon) => this._getChildrenTiles(p, creators),
-        this.rotationalSymmetryOrder,
-        this.reflectionSymmetry,
-        this.name
-      );
-    } else {
-      return nonVolumeHierarchical(
-        Prototile(
-          (p: Polygon) => this._getParentTile(p as T, creators),
-          (p: Polygon) => this._getChildrenTiles(p, creators),
-          this.rotationalSymmetryOrder,
-          this.reflectionSymmetry,
-          this.name
-        ),
-        this.coveringGenerations || 2,
-        this.intersectingGenerations || 2
-      );
-    }
+    if (this.#substitution === undefined)
+      throw new Error(`Prototiles must have a substitution!!`);
+    return Prototile({
+      children: (p: Polygon) =>
+        childTiles(this.#substitution as Substitution<T>, p, creators),
+      parent:
+        this.#parent === undefined
+          ? undefined
+          : (p: Polygon) =>
+              parentTile(this.#parent as Substitution<T>, p as T, creators),
+      tile: this.#tile,
+      rotationalSymmetryOrder: this.rotationalSymmetryOrder,
+      reflectionSymmetry: this.reflectionSymmetry,
+      name: this.name,
+      volumeHierarchic: this.volumeHierarchic,
+      coveringGenerations: this.coveringGenerations,
+      intersectingGenerations: this.intersectingGenerations
+    });
   }
+}
+
+function childTiles<T extends Polygon>(
+  substitution: Substitution<T>,
+  p: Polygon,
+  creators: ((p: Polygon) => Tile)[]
+): Tile[] {
+  const children: Tile[] = [];
+  const consumers = creators.map((f) => (p: Polygon) => {
+    const child = f(p);
+    children.push(child);
+    return child;
+  });
+  substitution(p as T, ...consumers);
+  return children;
+}
+
+function parentTile<T extends Polygon>(
+  substitution: Substitution<T>,
+  p: T,
+  creators: ((p: Polygon) => Tile)[]
+): Tile {
+  let parent: Tile | undefined = undefined;
+  const consumers = creators.map((f) => (p: Polygon) => {
+    parent = f(p);
+    return parent;
+  });
+  substitution(p, ...consumers);
+  if (parent === undefined)
+    throw new Error("Prototile parent method failed to create parent.");
+  return parent;
 }
 
 class _RuleBuilder implements RuleBuilder {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protos: _PrototileBuilder<any>[];
-  colors?: { hueSpan?: number; hueOffset?: number };
+  readonly colors?: { hueSpan?: number; hueOffset?: number };
 
   constructor(params?: { colors?: ColorRotationParameters }) {
     this.colors = params?.colors;
@@ -182,20 +172,8 @@ class _RuleBuilder implements RuleBuilder {
       builtProtos[i].create(p)
     );
 
-    const tileIndex = this.protos
-      .map((proto, i) => (proto._tile != undefined ? i : -1))
-      .filter((i) => i >= 0)[0];
-
-    if (tileIndex === undefined)
-      throw new Error("No Prototile has a seed tile method.");
-
-    const tile = (u: V, v: V) =>
-      creators[tileIndex](
-        (this.protos[tileIndex]._tile as (u: V, v: V) => Polygon)(u, v)
-      );
-
     builtProtos = this.protos.map((proto) => proto.build(creators));
 
-    return Rule(tile, builtProtos, this.colors);
+    return Rule(builtProtos, this.colors);
   }
 }

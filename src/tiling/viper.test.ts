@@ -5,7 +5,7 @@ import {
   similarChildren,
   inflationFactor,
   canCoverArbitraryVp,
-  isVolumeHeirarchical
+  isVolumeHierarchic
 } from "./rule-sanity-check";
 
 test("viper children intersect", () => {
@@ -53,5 +53,5 @@ test("viper sanity", () => {
   expect(Math.abs(inflationFactor(t, children[5]) - 3)).toBeLessThan(0.0000001);
 
   expect(canCoverArbitraryVp(viper)).toBeTruthy;
-  expect(isVolumeHeirarchical(viper)).toBeTruthy;
+  expect(isVolumeHierarchic(viper)).toBeTruthy;
 });
