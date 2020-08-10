@@ -2,7 +2,7 @@ export function invertFunction(
   f: (x: number) => number,
   range: [number, number],
   epsilon = 0.0000000002
-) {
+): (y: number) => number {
   const left = isFinite(f(range[0])) ? range[0] : range[0] + epsilon;
   const right = isFinite(f(range[1])) ? range[1] : range[1] - epsilon;
   const leftY = f(left);

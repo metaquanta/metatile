@@ -103,7 +103,7 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
   }
 
   _getChildrenTiles(p: Polygon, creators: ((p: Polygon) => Tile)[]): Tile[] {
-    let children: Tile[] = [];
+    const children: Tile[] = [];
     const consumers = creators.map((f) => (p: Polygon) => {
       const child = f(p);
       children.push(child);
@@ -163,6 +163,7 @@ class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
 }
 
 class _RuleBuilder implements RuleBuilder {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protos: _PrototileBuilder<any>[];
   colors?: { hueSpan?: number; hueOffset?: number };
 

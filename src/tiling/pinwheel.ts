@@ -85,4 +85,4 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
   return builder;
 }
 
-export default generatePinwheel(1, 3).build();
+export default generatePinwheel(1, 1).build();

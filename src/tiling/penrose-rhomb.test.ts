@@ -1,4 +1,4 @@
-import { Rhomb, Polygon, chirality } from "../classes/Polygon";
+import { Rhomb, chirality } from "../classes/Polygon";
 import { V } from "../classes/V";
 import penrose from "./penrose-rhomb";
 import {
