@@ -61,36 +61,36 @@ export function Polygon(vertices: V[]): Polygon {
 // These don't implement the interfaces here to trick the polymorphic this
 // nonsense. They're still treated as though they do elsewhere.
 class _Polygon {
-  _vertices: V[];
+  #vertices: V[];
   constructor(vertices: V[]) {
-    this._vertices = vertices;
+    this.#vertices = vertices;
   }
 
   triangles() {
-    return this._vertices
+    return this.#vertices
       .slice(2)
       .map((_, i) =>
         Triangle(
-          this._vertices[0],
-          this._vertices[i + 1],
-          this._vertices[i + 2]
+          this.#vertices[0],
+          this.#vertices[i + 1],
+          this.#vertices[i + 2]
         )
       );
   }
 
   edges(): [V, V][] {
-    return this._vertices.map((_, i) => [
-      this._vertices[i],
-      this._vertices[(i + 1) % this._vertices.length]
+    return this.#vertices.map((_, i) => [
+      this.#vertices[i],
+      this.#vertices[(i + 1) % this.#vertices.length]
     ]);
   }
 
   vertices() {
-    return this._vertices;
+    return this.#vertices;
   }
 
   sides() {
-    return this._vertices.length;
+    return this.#vertices.length;
   }
 
   area() {
@@ -106,13 +106,13 @@ class _Polygon {
   }
 
   center() {
-    return this._vertices
+    return this.#vertices
       .reduce((a, b) => a.add(b))
-      .scale(1 / this._vertices.length);
+      .scale(1 / this.#vertices.length);
   }
 
   translate(v: V): Polygon {
-    return Polygon(this._vertices.map((u) => u.add(v)));
+    return Polygon(this.#vertices.map((u) => u.add(v)));
   }
 
   equals(p: Polygon): boolean {
@@ -124,13 +124,13 @@ class _Polygon {
   }
 
   toString() {
-    if (this._vertices.length === 0) return "∅";
-    if (this._vertices.length === 1) return "⋅" + this._vertices[0];
-    return `⦗${this._vertices
+    if (this.#vertices.length === 0) return "∅";
+    if (this.#vertices.length === 1) return "⋅" + this.#vertices[0];
+    return `⦗${this.#vertices
       .map((v) => v.toString())
       .join(
-        this._vertices.length < 6
-          ? ["⭎", "⯅", "⯁", "⯂"][this._vertices.length - 2]
+        this.#vertices.length < 6
+          ? ["⭎", "⯅", "⯁", "⯂"][this.#vertices.length - 2]
           : "⬣"
       )}⦘`;
   }
