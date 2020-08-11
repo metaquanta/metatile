@@ -16,7 +16,6 @@ export interface Prototile {
 export interface Tile {
   readonly proto: Prototile;
   readonly parent: () => Tile;
-  readonly setParent: (p: Tile) => Tile;
   readonly children: () => Tile[];
   readonly intersects: (p: Polygon, depth?: number) => boolean;
   readonly contains: (p: Polygon, depth?: number) => boolean;
@@ -56,7 +55,7 @@ export function Prototile<P extends Polygon>(
       throw new Error(`Prototile.parent() - unsupported by ${this}!!`);
     },
     children(t) {
-      return params.children(t.polygon() as P).map((c) => c.setParent(t));
+      return params.children(t.polygon() as P);
     },
     create(p): Tile {
       if (params.volumeHierarchic) return new _Tile(p, this);
@@ -78,22 +77,15 @@ export function Prototile<P extends Polygon>(
 
 class _Tile implements Tile {
   readonly #polygon: Polygon;
-  readonly #parent?: Tile;
 
   readonly proto: Prototile;
 
-  constructor(p: Polygon, proto: Prototile, parent?: Tile) {
+  constructor(p: Polygon, proto: Prototile) {
     this.#polygon = p;
-    this.#parent = parent;
     this.proto = proto;
   }
 
-  setParent(p: Tile): Tile {
-    return new _Tile(this.#polygon, this.proto, p);
-  }
-
   parent(): Tile {
-    if (this.#parent !== undefined) return this.#parent;
     if (this.proto.parent !== undefined) return this.proto.parent(this);
     console.trace("!!!Unreachable reached!!!");
     throw new Error(`tile.parent() not supported on ${this}`);
@@ -133,25 +125,10 @@ class _NvhTile extends _Tile {
   readonly #intersectsMemo: boolean[];
   readonly #parent?: Tile;
 
-  constructor(
-    p: Polygon,
-    proto: Prototile,
-    intersectingGenerations: number,
-    parent?: Tile
-  ) {
-    super(p, proto, parent);
+  constructor(p: Polygon, proto: Prototile, intersectingGenerations: number) {
+    super(p, proto);
     this.#intersectingGenerations = intersectingGenerations;
     this.#intersectsMemo = [];
-    this.#parent = parent;
-  }
-
-  setParent(p: Tile): Tile {
-    return new _NvhTile(
-      this.polygon(),
-      this.proto,
-      this.#intersectingGenerations,
-      p
-    );
   }
 
   _intersects(p: Polygon, depth: number): boolean {
