@@ -1,8 +1,9 @@
-import { Rect } from "./Polygon";
-import { V } from "./V";
+import { Rect } from "../math/2d/Polygon";
+import { V } from "../math/2d/V";
 
 export type ViewPort = Rect;
 
+//  Fills the provided div with a resizeable canvas
 export const ViewPort = (outer: HTMLDivElement): ViewPort => {
   const inner = <HTMLDivElement>outer.firstElementChild;
   const canvas = <HTMLCanvasElement>inner.firstElementChild;
@@ -45,6 +46,8 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
     inner.style.width = `${size}px`;
   }
 
+  // The point on the canvas that corresponds to the upper left corner of the
+  // viewport for the current size/orientation.
   const getViewPortOrigin = () =>
     getInnerPosition().scale(window.devicePixelRatio).invert();
   const getViewPortSize = () => getOuterSize().scale(window.devicePixelRatio);
@@ -61,7 +64,6 @@ export const ViewPort = (outer: HTMLDivElement): ViewPort => {
     const rect = Rect(origin.x, origin.y, origin.x + size.x, origin.y + size.y);
     return {
       ...rect,
-      pad: (n) => rect.pad(n),
       translate() {
         return this;
       },

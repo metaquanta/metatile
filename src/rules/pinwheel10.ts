@@ -1,8 +1,9 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-10-tiles/
 
-import { Triangle } from "../classes/Polygon";
-import { V } from "../classes/V";
-import { PrototileBuilder, RuleBuilder } from "./PrototileBuilder";
+import { Triangle } from "../lib/math/2d/Polygon";
+import { V } from "../lib/math/2d/V";
+import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import { RuleBuilder } from "../tiles/RuleBuilder";
 
 export default RuleBuilder()
   .protoTile(
