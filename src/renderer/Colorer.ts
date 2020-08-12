@@ -46,7 +46,7 @@ export const RotationColorer = ({
       ((th / Math.PI / 2) % (1 / t.proto.rotationalSymmetryOrder)) *
       t.proto.rotationalSymmetryOrder;
     const angleHueVar = Math.abs(angle - 0.5) * hueVariation * 2;
-    const angleLightVar = Math.abs(((angle + 0.25) % 1) - 0.5) * hueSpan * 2;
+    const angleLightVar = Math.abs(((angle + 0.25) % 1) - 0.5) * hueSpan;
 
     const variant =
       Math.abs(protos.indexOf(t.proto)) * 2 + (t.reflected() ? 1 : 0);

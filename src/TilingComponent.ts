@@ -3,8 +3,9 @@ import { ViewPort } from "./lib/browser/ViewPort";
 import { RotationColorer, RotationColorerOptions } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import { Rule } from "./tiles/Rule";
-import rules from "./rules/rules";
+import rules, { RuleOptions } from "./rules/rules";
 import { TilingOptions } from "./tiles/Tiling";
+import pinwheel, { PinwheelPQ } from "./rules/pinwheel";
 
 function getRenderer(root: ShadowRoot): Renderer {
   root.innerHTML = `<style>
@@ -89,7 +90,9 @@ const observedAttributes = [
   "colorHueSpan",
   "colorHueOffset",
   "colorAlpha",
-  "tilingIncludeAncestors"
+  "tilingIncludeAncestors",
+  "pinwheelP",
+  "pinwheelQ"
 ];
 
 class Tiling extends HTMLElement {
@@ -113,23 +116,30 @@ class Tiling extends HTMLElement {
   set u(u: string) {
     _attribute(this, "u", u);
   }
-  set colorSaturation(colorSaturation: string) {
-    _attribute(this, "colorSaturation", colorSaturation);
+  set colorSaturation(saturation: string) {
+    _attribute(this, "colorSaturation", saturation);
   }
-  set colorLightness(colorLightness: string) {
-    _attribute(this, "colorLightness", colorLightness);
+  set colorLightness(lightness: string) {
+    _attribute(this, "colorLightness", lightness);
   }
-  set colorHueSpan(colorHueSpan: string) {
-    _attribute(this, "colorHueSpan", colorHueSpan);
+  set colorHueSpan(hueSpan: string) {
+    _attribute(this, "colorHueSpan", hueSpan);
   }
-  set colorHueOffset(colorHueOffset: string) {
-    _attribute(this, "colorHueOffset", colorHueOffset);
+  set colorHueOffset(hueOffset: string) {
+    _attribute(this, "colorHueOffset", hueOffset);
   }
-  set colorAlpha(colorAlpha: string) {
-    _attribute(this, "colorAlpha", colorAlpha);
+  set colorAlpha(alpha: string) {
+    _attribute(this, "colorAlpha", alpha);
   }
   set tilingIncludeAncestors(tilingIncludeAncestors: string) {
     _attribute(this, "tilingIncludeAncestors", tilingIncludeAncestors);
+  }
+  set pinwheelP(p: string) {
+    _attribute(this, "pinwheelP", p);
+  }
+
+  set pinwheelQ(q: string) {
+    _attribute(this, "pinwheelQ", q);
   }
 
   colorParameters(): RotationColorerOptions {
@@ -150,6 +160,18 @@ class Tiling extends HTMLElement {
     };
   }
 
+  ruleOptions(): RuleOptions | undefined {
+    if (this.getAttribute("pinwheelP") && this.getAttribute("pinwheelQ")) {
+      return {
+        pinwheel: {
+          p: parseInt(this.getAttribute("pinwheelP") as string),
+          q: parseInt(this.getAttribute("pinwheelQ") as string)
+        }
+      };
+    }
+    return undefined;
+  }
+
   attributeChangedCallback(name: string): void {
     if (observedAttributes.indexOf(name) >= 0) {
       this.render();
@@ -165,7 +187,13 @@ class Tiling extends HTMLElement {
   render(): void {
     if (this.renderer === undefined) return;
 
-    const rule = ruleForString(this.getAttribute("rule"));
+    const rule =
+      this.getAttribute("rule") === "Pinwheel" && this.ruleOptions()
+        ? PinwheelPQ(
+            this.ruleOptions()?.pinwheel?.p as number,
+            this.ruleOptions()?.pinwheel?.q as number
+          )
+        : ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
       RotationColorer({
         ...this.colorParameters(),
