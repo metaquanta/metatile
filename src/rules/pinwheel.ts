@@ -118,7 +118,7 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
 }
 
 // T(1) is the classic Pinwheel with only one prototile.
-export default generatePinwheel(7, 9).build();
+export default generatePinwheel(1, 1).build();
 
 export const PinwheelPQ = (p: number, q: number): Rule =>
   generatePinwheel(p, q).build();
