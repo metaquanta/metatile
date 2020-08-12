@@ -10,6 +10,8 @@ type Parameters = {
   colorHueOffset?: string;
   colorAlpha?: string;
   tilingIncludeAncestors?: string;
+  pinwheelP?: string;
+  pinwheelQ?: string;
 };
 
 let params = getUrlParameters();
@@ -42,7 +44,9 @@ function getUrlParameters(): Parameters {
     colorHueSpan: params.get("colorHueSpan") || undefined,
     colorHueOffset: params.get("colorHueOffset") || undefined,
     colorAlpha: params.get("colorAlpha") || undefined,
-    tilingIncludeAncestors: params.get("tilingIncludeAncestors") || undefined
+    tilingIncludeAncestors: params.get("tilingIncludeAncestors") || undefined,
+    pinwheelP: params.get("pinwheelP") || undefined,
+    pinwheelQ: params.get("pinwheelQ") || undefined
   };
 }
 
@@ -55,7 +59,7 @@ function random(n = 1) {
 }
 
 function rV() {
-  return `${round(random(100))},${round(random(100))}`;
+  return `${round(random(40) + 10)},${round(random(40) + 10)}`;
 }
 
 function rU() {
@@ -93,9 +97,9 @@ function getRandomParameters(params: Parameters): Parameters {
     rule: params.rule || randomRule(),
     v: params.v || rV(),
     u: params.u || rU(),
-    colorSaturation: params.colorSaturation || "" + round(random(), 2),
-    colorLightness: params.colorLightness || "" + round(random(0.75) + 0.25, 2),
-    colorHueSpan: params.colorHueSpan || "" + round(random(), 2),
+    colorSaturation: params.colorSaturation || "" + round(random(0.8) + 0.1, 2),
+    colorLightness: params.colorLightness || "" + round(random(0.5) + 0.25, 2),
+    colorHueSpan: params.colorHueSpan || "" + round(random(0.5), 2),
     colorHueOffset: params.colorHueOffset || "" + round(random(), 2)
   };
 }
@@ -114,6 +118,15 @@ function setParameters(params: Parameters) {
     location.searchParams.set("colorHueOffset", params.colorHueOffset);
   if (params.colorAlpha)
     location.searchParams.set("colorAlpha", params.colorAlpha);
+  if (params.tilingIncludeAncestors)
+    location.searchParams.set(
+      "tilingIncludeAncestors",
+      params.tilingIncludeAncestors
+    );
+  if (params.pinwheelP)
+    location.searchParams.set("pinwheelP", params.pinwheelP);
+  if (params.pinwheelQ)
+    location.searchParams.set("pinwheelQ", params.pinwheelQ);
   window.history.pushState(
     {},
     window.document.title,

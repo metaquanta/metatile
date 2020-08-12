@@ -19,3 +19,7 @@ export default {
   Pinwheel13: pinwheel13,
   Viper: viper
 };
+
+export interface RuleOptions {
+  pinwheel?: { p: number; q: number };
+}
