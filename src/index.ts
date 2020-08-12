@@ -9,6 +9,7 @@ type Parameters = {
   colorHueSpan?: string;
   colorHueOffset?: string;
   colorAlpha?: string;
+  colorStrokeAlpha?: string;
   tilingIncludeAncestors?: string;
   pinwheelP?: string;
   pinwheelQ?: string;
@@ -44,6 +45,7 @@ function getUrlParameters(): Parameters {
     colorHueSpan: params.get("colorHueSpan") || undefined,
     colorHueOffset: params.get("colorHueOffset") || undefined,
     colorAlpha: params.get("colorAlpha") || undefined,
+    colorStrokeAlpha: params.get("colorStrokeAlpha") || undefined,
     tilingIncludeAncestors: params.get("tilingIncludeAncestors") || undefined,
     pinwheelP: params.get("pinwheelP") || undefined,
     pinwheelQ: params.get("pinwheelQ") || undefined
@@ -118,6 +120,8 @@ function setParameters(params: Parameters) {
     location.searchParams.set("colorHueOffset", params.colorHueOffset);
   if (params.colorAlpha)
     location.searchParams.set("colorAlpha", params.colorAlpha);
+  if (params.colorStrokeAlpha)
+    location.searchParams.set("colorStrokeAlpha", params.colorStrokeAlpha);
   if (params.tilingIncludeAncestors)
     location.searchParams.set(
       "tilingIncludeAncestors",

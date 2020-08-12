@@ -16,7 +16,7 @@ export interface TilingOptions {
   maxStackDepth?: number;
 }
 
-const defaultOptions = { includeAncestors: false, maxStackDepth: 200 };
+const defaultOptions = { includeAncestors: false, maxStackDepth: 500 };
 
 export function* coverWith(
   tile: Tile,
