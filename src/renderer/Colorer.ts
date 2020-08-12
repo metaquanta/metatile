@@ -62,6 +62,19 @@ export const RotationColorer = ({
   };
 };
 
+export const SolidRgbColorer = (
+  r = 0,
+  g = 0,
+  b = 0,
+  alpha = 1
+): ((t: {
+  proto: Prototile;
+  polygon: () => Polygon;
+  reflected: () => boolean;
+}) => string) => (_unused) => {
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 // Super rough/eye-balled first order approximation of RYB color wheel.
 export function rybToRgb(theta: number): number {
   if (theta < 120) return theta / 2;

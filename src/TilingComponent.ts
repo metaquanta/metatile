@@ -1,11 +1,15 @@
 import { V } from "./lib/math/2d/V";
 import { ViewPort } from "./lib/browser/ViewPort";
-import { RotationColorer, RotationColorerOptions } from "./renderer/Colorer";
+import {
+  RotationColorer,
+  RotationColorerOptions,
+  SolidRgbColorer
+} from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import { Rule } from "./tiles/Rule";
 import rules, { RuleOptions } from "./rules/rules";
 import { TilingOptions } from "./tiles/Tiling";
-import pinwheel, { PinwheelPQ } from "./rules/pinwheel";
+import { PinwheelPQ } from "./rules/pinwheel";
 
 function getRenderer(root: ShadowRoot): Renderer {
   root.innerHTML = `<style>
@@ -90,6 +94,7 @@ const observedAttributes = [
   "colorHueSpan",
   "colorHueOffset",
   "colorAlpha",
+  "colorStrokeAlpha",
   "tilingIncludeAncestors",
   "pinwheelP",
   "pinwheelQ"
@@ -131,24 +136,27 @@ class Tiling extends HTMLElement {
   set colorAlpha(alpha: string) {
     _attribute(this, "colorAlpha", alpha);
   }
+  set colorStrokeAlpha(alpha: string) {
+    _attribute(this, "colorStrokeAlpha", alpha);
+  }
   set tilingIncludeAncestors(tilingIncludeAncestors: string) {
     _attribute(this, "tilingIncludeAncestors", tilingIncludeAncestors);
   }
   set pinwheelP(p: string) {
     _attribute(this, "pinwheelP", p);
   }
-
   set pinwheelQ(q: string) {
     _attribute(this, "pinwheelQ", q);
   }
 
-  colorParameters(): RotationColorerOptions {
+  colorOptions(): RotationColorerOptions & { strokeAlpha?: number } {
     const p = {
       saturation: parseFloat(this.getAttribute("colorSaturation")),
       lightness: parseFloat(this.getAttribute("colorLightness")),
       hueSpan: parseFloat(this.getAttribute("colorHueSpan")),
       hueOffset: parseFloat(this.getAttribute("colorHueOffset")),
-      alpha: parseFloat(this.getAttribute("colorAlpha"))
+      alpha: parseFloat(this.getAttribute("colorAlpha")),
+      strokeAlpha: parseFloat(this.getAttribute("colorStrokeAlpha"))
     };
     console.debug(`colorParameters(): `, p);
     return p;
@@ -196,9 +204,12 @@ class Tiling extends HTMLElement {
         : ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
       RotationColorer({
-        ...this.colorParameters(),
+        ...this.colorOptions(),
         protos: rule.protos
       })
+    );
+    this.renderer.setStrokeColorer(
+      SolidRgbColorer(0, 0, 0, this.colorOptions().strokeAlpha || 1)
     );
     const tile = rule.tileFromEdge(
       parseVector(this.getAttribute("v"), V(11, 17)),

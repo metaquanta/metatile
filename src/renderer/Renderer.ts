@@ -66,10 +66,10 @@ export function Renderer(
 ): Renderer {
   const looper: Looper = {
     stopped: true,
-    speedTiles: 100,
+    speedTiles: 500,
     // Apparently, Chrome calls a requestAnimationFrame() over 50ms a
-    // "violation". (sometimes)
-    speedMs: 50,
+    // "violation". (sometimes). Fuck 'em.
+    speedMs: 75,
     lastMs: Date.now(),
     finish: undefined,
     nextBatch: undefined,
