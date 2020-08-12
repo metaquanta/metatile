@@ -1,6 +1,6 @@
 import { V } from "./lib/math/2d/V";
 import { ViewPort } from "./lib/browser/ViewPort";
-import { colorRotation, ColorRotationParameters } from "./renderer/Colorer";
+import { RotationColorer, RotationColorerOptions } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
 import { Rule } from "./tiles/Rule";
 import rules from "./rules/rules";
@@ -132,7 +132,7 @@ class Tiling extends HTMLElement {
     _attribute(this, "tilingIncludeAncestors", tilingIncludeAncestors);
   }
 
-  colorParameters(): ColorRotationParameters {
+  colorParameters(): RotationColorerOptions {
     const p = {
       saturation: parseFloat(this.getAttribute("colorSaturation")),
       lightness: parseFloat(this.getAttribute("colorLightness")),
@@ -167,7 +167,7 @@ class Tiling extends HTMLElement {
 
     const rule = ruleForString(this.getAttribute("rule"));
     this.renderer.setFillColorer(
-      colorRotation({
+      RotationColorer({
         ...this.colorParameters(),
         protos: rule.protos
       })

@@ -26,6 +26,7 @@ export type Triangle = Polygon & {
   translate: (v: V) => Triangle;
 };
 
+// Looks nicer than "Quadrilateral".
 export type Tetragon = Polygon & {
   a: V;
   b: V;
@@ -34,6 +35,7 @@ export type Tetragon = Polygon & {
   translate: (v: V) => Tetragon;
 };
 
+// We gotta have a "Rhomb" for Penrose.
 export type Rhomb = Tetragon;
 
 export type Rect = Polygon & {
@@ -41,7 +43,6 @@ export type Rect = Polygon & {
   right: number;
   top: number;
   bottom: number;
-  pad: (n: number) => Rect;
 };
 
 export function isRect<T>(p: Rect | T): boolean {
@@ -57,6 +58,8 @@ export function Polygon(vertices: V[]): Polygon {
 class _Polygon {
   #vertices: V[];
   constructor(vertices: V[]) {
+    if (vertices.length < 3)
+      throw new Error("!!A polygon must have at least three vertices.!!");
     this.#vertices = vertices;
   }
 
@@ -118,13 +121,11 @@ class _Polygon {
   }
 
   toString() {
-    if (this.#vertices.length === 0) return "∅";
-    if (this.#vertices.length === 1) return "⋅" + this.#vertices[0];
     return `⦗${this.#vertices
       .map((v) => v.toString())
       .join(
         this.#vertices.length < 6
-          ? ["⭎", "⯅", "⯁", "⯂"][this.#vertices.length - 2]
+          ? ["⯅", "⯁", "⯂"][this.#vertices.length - 3]
           : "⬣"
       )}⦘`;
   }
@@ -184,8 +185,8 @@ class _Tetragon extends _Polygon {
 class _Rect extends _Polygon {
   left: number;
   right: number;
-  top: number; // by computer graphics conventions, this is the bottom
-  bottom: number; // by computer graphics conventions, this is the top
+  top: number; // note: by computer graphics conventions, this is the bottom
+  bottom: number; // note: by computer graphics conventions, this is the top
   constructor(x0: number, y0: number, xf: number, yf: number) {
     super([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]);
     this.left = x0;
@@ -204,6 +205,8 @@ class _Rect extends _Polygon {
   }
 
   toString() {
+    // note: bottom and top are really top and bottom by computer graphics
+    // convention
     return `⟮↤${this.left}, ↧${this.bottom}, ↦${this.right}, ↥${this.top}⟯`;
   }
 }
@@ -253,8 +256,8 @@ function area(p: Polygon): number {
   );
 }
 
-// Yup, I realized my area alg can determine chirality.
 export function chirality(p: Polygon): boolean {
+  // Yup, I realized my area alg can determine chirality.
   return (
     p
       .edges()
@@ -312,6 +315,7 @@ export function canvasPathFromPolygon<
   return path;
 }
 
+// For SVG Path element.
 export function svgPathFromPolygon(poly: Polygon): string {
   return (
     `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
@@ -324,6 +328,7 @@ export function svgPathFromPolygon(poly: Polygon): string {
   );
 }
 
+// For SVG Polygon's points attribute.
 export function svgPointsFromPolygon(p: Polygon): string {
   return p
     .vertices()

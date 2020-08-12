@@ -3,6 +3,7 @@ import { Polygon } from "./Polygon";
 import { V } from "./V";
 
 export interface AffineTransform {
+  // ...Transform or Transformation?
   translation: V;
   linearTransform: M;
   transform(p: Polygon): Polygon;

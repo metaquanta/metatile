@@ -1,7 +1,7 @@
 import { Tile } from "./Tile";
 import { Tiling, TilingOptions } from "./Tiling";
 import { V } from "../lib/math/2d/V";
-import { ColorRotationParameters } from "../renderer/Colorer";
+import { RotationColorerOptions } from "../renderer/Colorer";
 import { first } from "../lib/util";
 import { Prototile } from "./Prototile";
 
@@ -13,12 +13,12 @@ export interface Rule {
   readonly tile: () => Tile;
   readonly tileFromEdge: (edge: V, pos?: V) => Tile;
   readonly tiling: (tile: Tile, options: TilingOptions) => Tiling;
-  readonly colorOptions?: ColorRotationParameters;
+  readonly colorOptions?: RotationColorerOptions;
 }
 
 export function Rule(
   prototiles: Prototile[],
-  colorOptions?: ColorRotationParameters
+  colorOptions?: RotationColorerOptions
 ): Rule {
   const seed = first(prototiles, (p) => p.tile !== undefined);
   if (seed === undefined)

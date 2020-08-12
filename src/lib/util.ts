@@ -1,5 +1,3 @@
-import { V } from "./math/2d/V";
-
 export function mapOf<K, V>(...entries: [K, V][]): Map<K, V> {
   const m = new Map<K, V>();
   entries.forEach((pair) => m.set(pair[0], pair[1]));
@@ -19,6 +17,10 @@ export function first<T>(a: Iterable<T>, p: (e: T) => boolean): T | undefined {
   }
 
   return undefined;
+}
+
+export function range(n: number): number[] {
+  return [...Array(n).keys()];
 }
 
 export function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
