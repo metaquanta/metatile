@@ -1,8 +1,9 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
 
-import { Rhomb, Tetragon } from "../classes/Polygon";
-import { V } from "../classes/V";
-import { RuleBuilder, PrototileBuilder } from "./PrototileBuilder";
+import { Rhomb, Tetragon } from "../lib/math/2d/Polygon";
+import { V } from "../lib/math/2d/V";
+import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const SQRT2 = 2 ** (1 / 2);
 

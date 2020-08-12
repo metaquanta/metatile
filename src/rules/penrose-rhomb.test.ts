@@ -1,12 +1,12 @@
-import { Rhomb, chirality } from "../classes/Polygon";
-import { V } from "../classes/V";
+import { Rhomb, chirality } from "../lib/math/2d/Polygon";
+import { V } from "../lib/math/2d/V";
 import penrose from "./penrose-rhomb";
 import {
   similarChildren,
   inflationFactor,
   canCoverArbitraryVp,
   isVolumeHierarchic
-} from "./rule-sanity-check";
+} from "../rule-sanity-check";
 
 test("penrose parent inverts children", () => {
   const u = V(400, 0);

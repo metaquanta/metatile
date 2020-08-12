@@ -1,7 +1,10 @@
-import { AffineTransform, Polygon } from "../classes/Polygon";
-import { Rule } from "../classes/Rule";
-import { Prototile, Tile } from "../classes/Tile";
-import { theta, scalingM, rotationM } from "../classes/V";
+import { Polygon } from "./lib/math/2d/Polygon";
+import { Rule } from "./tiles/Rule";
+import { Tile } from "./tiles/Tile";
+import { theta } from "./lib/math/2d/V";
+import { Prototile } from "./tiles/Prototile";
+import { AffineTransform } from "./lib/math/2d/AffineTransform";
+import { rotationM, scalingM } from "./lib/math/2d/M";
 
 export function similarChildren(parent: Tile): Tile[] {
   const memoedProtos: Prototile[] = [];

@@ -1,10 +1,10 @@
-import { V } from "./classes/V";
-import { ViewPort } from "./classes/ViewPort";
+import { V } from "./lib/math/2d/V";
+import { ViewPort } from "./lib/browser/ViewPort";
 import { colorRotation, ColorRotationParameters } from "./renderer/Colorer";
 import { Renderer } from "./renderer/Renderer";
-import { Rule } from "./classes/Rule";
-import rules from "./tiling/rules";
-import { TilingOptions } from "./classes/Tiling";
+import { Rule } from "./tiles/Rule";
+import rules from "./rules/rules";
+import { TilingOptions } from "./tiles/Tiling";
 
 function getRenderer(root: ShadowRoot): Renderer {
   root.innerHTML = `<style>
@@ -176,7 +176,8 @@ class Tiling extends HTMLElement {
       parseVector(this.getAttribute("v"), V(11, 17)),
       parseVector(this.getAttribute("u"), V(1500, 1500))
     );
-    this.renderer.setTileStream(rule.tiling(tile, this.tilingOptions()).cover);
+
+    this.renderer.setTileStream(rule.tiling(tile, {}).cover);
   }
 }
 

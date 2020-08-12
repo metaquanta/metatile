@@ -1,8 +1,8 @@
-import { canvasPathFromPolygon, Polygon } from "../classes/Polygon";
-import { Prototile } from "../classes/Tile";
-import { ViewPort } from "../classes/ViewPort";
-import { isCallable } from "../util";
+import { canvasPathFromPolygon, Polygon } from "../lib/math/2d/Polygon";
+import { ViewPort } from "../lib/browser/ViewPort";
+import { isCallable } from "../lib/util";
 import { Colorer } from "./Colorer";
+import { Prototile } from "../tiles/Prototile";
 
 type Tile = {
   polygon: () => Polygon;

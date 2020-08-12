@@ -1,6 +1,6 @@
-import { Polygon } from "../classes/Polygon";
-import { Prototile } from "../classes/Tile";
-import { theta } from "../classes/V";
+import { Polygon } from "../lib/math/2d/Polygon";
+import { theta } from "../lib/math/2d/V";
+import { Prototile } from "../tiles/Prototile";
 
 export type Colorer = (t: {
   proto: Prototile;

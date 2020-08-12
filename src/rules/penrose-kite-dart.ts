@@ -1,6 +1,7 @@
-import { Tetragon } from "../classes/Polygon";
-import { V } from "../classes/V";
-import { RuleBuilder, PrototileBuilder } from "./PrototileBuilder";
+import { Tetragon } from "../lib/math/2d/Polygon";
+import { V } from "../lib/math/2d/V";
+import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const SIN36 = (5 / 8 - 5 ** (1 / 2) / 8) ** (1 / 2);
 const COS36 = (1 / 4) * (1 + 5 ** (1 / 2));

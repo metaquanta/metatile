@@ -1,4 +1,4 @@
-import { V, M } from "./V";
+import { V } from "./V";
 
 export interface Polygon {
   vertices: () => V[];
@@ -46,12 +46,6 @@ export type Rect = Polygon & {
 
 export function isRect<T>(p: Rect | T): boolean {
   return (p as Rect).bottom !== undefined;
-}
-
-export interface AffineTransform {
-  translation: V;
-  linearTransform: M;
-  transform(p: Polygon): Polygon;
 }
 
 export function Polygon(vertices: V[]): Polygon {
@@ -223,20 +217,6 @@ export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
 
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
   new _Rect(x0, y0, xf, yf);
-
-export function AffineTransform(
-  linearTransform: M,
-  translation: V
-): AffineTransform {
-  return {
-    linearTransform,
-    translation,
-    transform: (p: Polygon) =>
-      Polygon(
-        p.vertices().map((v) => linearTransform.multiply(v).add(translation))
-      )
-  };
-}
 
 function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {

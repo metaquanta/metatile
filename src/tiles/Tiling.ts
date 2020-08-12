@@ -1,7 +1,5 @@
-import { isRect, Polygon, Rect } from "./Polygon";
+import { Polygon } from "../lib/math/2d/Polygon";
 import { Tile } from "./Tile";
-
-const VP_FUDGE = 100;
 
 export function Tiling(tile: Tile, options?: TilingOptions): Tiling {
   return {
@@ -18,7 +16,7 @@ export interface TilingOptions {
   maxStackDepth?: number;
 }
 
-const defaultOptions = { includeAncestors: true, maxStackDepth: 200 };
+const defaultOptions = { includeAncestors: false, maxStackDepth: 200 };
 
 export function* coverWith(
   tile: Tile,
@@ -26,9 +24,12 @@ export function* coverWith(
   options?: TilingOptions
 ): Generator<Tile> {
   const opts = { ...defaultOptions, ...options };
-  const bufferedMask = isRect(mask) ? (mask as Rect).pad(VP_FUDGE) : mask;
   function* descend(tile: Tile, d: number): Generator<Tile> {
-    //console.debug(`Tiling:cover:descend(${tile}, ${d})`);
+    /*console.debug(
+      `Tiling:cover:descend(Tile, ${d}) ${
+        tile.proto
+      } [${tile.polygon().area()}]`
+    );*/
     if (d < 0) {
       console.trace(`!!!Unreachable reached!!! [d: ${d}]`);
       throw new Error(
@@ -36,9 +37,10 @@ export function* coverWith(
       );
     }
     for (const t of tile.children()) {
-      if (t.intersects(bufferedMask)) {
-        if (d === 1) yield t;
-        else {
+      if (t.intersects(mask)) {
+        if (d === 1) {
+          yield t;
+        } else {
           if (opts.includeAncestors) yield t;
           yield* descend(t, d - 1);
         }
@@ -47,22 +49,26 @@ export function* coverWith(
   }
 
   function* ascend(tile: Tile, d: number, nvhExtra?: number): Generator<Tile> {
-    //console.debug(`Tiling:cover:ascend(${tile}, ${d}, ${nvhExtra})`);
+    /*console.debug(
+      `Tiling:cover:ascend(Tile, ${d}) ${tile.proto} [${tile.polygon().area()}]`
+    );*/
     if (d > opts.maxStackDepth) {
       console.trace(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
       throw new Error(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
     }
     const parent = tile.parent();
     for (const t of parent.children()) {
-      if (!tile.equals(t) && t.intersects(bufferedMask)) {
-        if (d === 0 || opts.includeAncestors) yield t;
+      if (!tile.equals(t) && t.intersects(mask)) {
+        if (d === 0 || opts.includeAncestors) {
+          yield t;
+        }
         if (d > 0) yield* descend(t, d);
       }
     }
     // keep going to be sure.
     if (nvhExtra !== undefined && nvhExtra > 0) {
       yield* ascend(parent, d + 1, nvhExtra - 1);
-    } else if (!parent.contains(bufferedMask)) {
+    } else if (!parent.contains(mask)) {
       yield* ascend(parent, d + 1);
       // contains() isn't enough for N.V.H. tiles
     } else if (
