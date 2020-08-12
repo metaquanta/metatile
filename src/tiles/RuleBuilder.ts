@@ -26,8 +26,8 @@ class _RuleBuilder implements RuleBuilder {
   protos: PrototileBuilder<any>[];
   readonly colors?: { hueSpan?: number; hueOffset?: number };
 
-  constructor(params?: { colors?: RotationColorerOptions }) {
-    this.colors = params?.colors;
+  constructor(params: { colors?: RotationColorerOptions } = {}) {
+    this.colors = params.colors;
     this.protos = [];
   }
 
