@@ -71,7 +71,7 @@ export const SolidRgbColorer = (
   proto: Prototile;
   polygon: () => Polygon;
   reflected: () => boolean;
-}) => string) => (_unused) => {
+}) => string) => () => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
