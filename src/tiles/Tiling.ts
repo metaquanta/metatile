@@ -24,6 +24,7 @@ export function* coverWith(
   options?: TilingOptions
 ): Generator<Tile> {
   const opts = { ...defaultOptions, ...options };
+  console.debug(`Tiling:coverWith [${opts}]`);
   function* descend(tile: Tile, d: number): Generator<Tile> {
     /*console.debug(
       `Tiling:cover:descend(Tile, ${d}) ${

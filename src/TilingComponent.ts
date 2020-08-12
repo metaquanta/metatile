@@ -216,7 +216,7 @@ class Tiling extends HTMLElement {
       parseVector(this.getAttribute("u"), V(1500, 1500))
     );
 
-    this.renderer.setTileStream(rule.tiling(tile, {}).cover);
+    this.renderer.setTileStream(rule.tiling(tile, this.tilingOptions()).cover);
   }
 }
 
