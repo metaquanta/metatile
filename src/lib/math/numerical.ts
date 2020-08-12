@@ -12,6 +12,10 @@ export function invertFunction(
     if (Math.abs(leftY - y) < epsilon) return range[0];
     if (Math.abs(rightY - y) < epsilon) return range[1];
 
+    // The function names are misleading. Both falsiMethod() and
+    // bisectionMethod() result in alternating calls to both. This speeds up
+    // bisection and prevents falsi from getting stuck on poorly conditioned
+    // functions.
     return falsiMethod((x) => f(x) - y, left, right, epsilon);
   };
 }

@@ -18,7 +18,6 @@ export type Renderer = {
   ) => void;
   setFillColorer: (c: Colorer) => void;
   setStrokeColorer: (c: Colorer) => void;
-  drawTile: (t: Tile) => void;
 };
 
 type Looper = {
@@ -26,12 +25,12 @@ type Looper = {
   speedMs: number;
   lastMs: number;
   stopped: boolean;
-  resolveStopped: (() => void) | undefined;
+  finish: (() => void) | undefined;
   start: (r: () => void, c: () => void) => void;
   stop: () => Promise<unknown>;
-  iter: (() => void) | undefined;
+  nextBatch: (() => void) | undefined;
   cleanUp: (() => void) | undefined;
-  cnt: number;
+  tasksCompleted: number;
 };
 
 type PrivateRenderer = Renderer & {
@@ -40,8 +39,7 @@ type PrivateRenderer = Renderer & {
   renderNext: () => boolean;
   clearCanvas: () => void;
   ctx: CanvasRenderingContext2D | undefined;
-  svg: SVGElement | undefined;
-  vp: ViewPort;
+  vp: Polygon;
   stop: () => void;
   fillColorer: Colorer | undefined;
   strokeColorer: Colorer | undefined;
@@ -49,7 +47,7 @@ type PrivateRenderer = Renderer & {
   getStroke: (t: Tile) => string;
 };
 
-export function drawCanvas(
+function drawCanvas(
   tile: Polygon,
   strokeColor: string,
   fillColor: string,
@@ -63,7 +61,7 @@ export function drawCanvas(
 }
 
 export function Renderer(
-  canvas: HTMLCanvasElement | SVGElement,
+  canvas: HTMLCanvasElement,
   viewPort: ViewPort
 ): Renderer {
   const looper: Looper = {
@@ -73,12 +71,12 @@ export function Renderer(
     // "violation". (sometimes)
     speedMs: 50,
     lastMs: Date.now(),
-    resolveStopped: undefined,
-    iter: undefined,
+    finish: undefined,
+    nextBatch: undefined,
     cleanUp: undefined,
-    cnt: 0,
+    tasksCompleted: 0,
     start(task, cleanUp) {
-      console.debug(`Renderer:Looper.start() [${this.cnt}]`);
+      console.debug(`Renderer:Looper.start() [${this.tasksCompleted}]`);
       if (!this.stopped) {
         this.stop().then(() => this.start(task, cleanUp));
         return;
@@ -87,36 +85,41 @@ export function Renderer(
       if (this.cleanUp) this.cleanUp();
       this.cleanUp = cleanUp;
       this.lastMs = Date.now();
-      this.iter = () => {
+      this.nextBatch = () => {
         if (this.stopped) {
-          if (this.resolveStopped) this.resolveStopped();
+          if (this.finish) this.finish();
         } else {
           let i = 0;
           for (; i < this.speedTiles && task(); i++) {
-            this.cnt++;
+            this.tasksCompleted++;
           }
           const ms = Date.now();
           /*console.log(
             `Renderer:Looper - ${i} tiles in ${ms - this.lastMs}ms. [${
               this.lastMs
             }, ${ms}]`
-          )*/ this.speedTiles = Math.max(
-            (this.speedMs / (ms - this.lastMs)) * this.speedTiles,
+          )*/
+          this.speedTiles = Math.max(
+            (this.speedMs * this.speedTiles) / (ms - this.lastMs),
             10 // It can get stuck too low and become /really/ slow
           );
           this.lastMs = Date.now();
-          window.requestAnimationFrame(() => this.iter && this.iter());
+          window.requestAnimationFrame(
+            () => this.nextBatch && this.nextBatch()
+          );
         }
       };
-      window.requestAnimationFrame(() => this.iter && this.iter());
+      window.requestAnimationFrame(() => this.nextBatch && this.nextBatch());
     },
     stop(): Promise<unknown> {
-      console.debug(`Renderer:Looper.stop() [${this.cnt} ${this.stopped}]`);
+      console.debug(
+        `Renderer:Looper.stop() [${this.tasksCompleted} ${this.stopped}]`
+      );
       if (this.stopped) {
         return Promise.resolve();
       }
       const promise = new Promise((f) => {
-        this.resolveStopped = f;
+        this.finish = f;
       });
       this.stopped = true;
       return promise;
@@ -127,10 +130,7 @@ export function Renderer(
   const renderer: PrivateRenderer = {
     tiles: undefined,
     tileIterator: undefined,
-    ctx: isCanvas(canvas)
-      ? (canvas as HTMLCanvasElement).getContext("2d") || undefined
-      : undefined,
-    svg: isSvg(canvas) ? (canvas as SVGElement) : undefined,
+    ctx: (canvas as HTMLCanvasElement).getContext("2d") || undefined,
     vp: viewPort,
     fillColorer: undefined,
     strokeColorer: undefined,
@@ -195,7 +195,6 @@ export function Renderer(
     clearCanvas() {
       if (this.ctx)
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      if (this.svg) this.svg.innerHTML = "";
       this.tileIterator = undefined;
     },
     getFill(t) {
@@ -208,22 +207,7 @@ export function Renderer(
     },
     stop() {
       looper.stop();
-    },
-    drawTile(t: Tile) {
-      if (this.ctx) {
-        drawCanvas(t.polygon(), this.getStroke(t), this.getFill(t), this.ctx);
-      } else {
-        console.error("Renderer.drawTile() No canvas!");
-      }
     }
   };
   return renderer;
-}
-
-function isCanvas(c: HTMLCanvasElement | SVGElement): boolean {
-  return (c as HTMLCanvasElement).getContext !== undefined;
-}
-
-function isSvg(c: HTMLCanvasElement | SVGElement): boolean {
-  return (c as HTMLCanvasElement).getContext === undefined;
 }

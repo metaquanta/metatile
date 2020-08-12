@@ -1,7 +1,7 @@
 import { Polygon } from "../lib/math/2d/Polygon";
 import { Tile } from "./Tile";
 import { Rule } from "./Rule";
-import { ColorRotationParameters } from "../renderer/Colorer";
+import { RotationColorerOptions } from "../renderer/Colorer";
 import { PrototileBuilder } from "./PrototileBuilder";
 import { Prototile } from "./Prototile";
 
@@ -16,7 +16,7 @@ export type Substitution<T extends Polygon> = (
 ) => void;
 
 export function RuleBuilder(params?: {
-  colors?: ColorRotationParameters;
+  colors?: RotationColorerOptions;
 }): RuleBuilder {
   return new _RuleBuilder({ colors: params?.colors });
 }
@@ -26,7 +26,7 @@ class _RuleBuilder implements RuleBuilder {
   protos: PrototileBuilder<any>[];
   readonly colors?: { hueSpan?: number; hueOffset?: number };
 
-  constructor(params?: { colors?: ColorRotationParameters }) {
+  constructor(params?: { colors?: RotationColorerOptions }) {
     this.colors = params?.colors;
     this.protos = [];
   }
