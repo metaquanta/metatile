@@ -10,6 +10,8 @@ Draw substitution tilings in a web-component wrapped canvas.
 Demos: 
 - [Sadun's T(9/20)](https://tilings.metaquanta.com/?rule=Pinwheel&pinwheelP=9&pinwheelQ=20&v=30,0&u=1500,1500&colorSaturation=0.79&colorLightness=0.65&colorHueSpan=0.17&colorHueOffset=0.4)
 - [Fibonacci with ancestors included](https://tilings.metaquanta.com/?rule=Fibonacci&tilingIncludeAncestors=y&colorAlpha=0.2&v=11,3&u=1500,1500&colorSaturation=0.4&colorLightness=0.4&colorHueSpan=0.2&colorHueOffset=0.4)
+- [Penrose Rhomb](https://tilings.metaquanta.com/?rule=Penrose-Rhomb&v=25,35&u=1500,1400&colorSaturation=0.55&colorLightness=0.45&colorHueSpan=0.33&colorHueOffset=0.33)
+- [Random](https://tilings.metaquanta.com/)
 
 As a web-component, knobs are twisted via attributes on the HTML tag.
 
