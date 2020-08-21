@@ -1,5 +1,5 @@
-import { Rect, Tetragon, Triangle } from "./Polygon";
-import { V } from "./V";
+import { Rect, Tetragon, Triangle } from "./Polygon.js";
+import { V } from "./V.js";
 
 test("Rect.translate()", () => {
   const v = V(23, 75);

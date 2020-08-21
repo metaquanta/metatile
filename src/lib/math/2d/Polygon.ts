@@ -1,4 +1,4 @@
-import { V } from "./V";
+import { V } from "./V.js";
 
 export interface Polygon {
   vertices: () => V[];

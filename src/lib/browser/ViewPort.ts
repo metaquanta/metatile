@@ -1,5 +1,5 @@
-import { Rect } from "../math/2d/Polygon";
-import { V } from "../math/2d/V";
+import { Rect } from "../math/2d/Polygon.js";
+import { V } from "../math/2d/V.js";
 
 export type ViewPort = Rect;
 

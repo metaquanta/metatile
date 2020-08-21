@@ -1,5 +1,5 @@
-import { Polygon } from "../lib/math/2d/Polygon";
-import { Tile } from "./Tile";
+import { Polygon } from "../lib/math/2d/Polygon.js";
+import { Tile } from "./Tile.js";
 
 export function Tiling(tile: Tile, options?: TilingOptions): Tiling {
   return {
