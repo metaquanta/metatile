@@ -1,15 +1,15 @@
-import { V } from "./lib/math/2d/V";
-import { ViewPort } from "./lib/browser/ViewPort";
+import { V } from "./lib/math/2d/V.js";
+import { ViewPort } from "./lib/browser/ViewPort.js";
 import {
   RotationColorer,
   RotationColorerOptions,
   SolidRgbColorer
-} from "./renderer/Colorer";
-import { Renderer } from "./renderer/Renderer";
-import { Rule } from "./tiles/Rule";
-import rules, { RuleOptions } from "./rules/rules";
-import { TilingOptions } from "./tiles/Tiling";
-import { PinwheelPQ } from "./rules/pinwheel";
+} from "./renderer/Colorer.js";
+import { Renderer } from "./renderer/Renderer.js";
+import { Rule } from "./tiles/Rule.js";
+import rules, { RuleOptions } from "./rules/rules.js";
+import { TilingOptions } from "./tiles/Tiling.js";
+import { PinwheelPQ } from "./rules/pinwheel.js";
 
 function getRenderer(root: ShadowRoot): Renderer {
   root.innerHTML = `<style>

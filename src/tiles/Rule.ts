@@ -1,9 +1,9 @@
-import { Tile } from "./Tile";
-import { Tiling, TilingOptions } from "./Tiling";
-import { V } from "../lib/math/2d/V";
-import { RotationColorerOptions } from "../renderer/Colorer";
-import { first } from "../lib/util";
-import { Prototile } from "./Prototile";
+import { Tile } from "./Tile.js";
+import { Tiling, TilingOptions } from "./Tiling.js";
+import { V } from "../lib/math/2d/V.js";
+import { RotationColorerOptions } from "../renderer/Colorer.js";
+import { first } from "../lib/util.js";
+import { Prototile } from "./Prototile.js";
 
 const s = V(31, 17);
 const t = V(97, 109);

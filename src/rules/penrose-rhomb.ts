@@ -1,9 +1,9 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/
 
-import { Rhomb } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
-import { RuleBuilder } from "../tiles/RuleBuilder";
+import { Rhomb } from "../lib/math/2d/Polygon.js";
+import { V } from "../lib/math/2d/V.js";
+import { PrototileBuilder } from "../tiles/PrototileBuilder.js";
+import { RuleBuilder } from "../tiles/RuleBuilder.js";
 
 const SIN15 = Math.sin(Math.PI / 5);
 const COS15 = Math.cos(Math.PI / 5);

@@ -1,5 +1,5 @@
-import { invertFunction } from "./numerical";
-import { gcd } from "./util";
+import { invertFunction } from "./numerical.js";
+import { gcd } from "./util.js";
 
 test("invert() inverts trivial", () => {
   const eps = 0.000001;

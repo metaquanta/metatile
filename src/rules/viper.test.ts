@@ -1,12 +1,12 @@
-import { Rect } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
-import viper from "./viper";
+import { Rect } from "../lib/math/2d/Polygon.js";
+import { V } from "../lib/math/2d/V.js";
+import viper from "./viper.js";
 import {
   similarChildren,
   inflationFactor,
   canCoverArbitraryVp,
   isVolumeHierarchic
-} from "../rule-sanity-check";
+} from "../rule-sanity-check.js";
 
 test("viper children intersect", () => {
   const rect = Rect(2000, 1000, 2500, 2000);

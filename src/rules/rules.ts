@@ -1,12 +1,12 @@
-import ammannBeenker from "./ammann-beenker";
-import fibonacci from "./fibonacci";
-import minitangram from "./minitangram";
-import penroseKiteDart from "./penrose-kite-dart";
-import penroseRhomb from "./penrose-rhomb";
-import pinwheel from "./pinwheel";
-import pinwheel10 from "./pinwheel10";
-import pinwheel13 from "./pinwheel13";
-import viper from "./viper";
+import ammannBeenker from "./ammann-beenker.js";
+import fibonacci from "./fibonacci.js";
+import minitangram from "./minitangram.js";
+import penroseKiteDart from "./penrose-kite-dart.js";
+import penroseRhomb from "./penrose-rhomb.js";
+import pinwheel from "./pinwheel.js";
+import pinwheel10 from "./pinwheel10.js";
+import pinwheel13 from "./pinwheel13.js";
+import viper from "./viper.js";
 
 export default {
   "Ammann-Beenker": ammannBeenker,
