@@ -5,13 +5,14 @@ import {
   RotationColorerOptions,
   SolidRgbColorer
 } from "./renderer/Colorer.js";
-import { Renderer } from "./renderer/Renderer.js";
+import { RendererBuilder } from "./renderer/Renderer.js";
 import { Rule } from "./tiles/Rule.js";
 import rules, { RuleOptions } from "./rules/rules.js";
 import { TilingOptions } from "./tiles/Tiling.js";
 import { PinwheelPQ } from "./rules/pinwheel.js";
+import { Rect } from "./lib/math/2d/Polygon.js";
 
-function getRenderer(root: ShadowRoot): Renderer {
+function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
   root.innerHTML = `<style>
       :host {
         display: block;
@@ -36,7 +37,7 @@ function getRenderer(root: ShadowRoot): Renderer {
   outerDiv.appendChild(innerDiv);
   root.appendChild(outerDiv);
   const vp = ViewPort(outerDiv);
-  return Renderer(canvas, vp);
+  return [canvas, vp];
 }
 
 function ruleForString(name: string | null): Rule {
@@ -102,7 +103,7 @@ const observedAttributes = [
 
 class Tiling extends HTMLElement {
   viewPort: ViewPort | undefined = undefined;
-  renderer: Renderer | undefined = undefined;
+  canvas: HTMLCanvasElement | undefined = undefined;
 
   constructor() {
     super();
@@ -188,12 +189,12 @@ class Tiling extends HTMLElement {
 
   connectedCallback(): void {
     const shadowRoot = this.attachShadow({ mode: "open" });
-    this.renderer = getRenderer(shadowRoot);
+    [this.canvas, this.viewPort] = getRenderer(shadowRoot);
     this.render();
   }
 
   render(): void {
-    if (this.renderer === undefined) return;
+    if (this.canvas === undefined) return;
 
     const rule =
       this.getAttribute("rule") === "Pinwheel" && this.ruleOptions()
@@ -202,21 +203,27 @@ class Tiling extends HTMLElement {
             this.ruleOptions()?.pinwheel?.q as number
           )
         : ruleForString(this.getAttribute("rule"));
-    this.renderer.setFillColorer(
-      RotationColorer({
-        ...this.colorOptions(),
-        protos: rule.protos
-      })
-    );
-    this.renderer.setStrokeColorer(
-      SolidRgbColorer(0, 0, 0, this.colorOptions().strokeAlpha || 1)
-    );
+
     const tile = rule.tileFromEdge(
       parseVector(this.getAttribute("v"), V(11, 17)),
       parseVector(this.getAttribute("u"), V(1500, 1500))
     );
 
-    this.renderer.setTileStream(rule.tiling(tile, this.tilingOptions()).cover);
+    RendererBuilder()
+      .canvas(this.canvas)
+      .viewport(this.viewPort as Rect)
+      .fillColorer(
+        RotationColorer({
+          ...this.colorOptions(),
+          protos: rule.protos
+        })
+      )
+      .strokeColorer(
+        SolidRgbColorer(0, 0, 0, this.colorOptions().strokeAlpha || 1)
+      )
+      .tiles(rule.tiling(tile, this.tilingOptions()).cover)
+      .build()
+      .render();
   }
 }
 
