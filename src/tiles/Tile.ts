@@ -25,11 +25,8 @@ export function Tile(
 class _Tile implements Tile {
   readonly #polygon: Polygon;
 
-  readonly proto: Prototile;
-
-  constructor(p: Polygon, proto: Prototile) {
+  constructor(p: Polygon, readonly proto: Prototile) {
     this.#polygon = p;
-    this.proto = proto;
   }
 
   parent(): Tile {
