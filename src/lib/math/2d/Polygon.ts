@@ -56,7 +56,7 @@ export function Polygon(vertices: V[]): Polygon {
 // These don't implement the interfaces here to trick the polymorphic this
 // nonsense. They're still treated as though they do elsewhere.
 class _Polygon {
-  #vertices: V[];
+  readonly #vertices: V[];
   constructor(vertices: V[]) {
     if (vertices.length < 3)
       throw new Error("!!A polygon must have at least three vertices.!!");
@@ -132,15 +132,8 @@ class _Polygon {
 }
 
 class _Triangle extends _Polygon {
-  a: V;
-  b: V;
-  c: V;
-
-  constructor(a: V, b: V, c: V) {
+  constructor(readonly a: V, readonly b: V, readonly c: V) {
     super([a, b, c]);
-    this.a = a;
-    this.b = b;
-    this.c = c;
   }
 
   triangles() {
@@ -156,17 +149,8 @@ class _Triangle extends _Polygon {
 }
 
 class _Tetragon extends _Polygon {
-  a: V;
-  b: V;
-  c: V;
-  d: V;
-
-  constructor(a: V, b: V, c: V, d: V) {
+  constructor(readonly a: V, readonly b: V, readonly c: V, readonly d: V) {
     super([a, b, c, d]);
-    this.a = a;
-    this.b = b;
-    this.c = c;
-    this.d = d;
   }
 
   translate(v: V): Tetragon {
@@ -183,16 +167,15 @@ class _Tetragon extends _Polygon {
 }
 
 class _Rect extends _Polygon {
-  left: number;
-  right: number;
-  top: number; // note: by computer graphics conventions, this is the bottom
-  bottom: number; // note: by computer graphics conventions, this is the top
-  constructor(x0: number, y0: number, xf: number, yf: number) {
-    super([V(x0, y0), V(xf, y0), V(xf, yf), V(x0, yf)]);
-    this.left = x0;
-    this.right = xf;
-    this.top = yf;
-    this.bottom = y0;
+  // note: by computer graphics conventions, top is the bottom
+  // note: by computer graphics conventions, bottom is the top
+  constructor(
+    readonly left: number,
+    readonly bottom: number,
+    readonly right: number,
+    readonly top: number
+  ) {
+    super([V(left, bottom), V(right, bottom), V(right, top), V(left, top)]);
   }
 
   pad(n: number) {
