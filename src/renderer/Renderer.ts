@@ -1,16 +1,68 @@
-import { canvasPathFromPolygon, Polygon } from "../lib/math/2d/Polygon.js";
+import {
+  canvasPathFromPolygon,
+  Polygon,
+  svgPointsFromPolygon
+} from "../lib/math/2d/Polygon.js";
 import { ViewPort } from "../lib/browser/ViewPort.js";
 import { isCallable } from "../lib/util.js";
 import { Colorer } from "./Colorer.js";
 import Runner from "./Runner.js";
 import { Tile } from "../tiles/Tile.js";
 
-export type Renderer = {
-  render: () => void;
-};
+class Renderer {
+  #draw: (p: Polygon, s: string, f: string) => void;
+  #clear: () => void;
+  #strokeColorer: (t: Tile) => string;
+  #fillColorer: (t: Tile) => string;
+  #tiles: Iterator<Tile>;
+
+  constructor(
+    draw: (p: Polygon, s: string, f: string) => void,
+    clear: () => void,
+    strokeColorer: (t: Tile) => string,
+    fillColorer: (t: Tile) => string,
+    tiles: Iterator<Tile>
+  ) {
+    this.#draw = draw;
+    this.#clear = clear;
+    this.#strokeColorer = strokeColorer;
+    this.#fillColorer = fillColorer;
+    this.#tiles = tiles;
+  }
+
+  render() {
+    const runner = Runner();
+
+    const renderNext = () => {
+      const { done: tilesDone, value: tilesValue } = this.#tiles.next();
+      if (!tilesDone && tilesValue) {
+        this.#draw(
+          tilesValue.polygon(),
+          this.#strokeColorer(tilesValue),
+          this.#fillColorer(tilesValue)
+        );
+        return true;
+      }
+      if (tilesDone) {
+        console.debug(
+          `Renderer.renderNext() - DONE! [${tilesDone}, ${tilesValue}]`
+        );
+        runner.stop();
+        return false;
+      }
+      return false;
+    };
+
+    runner.start(
+      () => renderNext(),
+      () => this.#clear()
+    );
+  }
+}
 
 class Builder {
   #canvas: HTMLCanvasElement | undefined;
+  #svg: SVGSVGElement | undefined;
   #viewPort: ViewPort | undefined;
   #tiles: ((vp: Polygon) => Iterable<Tile>) | undefined;
   #fillColorer: Colorer | undefined;
@@ -39,22 +91,21 @@ class Builder {
     return this;
   }
 
+  svg(svg: SVGSVGElement) {
+    this.#svg = svg;
+    return this;
+  }
+
   viewport(vp: ViewPort) {
     this.#viewPort = vp;
     return this;
   }
 
   build() {
-    const runner = Runner();
-    const ctx =
-      (this.#canvas as HTMLCanvasElement).getContext("2d") || undefined;
     const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(
       this.#viewPort as Polygon
     )[Symbol.iterator]();
 
-    const clearCanvas = () => {
-      if (ctx) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    };
     const getFill = (tile: Tile) => {
       return this.#fillColorer
         ? this.#fillColorer(tile)
@@ -64,38 +115,31 @@ class Builder {
       return this.#strokeColorer ? this.#strokeColorer(tile) : "black";
     };
 
-    console.debug(`Renderer() [${this.#viewPort}]`);
-    const renderNext = () => {
-      const { done: tilesDone, value: tilesValue } = tileIterator.next();
-      if (!tilesDone && tilesValue) {
-        if (ctx) {
-          drawCanvas(
-            tilesValue.polygon(),
-            getStroke(tilesValue),
-            getFill(tilesValue),
-            ctx
-          );
-          return true;
-        }
-      }
-      if (tilesDone) {
-        console.debug(
-          `Renderer.renderNext() - DONE! [${tilesDone}, ${tilesValue}]`
+    if (this.#canvas) {
+      const ctx = (this.#canvas as HTMLCanvasElement).getContext("2d");
+      if (ctx)
+        return new Renderer(
+          (p, s, f) => drawCanvas(p, s, f, ctx),
+          () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
+          getStroke,
+          getFill,
+          tileIterator
         );
-        runner.stop();
-        return false;
-      }
-      return false;
-    };
+    }
 
-    return {
-      render: () => {
-        runner.start(
-          () => renderNext(),
-          () => clearCanvas()
-        );
-      }
-    };
+    if (this.#svg !== undefined) {
+      return new Renderer(
+        (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
+        () => {
+          (this.#svg as SVGSVGElement).innerHTML = "";
+        },
+        getStroke,
+        getFill,
+        tileIterator
+      );
+    }
+
+    throw new Error("No canvas or svg!");
   }
 }
 
@@ -103,7 +147,7 @@ export function RendererBuilder(): Builder {
   return new Builder();
 }
 
-function drawCanvas(
+export function drawCanvas(
   tile: Polygon,
   strokeColor: string,
   fillColor: string,
@@ -114,4 +158,18 @@ function drawCanvas(
   const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
+}
+
+const svgNs = "http://www.w3.org/2000/svg";
+function drawSvg(
+  tile: Polygon,
+  strokeColor: string,
+  fillColor: string,
+  svg: SVGElement
+): void {
+  const p = document.createElementNS(svgNs, "polygon");
+  p.setAttributeNS(svgNs, "points", svgPointsFromPolygon(tile));
+  p.setAttributeNS(svgNs, "fill", fillColor);
+  p.setAttributeNS(svgNs, "stroke", strokeColor);
+  svg.appendChild(p);
 }
