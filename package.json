@@ -6,8 +6,10 @@
   "license": "AGPL-3.0",
   "repository": "github:metaquanta/tilings",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch --preserveWatchOutput",
+    "build": "babel src --out-dir public --ignore 'src/**/*.test.js' --extensions '.ts'",
+    "build:watch": "babel --watch src --out-dir public --ignore 'src/**/*.test.js' --extensions '.ts'",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch --preserveWatchOutput",
     "assets": "copy-and-watch src/**/*.{html,css,svg} public",
     "assets:watch": "copy-and-watch --watch src/**/*.{html,css,svg} public",
     "lint": "eslint 'src/**/*.ts'",
@@ -15,13 +17,7 @@
     "serve": "es-dev-server --compatibility none --event-stream false --node-resolve --root-dir public/ --watch",
     "test": "jest",
     "test:watch": "jest --watch",
-    "watch": "npm-run-all --parallel build:watch assets:watch serve"
-  },
-  "eslintConfig": {
-    "extends": [
-      "prettier",
-      "prettier/@typescript-eslint"
-    ]
+    "watch": "npm-run-all --parallel build:watch typecheck:watch assets:watch serve"
   },
   "jest": {
     "transform": {
@@ -35,6 +31,10 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-transform-typescript": "^7.11.0",
+    "@babel/preset-typescript": "^7.10.4",
     "@types/jest": "^26.0.5",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
