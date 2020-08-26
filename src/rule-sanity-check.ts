@@ -1,10 +1,10 @@
-import { Polygon } from "./lib/math/2d/Polygon.js";
-import { Rule } from "./tiles/Rule.js";
-import { Tile } from "./tiles/Tile.js";
-import { theta } from "./lib/math/2d/V.js";
-import { Prototile } from "./tiles/Prototile.js";
-import { AffineTransform } from "./lib/math/2d/AffineTransform.js";
-import { rotationM, scalingM } from "./lib/math/2d/M.js";
+import { Polygon } from "./lib/math/2d/Polygon";
+import { Rule } from "./tiles/Rule";
+import { Tile } from "./tiles/Tile";
+import { theta } from "./lib/math/2d/V";
+import { Prototile } from "./tiles/Prototile";
+import { AffineTransform } from "./lib/math/2d/AffineTransform";
+import { rotationM, scalingM } from "./lib/math/2d/M";
 
 export function similarChildren(parent: Tile): Tile[] {
   const memoedProtos: Prototile[] = [];

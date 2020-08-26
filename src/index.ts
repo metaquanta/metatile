@@ -1,4 +1,4 @@
-import Tiling from "./TilingComponent.js";
+import Tiling from "./TilingComponent";
 
 type Parameters = {
   rule?: string;

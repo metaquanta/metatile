@@ -1,7 +1,7 @@
-import { Polygon } from "../lib/math/2d/Polygon.js";
-import { Tile } from "./Tile.js";
-import { V } from "../lib/math/2d/V.js";
-import { Prototile } from "./Prototile.js";
+import { Polygon } from "../lib/math/2d/Polygon";
+import { Tile } from "./Tile";
+import { V } from "../lib/math/2d/V";
+import { Prototile } from "./Prototile";
 
 export interface PrototileBuilder<T extends Polygon> {
   readonly substitution: (

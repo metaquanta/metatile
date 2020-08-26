@@ -1,9 +1,9 @@
 // https://tilings.math.uni-bielefeld.de/substitution/minitangram/
 
-import { Tetragon, Triangle } from "../lib/math/2d/Polygon.js";
-import { PrototileBuilder } from "../tiles/PrototileBuilder.js";
-import { midpoint, V } from "../lib/math/2d/V.js";
-import { RuleBuilder } from "../tiles/RuleBuilder.js";
+import { Tetragon, Triangle } from "../lib/math/2d/Polygon";
+import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import { midpoint, V } from "../lib/math/2d/V";
+import { RuleBuilder } from "../tiles/RuleBuilder";
 
 export default RuleBuilder()
   .protoTile(

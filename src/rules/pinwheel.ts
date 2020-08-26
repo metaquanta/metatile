@@ -1,12 +1,12 @@
 // Reference: https://arxiv.org/abs/math/9712263
 
-import { Triangle } from "../lib/math/2d/Polygon.js";
-import { PrototileBuilder } from "../tiles/PrototileBuilder.js";
-import { V } from "../lib/math/2d/V.js";
-import { gcd } from "../lib/math/util.js";
-import { invertFunction } from "../lib/math/numerical.js";
-import { RuleBuilder } from "../tiles/RuleBuilder.js";
-import { Rule } from "../tiles/Rule.js";
+import { Triangle } from "../lib/math/2d/Polygon";
+import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import { V } from "../lib/math/2d/V";
+import { gcd } from "../lib/math/util";
+import { invertFunction } from "../lib/math/numerical";
+import { RuleBuilder } from "../tiles/RuleBuilder";
+import { Rule } from "../tiles/Rule";
 
 const z = (theta: number) =>
   Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2);

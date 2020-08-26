@@ -1,5 +1,5 @@
-import { Polygon, chirality } from "../lib/math/2d/Polygon.js";
-import { Prototile } from "./Prototile.js";
+import { Polygon, chirality } from "../lib/math/2d/Polygon";
+import { Prototile } from "./Prototile";
 
 export interface Tile {
   readonly proto: Prototile;
