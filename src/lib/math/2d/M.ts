@@ -1,4 +1,4 @@
-import { V } from "./V.js";
+import { V } from "./V";
 
 export interface M {
   m11: number;

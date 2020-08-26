@@ -1,6 +1,6 @@
-import { Polygon } from "../lib/math/2d/Polygon.js";
-import { V } from "../lib/math/2d/V.js";
-import { Tile } from "./Tile.js";
+import { Polygon } from "../lib/math/2d/Polygon";
+import { V } from "../lib/math/2d/V";
+import { Tile } from "./Tile";
 
 export interface Prototile {
   readonly rotationalSymmetryOrder: number;

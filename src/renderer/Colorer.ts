@@ -1,7 +1,7 @@
-import { Polygon } from "../lib/math/2d/Polygon.js";
-import { theta } from "../lib/math/2d/V.js";
-import { range } from "../lib/util.js";
-import { Prototile } from "../tiles/Prototile.js";
+import { Polygon } from "../lib/math/2d/Polygon";
+import { theta } from "../lib/math/2d/V";
+import { range } from "../lib/util";
+import { Prototile } from "../tiles/Prototile";
 
 // These produce a string appropriate for CSS or Canvas styles.
 export type Colorer = (t: {

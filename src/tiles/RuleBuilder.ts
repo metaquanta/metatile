@@ -1,9 +1,9 @@
-import { Polygon } from "../lib/math/2d/Polygon.js";
-import { Tile } from "./Tile.js";
-import { Rule } from "./Rule.js";
-import { RotationColorerOptions } from "../renderer/Colorer.js";
-import { PrototileBuilder } from "./PrototileBuilder.js";
-import { Prototile } from "./Prototile.js";
+import { Polygon } from "../lib/math/2d/Polygon";
+import { Tile } from "./Tile";
+import { Rule } from "./Rule";
+import { RotationColorerOptions } from "../renderer/Colorer";
+import { PrototileBuilder } from "./PrototileBuilder";
+import { Prototile } from "./Prototile";
 
 export interface RuleBuilder {
   readonly protoTile: <T extends Polygon>(p: PrototileBuilder<T>) => this;

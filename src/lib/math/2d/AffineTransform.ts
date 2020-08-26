@@ -1,6 +1,6 @@
-import { M } from "./M.js";
-import { Polygon } from "./Polygon.js";
-import { V } from "./V.js";
+import { M } from "./M";
+import { Polygon } from "./Polygon";
+import { V } from "./V";
 
 export interface AffineTransform {
   // ...Transform or Transformation?

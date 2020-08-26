@@ -3,11 +3,11 @@ import {
   Polygon,
   svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
-import { ViewPort } from "../lib/browser/ViewPort.js";
-import { isCallable } from "../lib/util.js";
-import { Colorer } from "./Colorer.js";
-import Runner from "./Runner.js";
-import { Tile } from "../tiles/Tile.js";
+import { ViewPort } from "../lib/browser/ViewPort";
+import { isCallable } from "../lib/util";
+import { Colorer } from "./Colorer";
+import Runner from "./Runner";
+import { Tile } from "../tiles/Tile";
 
 class Renderer {
   #draw: (p: Polygon, s: string, f: string) => void;
