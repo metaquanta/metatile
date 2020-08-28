@@ -1,6 +1,8 @@
 import {
   canvasPathFromPolygon,
+  rectFrom,
   Polygon,
+  Rect,
   svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { ViewPort } from "../lib/browser/ViewPort";
@@ -102,8 +104,10 @@ class Builder {
   }
 
   build() {
+    const vp =
+      this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
     const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(
-      this.#viewPort as Polygon
+      vp as Polygon
     )[Symbol.iterator]();
 
     const getFill = (tile: Tile) => {
@@ -168,8 +172,11 @@ function drawSvg(
   svg: SVGElement
 ): void {
   const p = document.createElementNS(svgNs, "polygon");
-  p.setAttributeNS(svgNs, "points", svgPointsFromPolygon(tile));
-  p.setAttributeNS(svgNs, "fill", fillColor);
-  p.setAttributeNS(svgNs, "stroke", strokeColor);
+  // For some reason ns MUST be null below.
+  p.setAttributeNS(null, "points", svgPointsFromPolygon(tile));
+  p.setAttributeNS(null, "fill", fillColor);
+  p.setAttributeNS(null, "stroke", strokeColor);
+  p.setAttributeNS(null, "stroke-width", "0.5");
+  p.setAttributeNS(null, "stroke-linejoin", "round");
   svg.appendChild(p);
 }

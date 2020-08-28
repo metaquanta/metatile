@@ -1,16 +1,8 @@
-import { V } from "./lib/math/2d/V";
 import { ViewPort } from "./lib/browser/ViewPort";
-import {
-  RotationColorer,
-  RotationColorerOptions,
-  SolidRgbColorer
-} from "./renderer/Colorer.js";
+import { RotationColorer, SolidRgbColorer } from "./renderer/Colorer.js";
 import { RendererBuilder } from "./renderer/Renderer";
-import { Rule } from "./tiles/Rule";
-import rules, { RuleOptions } from "./rules/rules";
-import { TilingOptions } from "./tiles/Tiling";
-import { PinwheelPQ } from "./rules/pinwheel";
 import { Rect } from "./lib/math/2d/Polygon";
+import { getTagParameters } from "./params";
 
 function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
   root.innerHTML = `<style>
@@ -40,44 +32,11 @@ function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
   return [canvas, vp];
 }
 
-function ruleForString(name: string | null): Rule {
-  if (name && name in rules) return rules[name as keyof typeof rules];
-  console.debug(
-    `TilingComponent:ruleForString() - "${name}" not found. Using default.`
-  );
-  return rules["Penrose-Rhomb"];
-}
-
-function parseVector(vs: string | undefined | null, def: V): V {
-  //console.debug(`TilingComponent:parseVector(${vs}, ${def})`);
-  if (vs === undefined || vs === null) return def;
-  const components = vs.split(",").map((s) => Number.parseFloat(s));
-  if (components.length === 2) {
-    return V(components[0], components[1]);
-  }
-  console.debug(
-    `TilingComponent:parseVectorString(${vs}) failed. Using default.`
-  );
-  return def;
-}
-
-function parseFloat(f: string | null | undefined): number | undefined {
-  if (f === undefined || f === null) return undefined;
-  const n = Number.parseFloat(f);
-  if (isNaN(n)) return undefined;
-  return n;
-}
-
-function parseBool(b: string | null | undefined): boolean | undefined {
-  const truthStrings = ["true", "True", "yes", "Yes", "y", "Y", "1"];
-  const falseStrings = ["false", "False", "no", "No", "n", "N", "0"];
-  if (b === undefined || b === null) return undefined;
-  if (truthStrings.indexOf(b) >= 0) return true;
-  if (falseStrings.indexOf(b) >= 0) return false;
-  return undefined;
-}
-
-function _attribute(comp: Tiling, attribute: string, value: string): void {
+function _attribute(
+  comp: TilingElement,
+  attribute: string,
+  value: string
+): void {
   if (value !== "") {
     comp.setAttribute(attribute, value);
   } else {
@@ -101,7 +60,7 @@ const observedAttributes = [
   "pinwheelQ"
 ];
 
-class Tiling extends HTMLElement {
+class TilingElement extends HTMLElement {
   viewPort: ViewPort | undefined = undefined;
   canvas: HTMLCanvasElement | undefined = undefined;
 
@@ -150,37 +109,6 @@ class Tiling extends HTMLElement {
     _attribute(this, "pinwheelQ", q);
   }
 
-  colorOptions(): RotationColorerOptions & { strokeAlpha?: number } {
-    const p = {
-      saturation: parseFloat(this.getAttribute("colorSaturation")),
-      lightness: parseFloat(this.getAttribute("colorLightness")),
-      hueSpan: parseFloat(this.getAttribute("colorHueSpan")),
-      hueOffset: parseFloat(this.getAttribute("colorHueOffset")),
-      alpha: parseFloat(this.getAttribute("colorAlpha")),
-      strokeAlpha: parseFloat(this.getAttribute("colorStrokeAlpha"))
-    };
-    console.debug(`colorParameters(): `, p);
-    return p;
-  }
-
-  tilingOptions(): TilingOptions {
-    return {
-      includeAncestors: parseBool(this.getAttribute("tilingIncludeAncestors"))
-    };
-  }
-
-  ruleOptions(): RuleOptions | undefined {
-    if (this.getAttribute("pinwheelP") && this.getAttribute("pinwheelQ")) {
-      return {
-        pinwheel: {
-          p: parseInt(this.getAttribute("pinwheelP") as string),
-          q: parseInt(this.getAttribute("pinwheelQ") as string)
-        }
-      };
-    }
-    return undefined;
-  }
-
   attributeChangedCallback(name: string): void {
     if (observedAttributes.indexOf(name) >= 0) {
       this.render();
@@ -196,37 +124,30 @@ class Tiling extends HTMLElement {
   render(): void {
     if (this.canvas === undefined) return;
 
-    const rule =
-      this.getAttribute("rule") === "Pinwheel" && this.ruleOptions()
-        ? PinwheelPQ(
-            this.ruleOptions()?.pinwheel?.p as number,
-            this.ruleOptions()?.pinwheel?.q as number
-          )
-        : ruleForString(this.getAttribute("rule"));
+    const params = getTagParameters(this);
 
-    const tile = rule.tileFromEdge(
-      parseVector(this.getAttribute("v"), V(11, 17)),
-      parseVector(this.getAttribute("u"), V(1500, 1500))
-    );
+    const rule = params.getRule();
+
+    const tile = rule.tileFromEdge(params.getV(), params.getU());
+
+    const colorOptions = params.getColorOptions();
 
     RendererBuilder()
       .canvas(this.canvas)
       .viewport(this.viewPort as Rect)
       .fillColorer(
         RotationColorer({
-          ...this.colorOptions(),
+          ...colorOptions,
           protos: rule.protos
         })
       )
-      .strokeColorer(
-        SolidRgbColorer(0, 0, 0, this.colorOptions().strokeAlpha || 1)
-      )
-      .tiles(rule.tiling(tile, this.tilingOptions()).cover)
+      .strokeColorer(SolidRgbColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
+      .tiles(rule.tiling(tile, params.getTilingOptions()).cover)
       .build()
       .render();
   }
 }
 
-customElements.define("mq-tiling", Tiling);
+customElements.define("mq-tiling", TilingElement);
 
-export default Tiling;
+export default TilingElement;
