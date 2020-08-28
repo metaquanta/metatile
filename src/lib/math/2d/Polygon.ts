@@ -204,6 +204,20 @@ export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
   new _Rect(x0, y0, xf, yf);
 
+export function rectFrom(obj: DOMRect | SVGAnimatedRect | SVGRect): Rect {
+  if (
+    (obj as DOMRect | SVGRect).x !== undefined &&
+    (obj as DOMRect | SVGRect).height !== undefined
+  ) {
+    const rect = obj as DOMRect | SVGRect;
+    return Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+  }
+  if ((obj as SVGAnimatedRect).animVal) {
+    return rectFrom((obj as SVGAnimatedRect).animVal);
+  }
+  throw new Error(`can't cast ${obj} to Polygon`);
+}
+
 function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
     return (q as Polygon).vertices().every((v) => contains(p, v));
