@@ -19,7 +19,7 @@ export function Tile(
   intersectingGenerations?: number
 ): Tile {
   if (volumeHierarchic) return new _Tile(polygon, proto);
-  else return new _NvhTile(polygon, proto, intersectingGenerations || 4);
+  else return new _NvhTile(polygon, proto, intersectingGenerations ?? 4);
 }
 
 class _Tile implements Tile {
@@ -78,7 +78,7 @@ class _NvhTile extends _Tile {
   _intersects(p: Polygon, depth: number): boolean {
     if (depth === 0) return super.intersects(p);
     if (this.#parent === undefined) return true;
-    return super.intersects(p) || this.#parent.intersects(p, depth - 1);
+    return super.intersects(p) ?? this.#parent.intersects(p, depth - 1);
   }
 
   intersects(p: Polygon, depth?: number): boolean {
