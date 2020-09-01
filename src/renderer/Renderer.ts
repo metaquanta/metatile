@@ -2,7 +2,6 @@ import {
   canvasPathFromPolygon,
   rectFrom,
   Polygon,
-  Rect,
   svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { ViewPort } from "../lib/browser/ViewPort";
