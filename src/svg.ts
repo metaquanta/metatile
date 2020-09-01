@@ -1,4 +1,3 @@
-import { rectFrom } from "./lib/math/2d/Polygon";
 import { getUrlParameters } from "./params";
 import { RotationColorer, SolidRgbColorer } from "./renderer/Colorer";
 import { RendererBuilder } from "./renderer/Renderer";
