@@ -15,7 +15,7 @@ export interface Polygon {
   toString: () => string;
 }
 
-export function isPolygon<T>(p: Polygon | T): boolean {
+export function isPolygon<T>(p: Polygon | T): p is Polygon {
   return (p as Polygon).vertices !== undefined;
 }
 
@@ -45,7 +45,7 @@ export type Rect = Polygon & {
   bottom: number;
 };
 
-export function isRect<T>(p: Rect | T): boolean {
+export function isRect<T>(p: Rect | T): p is Rect {
   return (p as Rect).bottom !== undefined;
 }
 
@@ -220,7 +220,7 @@ export function rectFrom(obj: DOMRect | SVGAnimatedRect | SVGRect): Rect {
 
 function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
-    return (q as Polygon).vertices().every((v) => contains(p, v));
+    return q.vertices().every((v) => contains(p, v));
   }
   return p.triangles().some((t) => triangleContains(t, q as V));
 }

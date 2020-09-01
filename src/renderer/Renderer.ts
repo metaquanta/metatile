@@ -73,7 +73,7 @@ class Builder {
     if (!isCallable(tiles)) {
       this.#tiles = (_) => tiles as Iterable<Tile>;
     } else {
-      this.#tiles = tiles as (vp: Polygon) => Iterable<Tile>;
+      this.#tiles = tiles;
     }
     return this;
   }

@@ -23,10 +23,10 @@ export function range(n: number): number[] {
   return [...Array(n).keys()];
 }
 
-export function isCallable<T, V>(f: ((p: V) => T) | T): boolean {
+export function isCallable<T, V>(f: ((p: V) => T) | T): f is (p: V) => T {
   return (f as () => T).call !== undefined;
 }
 
-export function isArray<T, V>(a: V | Array<T>): boolean {
+export function isArray<T, V>(a: V | Array<T>): a is Array<T> {
   return (a as Array<T>).entries !== undefined;
 }
