@@ -1,14 +1,14 @@
+import { ViewPort } from "../lib/browser/ViewPort";
 import {
+  Polygon,
   canvasPathFromPolygon,
   rectFrom,
-  Polygon,
   svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
-import { ViewPort } from "../lib/browser/ViewPort";
-import { isCallable } from "../lib/util";
+import { isCallable, isDone } from "../lib/util";
+import { Tile } from "../tiles/Tile";
 import { Colorer } from "./Colorer";
 import Runner from "./Runner";
-import { Tile } from "../tiles/Tile";
 
 class Renderer {
   #draw: (p: Polygon, s: string, f: string) => void;
@@ -35,19 +35,17 @@ class Renderer {
     const runner = Runner();
 
     const renderNext = () => {
-      const { done: tilesDone, value: tilesValue } = this.#tiles.next();
-      if (!tilesDone && tilesValue) {
+      const result = this.#tiles.next();
+      if (!isDone(result)) {
         this.#draw(
-          tilesValue.polygon(),
-          this.#strokeColorer(tilesValue),
-          this.#fillColorer(tilesValue)
+          result.value.polygon(),
+          this.#strokeColorer(result.value),
+          this.#fillColorer(result.value)
         );
         return true;
       }
-      if (tilesDone) {
-        console.debug(
-          `Renderer.renderNext() - DONE! [${tilesDone}, ${tilesValue}]`
-        );
+      if (isDone(result)) {
+        console.debug(`Renderer.renderNext() - DONE!`);
         runner.stop();
         return false;
       }
@@ -71,7 +69,7 @@ class Builder {
 
   tiles(tiles: ((vp: Polygon) => Iterable<Tile>) | Iterable<Tile>) {
     if (!isCallable(tiles)) {
-      this.#tiles = (_) => tiles as Iterable<Tile>;
+      this.#tiles = (_) => tiles;
     } else {
       this.#tiles = tiles;
     }
@@ -119,7 +117,7 @@ class Builder {
     };
 
     if (this.#canvas) {
-      const ctx = (this.#canvas as HTMLCanvasElement).getContext("2d");
+      const ctx = this.#canvas.getContext("2d");
       if (ctx)
         return new Renderer(
           (p, s, f) => drawCanvas(p, s, f, ctx),

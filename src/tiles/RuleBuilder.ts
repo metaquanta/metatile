@@ -32,7 +32,7 @@ class _RuleBuilder implements RuleBuilder {
   }
 
   protoTile<T extends Polygon>(p: PrototileBuilder<T>): this {
-    this.protos.push(p as PrototileBuilder<T>);
+    this.protos.push(p);
     return this;
   }
 

@@ -27,5 +27,5 @@ test("invert() inverts non-trivial", () => {
 test("gcd", () => {
   expect(gcd(13, 20)).toEqual(1);
   expect(gcd(5, 1000)).toEqual(5);
-  expect(gcd(128, 4352323) === 2).toBeFalsy;
+  expect(gcd(128, 4352323) === 2).toBeFalsy();
 });

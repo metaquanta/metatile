@@ -1,5 +1,5 @@
 export default function Runner(): {
-  start: (r: () => void, c: () => void) => void;
+  start: (r: () => boolean, c: () => void) => void;
   stop: () => Promise<unknown>;
 } {
   // Apparently, Chrome calls a requestAnimationFrame() over 50ms a
@@ -11,7 +11,7 @@ export default function Runner(): {
     timestamp: number;
     stopped: boolean;
     finish: (() => void) | undefined;
-    start: (r: () => void, c: () => void) => void;
+    start: (r: () => boolean, c: () => void) => void;
     stop: () => Promise<unknown>;
     onFrame: (() => void) | undefined;
     tasksCompleted: number;
@@ -29,7 +29,7 @@ export default function Runner(): {
         return;
       }
       this.stopped = false;
-      if (init) init();
+      init();
       this.timestamp = Date.now();
       this.onFrame = () => {
         if (this.stopped) {
@@ -44,10 +44,10 @@ export default function Runner(): {
             10 // It can get stuck too low and become /really/ slow
           );
           this.timestamp = ms;
-          window.requestAnimationFrame(() => this.onFrame && this.onFrame());
+          window.requestAnimationFrame(() => this.onFrame?.());
         }
       };
-      window.requestAnimationFrame(() => this.onFrame && this.onFrame());
+      window.requestAnimationFrame(() => this.onFrame?.());
     },
     stop(): Promise<unknown> {
       console.debug(

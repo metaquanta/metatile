@@ -1,8 +1,8 @@
 import { ViewPort } from "./lib/browser/ViewPort";
-import { RotationColorer, SolidRgbColorer } from "./renderer/Colorer.js";
-import { RendererBuilder } from "./renderer/Renderer";
 import { Rect } from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
+import { RotationColorer, SolidRgbColorer } from "./renderer/Colorer.js";
+import { RendererBuilder } from "./renderer/Renderer";
 
 function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
   root.innerHTML = `<style>
@@ -63,10 +63,6 @@ const observedAttributes = [
 class TilingElement extends HTMLElement {
   viewPort: ViewPort | undefined = undefined;
   canvas: HTMLCanvasElement | undefined = undefined;
-
-  constructor() {
-    super();
-  }
 
   static get observedAttributes(): string[] {
     return observedAttributes;

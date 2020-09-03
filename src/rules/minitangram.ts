@@ -2,7 +2,7 @@
 
 import { Tetragon, Triangle } from "../lib/math/2d/Polygon";
 import { PrototileBuilder } from "../tiles/PrototileBuilder";
-import { midpoint, V } from "../lib/math/2d/V";
+import { V, midpoint } from "../lib/math/2d/V";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 export default RuleBuilder()

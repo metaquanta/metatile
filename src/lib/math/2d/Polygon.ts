@@ -1,21 +1,22 @@
 import { V } from "./V";
 
 export interface Polygon {
-  vertices: () => V[];
-  triangles: () => Triangle[];
-  edges: () => [V, V][];
-  sides: () => number;
-  contains: (p: V | Polygon) => boolean;
-  intersects: (p: Polygon) => boolean;
-  center: () => V;
-  area: () => number;
-  boundingBox: () => Rect;
-  translate: (v: V) => this;
-  equals: (p: Polygon) => boolean;
-  toString: () => string;
+  readonly vertices: () => V[];
+  readonly triangles: () => Triangle[];
+  readonly edges: () => [V, V][];
+  readonly sides: () => number;
+  readonly contains: (p: V | Polygon) => boolean;
+  readonly intersects: (p: Polygon) => boolean;
+  readonly center: () => V;
+  readonly area: () => number;
+  readonly boundingBox: () => Rect;
+  readonly translate: (v: V) => this;
+  readonly equals: (p: Polygon) => boolean;
+  readonly toString: () => string;
 }
 
 export function isPolygon<T>(p: Polygon | T): p is Polygon {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return (p as Polygon).vertices !== undefined;
 }
 
@@ -46,6 +47,7 @@ export type Rect = Polygon & {
 };
 
 export function isRect<T>(p: Rect | T): p is Rect {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return (p as Rect).bottom !== undefined;
 }
 
@@ -206,23 +208,25 @@ export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
 
 export function rectFrom(obj: DOMRect | SVGAnimatedRect | SVGRect): Rect {
   if (
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (obj as DOMRect | SVGRect).x !== undefined &&
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (obj as DOMRect | SVGRect).height !== undefined
   ) {
     const rect = obj as DOMRect | SVGRect;
     return Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
   }
-  if ((obj as SVGAnimatedRect).animVal) {
-    return rectFrom((obj as SVGAnimatedRect).animVal);
-  }
-  throw new Error(`can't cast ${obj} to Polygon`);
+  //if ((obj as SVGAnimatedRect).animVal) {
+  return rectFrom((obj as SVGAnimatedRect).animVal);
+  //}
+  //throw new Error(`can't cast ${obj} to Polygon`);
 }
 
 function contains(p: Polygon, q: Polygon | V): boolean {
   if (isPolygon(q)) {
     return q.vertices().every((v) => contains(p, v));
   }
-  return p.triangles().some((t) => triangleContains(t, q as V));
+  return p.triangles().some((t) => triangleContains(t, q));
 }
 
 function triangleContains(t: Polygon, p: V): boolean {
