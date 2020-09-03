@@ -24,9 +24,17 @@ export function range(n: number): number[] {
 }
 
 export function isCallable<T, V>(f: ((p: V) => T) | T): f is (p: V) => T {
-  return (f as () => T).call !== undefined;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return (f as (p: V) => T).call !== undefined;
 }
 
-export function isArray<T, V>(a: V | Array<T>): a is Array<T> {
-  return (a as Array<T>).entries !== undefined;
+export function isArray<T, V>(a: V | T[]): a is T[] {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return (a as T[]).entries !== undefined;
+}
+
+export function isDone<T>(
+  result: IteratorYieldResult<T> | IteratorReturnResult<T>
+): result is IteratorReturnResult<T> {
+  return result.done != undefined && result.done;
 }

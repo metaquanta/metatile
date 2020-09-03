@@ -1,19 +1,19 @@
-import { Polygon, chirality } from "../lib/math/2d/Polygon";
+import { chirality, Polygon } from "../lib/math/2d/Polygon";
 import { Prototile } from "./Prototile";
 
 export interface Tile {
   readonly proto: Prototile;
   readonly parent: () => Tile;
   readonly children: () => Tile[];
-  readonly intersects: (p: Polygon, depth?: number) => boolean;
-  readonly contains: (p: Polygon, depth?: number) => boolean;
+  readonly intersects: (p: Readonly<Polygon>, depth?: number) => boolean;
+  readonly contains: (p: Readonly<Polygon>, depth?: number) => boolean;
   readonly polygon: () => Polygon;
   readonly equals: (t: this) => boolean;
   readonly reflected: () => boolean;
 }
 
 export function Tile(
-  polygon: Polygon,
+  polygon: Readonly<Polygon>,
   proto: Prototile,
   volumeHierarchic: boolean,
   intersectingGenerations?: number
@@ -25,21 +25,21 @@ export function Tile(
 class _Tile implements Tile {
   readonly #polygon: Polygon;
 
-  constructor(p: Polygon, readonly proto: Prototile) {
+  constructor(p: Readonly<Polygon>, readonly proto: Prototile) {
     this.#polygon = p;
   }
 
-  parent(): Tile {
+  parent() {
     if (this.proto.parent !== undefined) return this.proto.parent(this);
     console.trace("!!!Unreachable reached!!!");
     throw new Error(`tile.parent() not supported on ${this}`);
   }
 
-  reflected(): boolean {
+  reflected() {
     return !this.proto.reflectionSymmetry && chirality(this.polygon());
   }
 
-  children(): Tile[] {
+  children() {
     return this.proto.children(this);
   }
 
@@ -66,7 +66,9 @@ class _Tile implements Tile {
 
 class _NvhTile extends _Tile {
   readonly #intersectingGenerations: number;
+
   readonly #intersectsMemo: boolean[];
+
   readonly #parent?: Tile;
 
   constructor(p: Polygon, proto: Prototile, intersectingGenerations: number) {
@@ -78,16 +80,20 @@ class _NvhTile extends _Tile {
   _intersects(p: Polygon, depth: number): boolean {
     if (depth === 0) return super.intersects(p);
     if (this.#parent === undefined) return true;
-    return super.intersects(p) ?? this.#parent.intersects(p, depth - 1);
+    return super.intersects(p) || this.#parent.intersects(p, depth - 1);
   }
 
   intersects(p: Polygon, depth?: number): boolean {
     if (depth === undefined)
       return this.intersects(p, this.#intersectingGenerations);
-    //TODO/fixme - assume p is always the one viewport.
-    if (this.#intersectsMemo[depth] === undefined) {
+    //TODO/fixme - assuming p is always the same/only viewport.
+    if (!hasElement(this.#intersectsMemo, depth)) {
       this.#intersectsMemo[depth] = this._intersects(p, depth);
     }
     return this.#intersectsMemo[depth];
   }
+}
+
+function hasElement<T>(arr: T[], i: number): boolean {
+  return arr[i] !== undefined;
 }

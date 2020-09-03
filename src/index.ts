@@ -19,4 +19,4 @@ if (
 const tag = new TilingElement();
 params.setAttributes(tag);
 
-(<HTMLDivElement>document.getElementsByTagName("div")[0]).appendChild(tag);
+document.getElementsByTagName("div")[0].appendChild(tag);

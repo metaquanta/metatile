@@ -88,8 +88,8 @@ function ruleOptions(params: ParameterStrings): RuleOptions | undefined {
   if (params.pinwheelP && params.pinwheelQ) {
     return {
       pinwheel: {
-        p: parseInt(params.pinwheelP as string),
-        q: parseInt(params.pinwheelQ as string)
+        p: parseInt(params.pinwheelP),
+        q: parseInt(params.pinwheelQ)
       }
     };
   }

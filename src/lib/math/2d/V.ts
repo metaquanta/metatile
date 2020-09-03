@@ -1,17 +1,17 @@
 const EPS = 1e-10;
 
 export interface V {
-  x: number;
-  y: number;
-  add: (u: V) => V;
-  invert: () => V;
-  subtract: (u: V) => V;
-  scale: (a: number) => V;
-  perp: () => V;
-  dot: (u: V) => number;
-  norm: () => number;
-  equals: (u: V) => boolean;
-  toString: () => string;
+  readonly x: number;
+  readonly y: number;
+  readonly add: (u: V) => V;
+  readonly invert: () => V;
+  readonly subtract: (u: V) => V;
+  readonly scale: (a: number) => V;
+  readonly perp: () => V;
+  readonly dot: (u: V) => number;
+  readonly norm: () => number;
+  readonly equals: (u: V) => boolean;
+  readonly toString: () => string;
 }
 
 class _V implements V {

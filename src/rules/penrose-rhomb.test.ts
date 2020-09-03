@@ -1,18 +1,18 @@
-import { Rhomb, chirality } from "../lib/math/2d/Polygon";
+import { chirality, Rhomb } from "../lib/math/2d/Polygon";
 import { V } from "../lib/math/2d/V";
-import penrose from "./penrose-rhomb";
 import {
-  similarChildren,
-  inflationFactor,
   canCoverArbitraryVp,
-  isVolumeHierarchic
+  inflationFactor,
+  isVolumeHierarchic,
+  similarChildren
 } from "../rule-sanity-check";
+import penrose from "./penrose-rhomb";
 
 test("penrose parent inverts children", () => {
   const u = V(400, 0);
   const v = V(900, 200);
   const r = penrose.tileFromEdge(u, v);
-  const s = r.parent().children()[0];
+  const [s] = r.parent().children();
   expect(r.equals(s)).toBeTruthy();
 });
 
@@ -27,7 +27,7 @@ test("penrose romb1 children", () => {
 });
 
 test("penrose romb2 children", () => {
-  const r = penrose.tileFromEdge(V(400, 0), V(900, 200)).children()[2];
+  const [, , r] = penrose.tileFromEdge(V(400, 0), V(900, 200)).children();
   const p = r.polygon() as Rhomb;
   const c = r.children().map((c) => c.polygon() as Rhomb);
   expect(p.a.equals(c[0].c)).toBeTruthy();
@@ -48,8 +48,8 @@ test("penrose romb sanity", () => {
     0.0000001
   );
 
-  expect(canCoverArbitraryVp(penrose)).toBeTruthy;
-  expect(isVolumeHierarchic(penrose)).toBeFalsy;
+  expect(canCoverArbitraryVp(penrose)).toBeTruthy();
+  expect(isVolumeHierarchic(penrose)).toBeFalsy();
 });
 
 test("penrose romb chirality", () => {

@@ -1,7 +1,7 @@
 import { Polygon } from "../lib/math/2d/Polygon";
-import { Tile } from "./Tile";
 import { V } from "../lib/math/2d/V";
 import { Prototile } from "./Prototile";
+import { Tile } from "./Tile";
 
 export interface PrototileBuilder<T extends Polygon> {
   readonly substitution: (
@@ -128,7 +128,7 @@ function parentTile<T extends Polygon>(
   p: T,
   creators: ((p: Polygon) => Tile)[]
 ): Tile {
-  let parent: Tile | undefined = undefined;
+  let parent: Tile | undefined;
   const consumers = creators.map((f) => (p: Polygon) => {
     parent = f(p);
     return parent;
