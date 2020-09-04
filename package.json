@@ -28,10 +28,7 @@
       "ts"
     ]
   },
-  "dependencies": {
-    "@luma.gl/engine": "^8.2.0",
-    "@luma.gl/webgl": "^8.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.4",
