@@ -14,9 +14,14 @@ export interface Tiling {
 export interface TilingOptions {
   includeAncestors?: boolean;
   maxStackDepth?: number;
+  progressive?: boolean;
 }
 
-const defaultOptions = { includeAncestors: false, maxStackDepth: 500 };
+const defaultOptions = {
+  includeAncestors: false,
+  maxStackDepth: 500,
+  progressive: true
+};
 
 export function* coverWith(
   tile: Tile,
@@ -80,6 +85,15 @@ export function* coverWith(
     } // else we're done
   }
 
-  yield tile;
-  yield* ascend(tile, 0);
+  if (options?.progressive) {
+    yield tile;
+    yield* ascend(tile, 0);
+  } else {
+    let d;
+    for (d = 0; !tile.contains(mask); d++) {
+      tile = tile.parent();
+    }
+    //todo: NVH
+    yield* descend(tile, d);
+  }
 }
