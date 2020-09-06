@@ -5,32 +5,48 @@ import { Prototile } from "../tiles/Prototile";
 
 // These produce a string appropriate for CSS or Canvas styles.
 export type Colorer = (t: {
-  proto: Prototile;
-  polygon: () => Polygon;
-  reflected: () => boolean;
-}) => string;
+  readonly proto: Prototile;
+  readonly polygon: () => Polygon;
+  readonly reflected: () => boolean;
+}) => Color;
 
 export type RotationColorerOptions = {
-  saturation?: number;
-  lightness?: number;
-  alpha?: number;
-  protos?: Prototile[];
-  hueSpan?: number;
-  hueOffset?: number;
+  readonly saturation?: number;
+  readonly lightness?: number;
+  readonly alpha?: number;
+  readonly protos?: Prototile[];
+  readonly hueSpan?: number;
+  readonly hueOffset?: number;
 };
 
-export const RotationColorer = ({
+export type Color = {
+  readonly h: number; // 1-360
+  readonly s: number; // 1-100
+  readonly v: number; // 1-100
+  readonly a: number; // 0.00-1.00
+  readonly toString: () => string;
+};
+
+class _Color implements Color {
+  constructor(
+    readonly h: number,
+    readonly s: number,
+    readonly v: number,
+    readonly a: number
+  ) {}
+  toString(): string {
+    return `hsla(${this.h}, ${this.s}%, ${this.v}%, ${this.a})`;
+  }
+}
+
+export function RotationColorer({
   saturation: s = 0.5,
   lightness: l = 0.5,
   alpha = 1,
   protos = [],
   hueSpan = 0,
   hueOffset = 0.05
-}: RotationColorerOptions): ((t: {
-  proto: Prototile;
-  polygon: () => Polygon;
-  reflected: () => boolean;
-}) => string) => {
+}: RotationColorerOptions): Colorer {
   // This assumes the protos lack mirror-symmetry and occur reflected.
   const numParts = protos.length * 2;
   const slotSize = 360 / numParts;
@@ -55,28 +71,17 @@ export const RotationColorer = ({
     /*console.debug(
       `colorer: ${numParts}, ${slotSize}, ${hueVariation}, ${th}, ${variant}, `
     );*/
-    const color = `hsla(${hueRgb}, ${s * 100}%, ${
-      (l - angleLightVar) * 100
-    }%, ${alpha})`;
-    return color;
+    return new _Color(hueRgb, s * 100, (l - angleLightVar) * 100, alpha);
   };
-};
+}
 
-export const SolidRgbColorer = (
-  r = 0,
-  g = 0,
-  b = 0,
-  alpha = 1
-): ((t: {
-  proto: Prototile;
-  polygon: () => Polygon;
-  reflected: () => boolean;
-}) => string) => () => {
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
+export function StaticColorer(h = 0, s = 0, v = 0, alpha = 1): Colorer {
+  const c = new _Color(h, s, v, alpha);
+  return () => c;
+}
 
 // Super rough/eye-balled first order approximation of RYB color wheel.
-export function rybToRgb(theta: number): number {
+function rybToRgb(theta: number): number {
   if (theta < 120) return theta / 2;
   if (theta < 180) return theta - 60;
   if (theta < 240) return theta * 2 - 240;

@@ -1,62 +1,46 @@
 import { ViewPort } from "../lib/browser/ViewPort";
 import {
-  Polygon,
-  canvasPathFromPolygon,
-  rectFrom,
-  svgPointsFromPolygon
+    canvasPathFromPolygon, Polygon, rectFrom, svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import { Tile } from "../tiles/Tile";
-import { Colorer } from "./Colorer";
+import { WebGlCanvas } from "../WebGlCanvas";
+import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
 
-class Renderer {
-  #draw: (p: Polygon, s: string, f: string) => void;
-  #clear: () => void;
-  #strokeColorer: (t: Tile) => string;
-  #fillColorer: (t: Tile) => string;
-  #tiles: Iterator<Tile>;
+function Renderer(
+  draw: (p: Polygon, s: Color, f: Color) => void,
+  block: () => void,
+  clear: () => void,
+  strokeColorer: Colorer,
+  fillColorer: Colorer,
+  tiles: Iterator<Tile>
+) {
+  return {
+    render() {
+      const runner = Runner();
 
-  constructor(
-    draw: (p: Polygon, s: string, f: string) => void,
-    clear: () => void,
-    strokeColorer: (t: Tile) => string,
-    fillColorer: (t: Tile) => string,
-    tiles: Iterator<Tile>
-  ) {
-    this.#draw = draw;
-    this.#clear = clear;
-    this.#strokeColorer = strokeColorer;
-    this.#fillColorer = fillColorer;
-    this.#tiles = tiles;
-  }
-
-  render() {
-    const runner = Runner();
-
-    const renderNext = () => {
-      const result = this.#tiles.next();
-      if (!isDone(result)) {
-        this.#draw(
-          result.value.polygon(),
-          this.#strokeColorer(result.value),
-          this.#fillColorer(result.value)
-        );
-        return true;
-      }
-      if (isDone(result)) {
-        console.debug(`Renderer.renderNext() - DONE!`);
-        runner.stop();
+      const rendertile = () => {
+        const result = tiles.next();
+        if (!isDone(result)) {
+          draw(
+            result.value.polygon(),
+            strokeColorer(result.value),
+            fillColorer(result.value)
+          );
+          return true;
+        }
+        if (isDone(result)) {
+          console.debug(`Renderer.renderNext() - DONE!`);
+          runner.stop();
+          return false;
+        }
         return false;
-      }
-      return false;
-    };
+      };
 
-    runner.start(
-      () => renderNext(),
-      () => this.#clear()
-    );
-  }
+      runner.start(rendertile, block, clear);
+    }
+  };
 }
 
 class Builder {
@@ -105,38 +89,60 @@ class Builder {
       this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
     const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(
       vp as Polygon
-    )[Symbol.iterator]();
+    );
 
-    const getFill = (tile: Tile) => {
-      return this.#fillColorer
-        ? this.#fillColorer(tile)
-        : "rgba(255, 192, 203, 0.3)"; //todo
-    };
-    const getStroke = (tile: Tile) => {
-      return this.#strokeColorer ? this.#strokeColorer(tile) : "black";
-    };
+    const fill = this.#fillColorer ?? StaticColorer(0, 0, 50, 1);
+    const stroke = this.#strokeColorer ?? StaticColorer(0, 0, 0, 1);
 
     if (this.#canvas) {
+      const gl = this.#canvas.getContext("webgl");
+      if (gl) {
+        const glc = WebGlCanvas(gl);
+        glc.clear();
+        let i = 0;
+        const vertices = new Float32Array(100000 * 6);
+        const colors = new Float32Array(100000 * 12);
+        for (const t of tileIterator) {
+          const color = fill(t);
+          for (const v of t
+            .polygon()
+            .triangles()
+            .flatMap((t) => t.vertices())) {
+            vertices[2 * i] = v.x;
+            vertices[2 * i + 1] = v.y;
+            colors[4 * i] = color.h;
+            colors[4 * i + 1] = color.s;
+            colors[4 * i + 2] = color.v;
+            colors[4 * i + 3] = color.a;
+            i = i + 1;
+          }
+        }
+        return {
+          render: () => glc.colors(colors).vertices(vertices).render()
+        };
+      }
       const ctx = this.#canvas.getContext("2d");
       if (ctx)
-        return new Renderer(
+        return Renderer(
           (p, s, f) => drawCanvas(p, s, f, ctx),
+          () => undefined,
           () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
-          getStroke,
-          getFill,
-          tileIterator
+          stroke,
+          fill,
+          tileIterator[Symbol.iterator]()
         );
     }
 
     if (this.#svg !== undefined) {
-      return new Renderer(
+      return Renderer(
         (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
+        () => undefined,
         () => {
           (this.#svg as SVGSVGElement).innerHTML = "";
         },
-        getStroke,
-        getFill,
-        tileIterator
+        stroke,
+        fill,
+        tileIterator[Symbol.iterator]()
       );
     }
 
@@ -148,14 +154,14 @@ export function RendererBuilder(): Builder {
   return new Builder();
 }
 
-export function drawCanvas(
+function drawCanvas(
   tile: Polygon,
-  strokeColor: string,
-  fillColor: string,
+  strokeColor: Color,
+  fillColor: Color,
   ctx: CanvasRenderingContext2D
 ): void {
-  ctx.fillStyle = fillColor;
-  ctx.strokeStyle = strokeColor;
+  ctx.fillStyle = fillColor.toString();
+  ctx.strokeStyle = strokeColor.toString();
   const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
@@ -164,15 +170,15 @@ export function drawCanvas(
 const svgNs = "http://www.w3.org/2000/svg";
 function drawSvg(
   tile: Polygon,
-  strokeColor: string,
-  fillColor: string,
+  strokeColor: Color,
+  fillColor: Color,
   svg: SVGElement
 ): void {
   const p = document.createElementNS(svgNs, "polygon");
   // For some reason ns MUST be null below.
   p.setAttributeNS(null, "points", svgPointsFromPolygon(tile));
-  p.setAttributeNS(null, "fill", fillColor);
-  p.setAttributeNS(null, "stroke", strokeColor);
+  p.setAttributeNS(null, "fill", fillColor.toString());
+  p.setAttributeNS(null, "stroke", strokeColor.toString());
   p.setAttributeNS(null, "stroke-width", "0.5");
   p.setAttributeNS(null, "stroke-linejoin", "round");
   svg.appendChild(p);

@@ -1,7 +1,7 @@
 import { ViewPort } from "./lib/browser/ViewPort";
 import { Rect } from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
-import { RotationColorer, SolidRgbColorer } from "./renderer/Colorer.js";
+import { RotationColorer, StaticColorer } from "./renderer/Colorer.js";
 import { RendererBuilder } from "./renderer/Renderer";
 
 function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
@@ -137,7 +137,7 @@ class TilingElement extends HTMLElement {
           protos: rule.protos
         })
       )
-      .strokeColorer(SolidRgbColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
+      .strokeColorer(StaticColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
       .tiles(rule.tiling(tile, params.getTilingOptions()).cover)
       .build()
       .render();
