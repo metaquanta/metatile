@@ -26,6 +26,7 @@ type WebGlCanvasBuilder2 = {
 export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
   const program = gl.createProgram();
   if (program === null) throw new Error();
+  const canvas = gl.canvas as HTMLCanvasElement;
 
   gl.attachShader(
     program,
@@ -38,11 +39,10 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
         // hsl to rgb from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
         // via https://luma.gl/docs/getting-started/shader-modules
         vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-        vec2 scale = vec2(3000, 3000);
-        vec2 trans = vec2(1500, 1500);
+        vec2 scale = vec2(${canvas.clientWidth}, ${canvas.clientHeight});
         vec3 p = abs(fract(color.xxx/360.0 + K.xyz) * 6.0 - K.www);
         vColor = vec4(color.z/100.0 * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), color.y/100.0), color.w);
-        gl_Position = vec4((position-trans)/scale, 0.0, 1.0);
+        gl_Position = vec4((position)/scale-vec2(1.0,1.0), 0.0, 1.0);
       }
 
     `(gl)
@@ -83,7 +83,6 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
   const glc = {
     vertices: (arr: Float32Array): WebGlCanvas => {
       console.log("WebGlCanvas.vertices()");
-      //arr = [250, 500, 750, 250, 750, 750].concat(arr.slice(0, 600));
       console.log(arr);
       vertexCount = arr.length / 2;
       buffer(gl, arr);
@@ -93,9 +92,6 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
     },
     colors: (arr: Float32Array): WebGlCanvas => {
       console.log("WebGlCanvas.colors()");
-      /*arr = [180, 50, 50, 1.0, 180, 50, 50, 1.0, 180, 50, 50, 1.0].concat(
-        arr.slice(0, 1200)
-      );*/
       buffer(gl, arr);
       gl.vertexAttribPointer(colorsLocation, 4, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(colorsLocation);
@@ -172,8 +168,9 @@ function clear(gl: WebGLRenderingContext): void {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-function vert(x: TemplateStringsArray) {
-  return (gl: WebGLRenderingContext) => _shader(gl, gl.VERTEX_SHADER, x.join());
+function vert(s: TemplateStringsArray, w: number, h: number) {
+  return (gl: WebGLRenderingContext) =>
+    _shader(gl, gl.VERTEX_SHADER, `${s[0]}${w}${s[1]}${h}${s[2]}`);
 }
 
 function frag(x: TemplateStringsArray) {
