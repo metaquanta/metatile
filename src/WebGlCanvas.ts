@@ -1,6 +1,8 @@
 export type WebGlCanvas = {
   clear: () => void;
-  render: () => void;
+  render: (
+    mode: WebGLRenderingContext["TRIANGLES"] | WebGLRenderingContext["LINES"]
+  ) => void;
   vertices: (a: Float32Array) => WebGlCanvas;
   colors: (c: Float32Array) => WebGlCanvas;
 };
@@ -36,12 +38,11 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
       varying vec4 vColor;
 
       void main() {
-        // hsl to rgb from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-        // via https://luma.gl/docs/getting-started/shader-modules
-        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        // hsl to rgb from https://www.shadertoy.com/view/XljGzV
+        vec3 rgb = clamp( abs(mod(color.x/360.0*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
+        vColor = vec4(color.z/100.0 + color.y/100.0 * (rgb-0.5)*(1.0-abs(2.0*color.z/100.0-1.0)), color.w);
+        
         vec2 scale = vec2(${canvas.clientWidth}, ${canvas.clientHeight});
-        vec3 p = abs(fract(color.xxx/360.0 + K.xyz) * 6.0 - K.www);
-        vColor = vec4(color.z/100.0 * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), color.y/100.0), color.w);
         gl_Position = vec4((position)/scale-vec2(1.0,1.0), 0.0, 1.0);
       }
 
@@ -100,12 +101,14 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
     clear: (): void => {
       clear(gl);
     },
-    render: (): void => {
+    render: (
+      mode: WebGLRenderingContext["TRIANGLES"] | WebGLRenderingContext["LINES"]
+    ): void => {
       console.log("WebGlCanvas.render()");
       console.log(gl.getProgramInfoLog(program));
       gl.useProgram(program);
       console.log(gl.getProgramInfoLog(program));
-      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+      gl.drawArrays(mode, 0, vertexCount);
       console.log(gl.getProgramInfoLog(program));
     }
   };
