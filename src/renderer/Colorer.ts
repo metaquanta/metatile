@@ -75,8 +75,8 @@ export function RotationColorer({
   };
 }
 
-export function StaticColorer(h = 0, s = 0, v = 0, alpha = 1): Colorer {
-  const c = new _Color(h, s, v, alpha);
+export function StaticColorer(h = 0, s = 0, l = 0, alpha = 1): Colorer {
+  const c = new _Color(h, s, l, alpha);
   return () => c;
 }
 

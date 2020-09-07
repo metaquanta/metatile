@@ -87,9 +87,8 @@ class Builder {
   build() {
     const vp =
       this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
-    const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(
-      vp as Polygon
-    );
+    if (vp === undefined) throw new Error();
+    const tileIterator = this.#tiles as (vp: Polygon) => Iterable<Tile>;
 
     const fill = this.#fillColorer ?? StaticColorer(0, 0, 50, 1);
     const stroke = this.#strokeColorer ?? StaticColorer(0, 0, 0, 1);
@@ -99,26 +98,51 @@ class Builder {
       if (gl) {
         const glc = WebGlCanvas(gl);
         glc.clear();
-        let i = 0;
-        const vertices = new Float32Array(100000 * 6);
-        const colors = new Float32Array(100000 * 12);
-        for (const t of tileIterator) {
-          const color = fill(t);
-          for (const v of t
-            .polygon()
-            .triangles()
-            .flatMap((t) => t.vertices())) {
-            vertices[2 * i] = v.x;
-            vertices[2 * i + 1] = v.y;
-            colors[4 * i] = color.h;
-            colors[4 * i + 1] = color.s;
-            colors[4 * i + 2] = color.v;
-            colors[4 * i + 3] = color.a;
-            i = i + 1;
-          }
-        }
         return {
-          render: () => glc.colors(colors).vertices(vertices).render()
+          render: () => {
+            let i = 0;
+            // ~ 12MiB
+            const vertices = new Float32Array(2 ** 21);
+            const colors = new Float32Array(2 ** 22);
+            for (const t of tileIterator(vp)) {
+              const color = fill(t);
+              for (const v of t
+                .polygon()
+                .triangles()
+                .flatMap((t) => t.vertices())) {
+                vertices[2 * i] = v.x;
+                vertices[2 * i + 1] = v.y;
+                colors[4 * i] = color.h;
+                colors[4 * i + 1] = color.s;
+                colors[4 * i + 2] = color.v;
+                colors[4 * i + 3] = color.a;
+                i = i + 1;
+              }
+            }
+            glc.colors(colors).vertices(vertices).render(gl.TRIANGLES);
+            i = 0;
+            for (const t of tileIterator(vp)) {
+              const color = stroke(t);
+              const v = t.polygon().vertices();
+              for (let j = 0; j < v.length; j++) {
+                vertices[4 * i] = v[j].x;
+                vertices[4 * i + 1] = v[j].y;
+                vertices[4 * i + 2] = v[(j + 1) % v.length].x;
+                vertices[4 * i + 3] = v[(j + 1) % v.length].y;
+                colors[8 * i] = color.h;
+                colors[8 * i + 1] = color.s;
+                colors[8 * i + 2] = color.v;
+                // webgl lines are too thick/dark
+                colors[8 * i + 3] = color.a * 0.3;
+                colors[8 * i + 4] = color.h;
+                colors[8 * i + 5] = color.s;
+                colors[8 * i + 6] = color.v;
+                colors[8 * i + 7] = color.a * 0.3;
+                i = i + 1;
+              }
+            }
+            glc.colors(colors).vertices(vertices).render(gl.LINES);
+          }
         };
       }
       const ctx = this.#canvas.getContext("2d");
@@ -129,7 +153,7 @@ class Builder {
           () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
           stroke,
           fill,
-          tileIterator[Symbol.iterator]()
+          tileIterator(vp)[Symbol.iterator]()
         );
     }
 
@@ -142,7 +166,7 @@ class Builder {
         },
         stroke,
         fill,
-        tileIterator[Symbol.iterator]()
+        tileIterator(vp)[Symbol.iterator]()
       );
     }
 
