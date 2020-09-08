@@ -4,13 +4,12 @@ import {
 } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import { Tile } from "../tiles/Tile";
-import { WebGlCanvas } from "../WebGlCanvas";
 import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
+import { WebGlCanvas } from "./WebGlCanvas";
 
 function Renderer(
   draw: (p: Polygon, s: Color, f: Color) => void,
-  block: () => void,
   clear: () => void,
   strokeColorer: Colorer,
   fillColorer: Colorer,
@@ -38,7 +37,67 @@ function Renderer(
         return false;
       };
 
-      runner.start(rendertile, block, clear);
+      runner.start(rendertile, () => undefined, clear);
+    }
+  };
+}
+
+function WebGlRenderer(
+  gl: WebGLRenderingContext,
+  strokeColorer: Colorer,
+  fillColorer: Colorer,
+  tiles: Iterable<Tile>
+) {
+  const glc = WebGlCanvas(gl);
+  glc.clear();
+  return {
+    render: () => {
+      let i = 0;
+      // ~ 12MiB
+      const vertices = new Float32Array(2 ** 21);
+      const colors = new Float32Array(2 ** 22);
+      const polygons = Array.from(tiles);
+      for (const t of polygons) {
+        const color = fillColorer(t);
+        for (const v of t
+          .polygon()
+          .triangles()
+          .flatMap((t) => t.vertices())) {
+          vertices[2 * i] = v.x;
+          vertices[2 * i + 1] = v.y;
+          colors[4 * i] = color.h;
+          colors[4 * i + 1] = color.s;
+          colors[4 * i + 2] = color.v;
+          colors[4 * i + 3] = color.a;
+          i = i + 1;
+        }
+      }
+      glc.colors(colors).vertices(vertices).render(gl.TRIANGLES);
+      i = 0;
+      for (const t of polygons) {
+        const color = strokeColorer(t);
+        for (const v of t
+          .polygon()
+          .edges()
+          .flatMap((e) => [e[0], e[1]])) {
+          vertices[2 * i] = v.x;
+          vertices[2 * i + 1] = v.y;
+          colors[4 * i] = color.h;
+          colors[4 * i + 1] = color.s;
+          colors[4 * i + 2] = color.v;
+          // webgl lines are too thick/dark
+          colors[4 * i + 3] = color.a * 0.3;
+          i = i + 1;
+        }
+      }
+      glc
+        .colors(colors.slice(0, 12800))
+        .vertices(vertices.slice(0, 6400))
+        .render(gl.LINES);
+      glc
+        .colors(colors.slice(12800))
+        .vertices(vertices.slice(6400))
+        .render(gl.LINES);
     }
   };
 }
@@ -88,7 +147,7 @@ class Builder {
     const vp =
       this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
     if (vp === undefined) throw new Error();
-    const tileIterator = this.#tiles as (vp: Polygon) => Iterable<Tile>;
+    const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(vp);
 
     const fill = this.#fillColorer ?? StaticColorer(0, 0, 50, 1);
     const stroke = this.#strokeColorer ?? StaticColorer(0, 0, 0, 1);
@@ -96,77 +155,28 @@ class Builder {
     if (this.#canvas) {
       const gl = this.#canvas.getContext("webgl");
       if (gl) {
-        const glc = WebGlCanvas(gl);
-        glc.clear();
-        return {
-          render: () => {
-            let i = 0;
-            // ~ 12MiB
-            const vertices = new Float32Array(2 ** 21);
-            const colors = new Float32Array(2 ** 22);
-            for (const t of tileIterator(vp)) {
-              const color = fill(t);
-              for (const v of t
-                .polygon()
-                .triangles()
-                .flatMap((t) => t.vertices())) {
-                vertices[2 * i] = v.x;
-                vertices[2 * i + 1] = v.y;
-                colors[4 * i] = color.h;
-                colors[4 * i + 1] = color.s;
-                colors[4 * i + 2] = color.v;
-                colors[4 * i + 3] = color.a;
-                i = i + 1;
-              }
-            }
-            glc.colors(colors).vertices(vertices).render(gl.TRIANGLES);
-            i = 0;
-            for (const t of tileIterator(vp)) {
-              const color = stroke(t);
-              const v = t.polygon().vertices();
-              for (let j = 0; j < v.length; j++) {
-                vertices[4 * i] = v[j].x;
-                vertices[4 * i + 1] = v[j].y;
-                vertices[4 * i + 2] = v[(j + 1) % v.length].x;
-                vertices[4 * i + 3] = v[(j + 1) % v.length].y;
-                colors[8 * i] = color.h;
-                colors[8 * i + 1] = color.s;
-                colors[8 * i + 2] = color.v;
-                // webgl lines are too thick/dark
-                colors[8 * i + 3] = color.a * 0.3;
-                colors[8 * i + 4] = color.h;
-                colors[8 * i + 5] = color.s;
-                colors[8 * i + 6] = color.v;
-                colors[8 * i + 7] = color.a * 0.3;
-                i = i + 1;
-              }
-            }
-            glc.colors(colors).vertices(vertices).render(gl.LINES);
-          }
-        };
+        return WebGlRenderer(gl, stroke, fill, tileIterator);
       }
       const ctx = this.#canvas.getContext("2d");
       if (ctx)
         return Renderer(
           (p, s, f) => drawCanvas(p, s, f, ctx),
-          () => undefined,
           () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
           stroke,
           fill,
-          tileIterator(vp)[Symbol.iterator]()
+          tileIterator[Symbol.iterator]()
         );
     }
 
     if (this.#svg !== undefined) {
       return Renderer(
         (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
-        () => undefined,
         () => {
           (this.#svg as SVGSVGElement).innerHTML = "";
         },
         stroke,
         fill,
-        tileIterator(vp)[Symbol.iterator]()
+        tileIterator[Symbol.iterator]()
       );
     }
 
