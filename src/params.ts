@@ -4,7 +4,7 @@ import { PinwheelPQ } from "./rules/pinwheel";
 import rules, { RuleOptions } from "./rules/rules";
 import { Rule } from "./tiles/Rule";
 import { TilingOptions } from "./tiles/Tiling";
-import TilingElement from "./TilingComponent";
+import TilingElement from "./TilingElement";
 
 export type ParameterStrings = {
   rule?: string;
@@ -19,6 +19,7 @@ export type ParameterStrings = {
   tilingIncludeAncestors?: string;
   pinwheelP?: string;
   pinwheelQ?: string;
+  renderer?: string;
 };
 
 export type Parameters = ParameterStrings & {
@@ -28,6 +29,7 @@ export type Parameters = ParameterStrings & {
   getColorOptions: () => ColorOptions;
   getTilingOptions: () => TilingOptions;
   setAttributes: (tag: TilingElement) => void;
+  getRenderer: () => "canvas" | "webgl" | "svg";
 };
 
 export type ColorOptions = RotationColorerOptions & { strokeAlpha?: number };
@@ -105,7 +107,7 @@ function colorOptions(params: ParameterStrings): ColorOptions {
     alpha: parseFloat(params.colorAlpha),
     strokeAlpha: parseFloat(params.colorStrokeAlpha)
   };
-  console.debug(`colorParameters(): `, p);
+  //console.debug(`colorParameters(): `, p);
   return p;
 }
 
@@ -154,7 +156,8 @@ function parameters(paramStrings: ParameterStrings): Parameters {
     setAttributes: (tag) =>
       Object.entries(paramStrings).forEach((k) =>
         tag.setAttribute(k[0], k[1] ?? "")
-      )
+      ),
+    getRenderer: () => parseRenderer(paramStrings.renderer ?? "")
   };
 }
 
@@ -255,4 +258,10 @@ function parseBool(b: string | null | undefined): boolean | undefined {
   if (truthStrings.indexOf(b) >= 0) return true;
   if (falseStrings.indexOf(b) >= 0) return false;
   return undefined;
+}
+
+function parseRenderer(r: string): "canvas" | "webgl" | "svg" {
+  if (r === "webgl") return "webgl";
+  if (r === "svg") return "svg";
+  return "canvas";
 }
