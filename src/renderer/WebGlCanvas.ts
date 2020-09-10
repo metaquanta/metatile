@@ -63,7 +63,7 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
   );
 
   gl.linkProgram(program);
-  console.log(gl.getProgramInfoLog(program));
+  //console.log(gl.getProgramInfoLog(program));
   const numAttribs = gl.getProgramParameter(
     program,
     gl.ACTIVE_ATTRIBUTES
@@ -76,7 +76,7 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
   const positionsLocation = gl.getAttribLocation(program, "position");
   const colorsLocation = gl.getAttribLocation(program, "color");
   gl.validateProgram(program);
-  console.log(gl.getProgramInfoLog(program));
+  //console.log(gl.getProgramInfoLog(program));
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error();
 
   let vertexCount: number;
@@ -84,7 +84,7 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
   const glc = {
     vertices: (arr: Float32Array): WebGlCanvas => {
       console.log("WebGlCanvas.vertices()");
-      console.log(arr);
+      //console.log(arr);
       vertexCount = arr.length / 2;
       buffer(gl, arr);
       gl.vertexAttribPointer(positionsLocation, 2, gl.FLOAT, false, 0, 0);
@@ -105,11 +105,11 @@ export function WebGlCanvas(gl: WebGLRenderingContext): WebGlCanvasBuilder {
       mode: WebGLRenderingContext["TRIANGLES"] | WebGLRenderingContext["LINES"]
     ): void => {
       console.log("WebGlCanvas.render()");
-      console.log(gl.getProgramInfoLog(program));
+      //console.log(gl.getProgramInfoLog(program));
       gl.useProgram(program);
-      console.log(gl.getProgramInfoLog(program));
+      //console.log(gl.getProgramInfoLog(program));
       gl.drawArrays(mode, 0, vertexCount);
-      console.log(gl.getProgramInfoLog(program));
+      //console.log(gl.getProgramInfoLog(program));
     }
   };
 
@@ -186,7 +186,7 @@ function _shader(gl: WebGLRenderingContext, type: number, source: string) {
   if (shader === null) throw new Error();
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
-  console.log(gl.getShaderInfoLog(shader));
+  //console.log(gl.getShaderInfoLog(shader));
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     throw new Error(gl.getShaderInfoLog(shader) ?? "");
   }

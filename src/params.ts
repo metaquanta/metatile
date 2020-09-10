@@ -132,7 +132,8 @@ function parameterStrings(
     colorStrokeAlpha: get("colorStrokeAlpha") ?? undefined,
     tilingIncludeAncestors: get("tilingIncludeAncestors") ?? undefined,
     pinwheelP: get("pinwheelP") ?? undefined,
-    pinwheelQ: get("pinwheelQ") ?? undefined
+    pinwheelQ: get("pinwheelQ") ?? undefined,
+    renderer: get("renderer") ?? undefined
   };
 }
 
