@@ -1,12 +1,13 @@
-import { ViewPort } from "../lib/browser/ViewPort";
 import {
-    canvasPathFromPolygon, Polygon, rectFrom, svgPointsFromPolygon
+    canvasPathFromPolygon, Polygon, Rect, rectFrom, svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import { Tile } from "../tiles/Tile";
 import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
 import { WebGlCanvas } from "./WebGlCanvas";
+
+export type Renderer = { render: () => void };
 
 function Renderer(
   draw: (p: Polygon, s: Color, f: Color) => void,
@@ -102,15 +103,15 @@ function WebGlRenderer(
   };
 }
 
-class Builder {
+class _RendererBuilder {
   #canvas: HTMLCanvasElement | undefined;
   #svg: SVGSVGElement | undefined;
-  #viewPort: ViewPort | undefined;
+  #viewPort: Rect | undefined;
   #tiles: ((vp: Polygon) => Iterable<Tile>) | undefined;
   #fillColorer: Colorer | undefined;
   #strokeColorer: Colorer | undefined;
 
-  tiles(tiles: ((vp: Polygon) => Iterable<Tile>) | Iterable<Tile>) {
+  tiles(tiles: ((vp: Polygon) => Iterable<Tile>) | Iterable<Tile>): this {
     if (!isCallable(tiles)) {
       this.#tiles = (_) => tiles;
     } else {
@@ -119,31 +120,31 @@ class Builder {
     return this;
   }
 
-  fillColorer(c: Colorer) {
+  fillColorer(c: Colorer): this {
     this.#fillColorer = c;
     return this;
   }
-  strokeColorer(c: Colorer) {
+  strokeColorer(c: Colorer): this {
     this.#strokeColorer = c;
     return this;
   }
 
-  canvas(c: HTMLCanvasElement) {
+  canvas(c: HTMLCanvasElement): this {
     this.#canvas = c;
     return this;
   }
 
-  svg(svg: SVGSVGElement) {
+  svg(svg: SVGSVGElement): this {
     this.#svg = svg;
     return this;
   }
 
-  viewport(vp: ViewPort) {
+  viewport(vp: Rect): this {
     this.#viewPort = vp;
     return this;
   }
 
-  build() {
+  build(mode: "canvas" | "webgl" | "svg") {
     const vp =
       this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
     if (vp === undefined) throw new Error();
@@ -153,22 +154,29 @@ class Builder {
     const stroke = this.#strokeColorer ?? StaticColorer(0, 0, 0, 1);
 
     if (this.#canvas) {
-      const gl = this.#canvas.getContext("webgl");
-      if (gl) {
-        return WebGlRenderer(gl, stroke, fill, tileIterator);
+      if (mode === "webgl") {
+        const gl = this.#canvas.getContext("webgl");
+        if (gl) {
+          return WebGlRenderer(gl, stroke, fill, tileIterator);
+        }
       }
-      const ctx = this.#canvas.getContext("2d");
-      if (ctx)
-        return Renderer(
-          (p, s, f) => drawCanvas(p, s, f, ctx),
-          () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
-          stroke,
-          fill,
-          tileIterator[Symbol.iterator]()
-        );
+      if (mode === "canvas") {
+        const ctx = this.#canvas.getContext("2d");
+        if (ctx) {
+          const renderer = Renderer(
+            (p, s, f) => drawCanvas(p, s, f, ctx),
+            () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
+            stroke,
+            fill,
+            tileIterator[Symbol.iterator]()
+          );
+          this.build = () => renderer;
+          return renderer;
+        }
+      }
     }
 
-    if (this.#svg !== undefined) {
+    if (this.#svg !== undefined && mode === "svg") {
       return Renderer(
         (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
         () => {
@@ -184,8 +192,9 @@ class Builder {
   }
 }
 
-export function RendererBuilder(): Builder {
-  return new Builder();
+export type RendererBuilder = _RendererBuilder;
+export function RendererBuilder(): RendererBuilder {
+  return new _RendererBuilder();
 }
 
 function drawCanvas(
@@ -196,6 +205,7 @@ function drawCanvas(
 ): void {
   ctx.fillStyle = fillColor.toString();
   ctx.strokeStyle = strokeColor.toString();
+  ctx.lineJoin = "round";
   const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);

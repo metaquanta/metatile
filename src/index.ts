@@ -1,5 +1,5 @@
 import { getUrlParameters, setRandomParameters } from "./params";
-import TilingElement from "./TilingComponent";
+import TilingElement from "./TilingElement";
 
 let params = getUrlParameters();
 console.debug("params:", params);
