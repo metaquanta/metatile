@@ -1,36 +1,8 @@
-import { ViewPort } from "./lib/browser/ViewPort";
-import { Rect } from "./lib/math/2d/Polygon";
+import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
+import { rectFrom } from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
 import { RotationColorer, StaticColorer } from "./renderer/Colorer.js";
-import { RendererBuilder } from "./renderer/Renderer";
-
-function getRenderer(root: ShadowRoot): [HTMLCanvasElement, ViewPort] {
-  root.innerHTML = `<style>
-      :host {
-        display: block;
-        contain: content;
-      }
-      :host, div {
-        margin: 0;
-      }
-      :host, #canvas_vp, canvas {
-        width: 100%;
-        height: 100%;
-      }
-      #canvas_vp > div {
-        position: fixed;
-      }
-    </style>`;
-  const outerDiv = document.createElement("div");
-  outerDiv.id = "canvas_vp";
-  const innerDiv = document.createElement("div");
-  const canvas = document.createElement("canvas");
-  innerDiv.appendChild(canvas);
-  outerDiv.appendChild(innerDiv);
-  root.appendChild(outerDiv);
-  const vp = ViewPort(outerDiv);
-  return [canvas, vp];
-}
+import { Renderer, RendererBuilder } from "./renderer/Renderer";
 
 function _attribute(
   comp: TilingElement,
@@ -42,7 +14,6 @@ function _attribute(
   } else {
     comp.removeAttribute(attribute);
   }
-  comp.render();
 }
 
 const observedAttributes = [
@@ -57,15 +28,20 @@ const observedAttributes = [
   "colorStrokeAlpha",
   "tilingIncludeAncestors",
   "pinwheelP",
-  "pinwheelQ"
+  "pinwheelQ",
+  "renderer"
 ];
 
-class TilingElement extends HTMLElement {
-  viewPort: ViewPort | undefined = undefined;
-  canvas: HTMLCanvasElement | undefined = undefined;
+class TilingElement extends FixedCanvasElement {
+  readonly #rendererBuilder: RendererBuilder = RendererBuilder();
+  #renderer: Renderer | undefined = undefined;
 
   static get observedAttributes(): string[] {
     return observedAttributes;
+  }
+
+  set renderer(renderer: string) {
+    _attribute(this, "renderer", renderer);
   }
 
   set rule(rule: string) {
@@ -105,42 +81,39 @@ class TilingElement extends HTMLElement {
     _attribute(this, "pinwheelQ", q);
   }
 
-  attributeChangedCallback(name: string): void {
-    if (observedAttributes.indexOf(name) >= 0) {
-      this.render();
-    }
-  }
-
   connectedCallback(): void {
-    const shadowRoot = this.attachShadow({ mode: "open" });
-    [this.canvas, this.viewPort] = getRenderer(shadowRoot);
+    super.connectedCallback();
     this.render();
   }
 
   render(): void {
-    if (this.canvas === undefined) return;
-
     const params = getTagParameters(this);
 
     const rule = params.getRule();
 
-    const tile = rule.tileFromEdge(params.getV(), params.getU());
-
     const colorOptions = params.getColorOptions();
 
-    RendererBuilder()
-      .canvas(this.canvas)
-      .viewport(this.viewPort as Rect)
-      .fillColorer(
-        RotationColorer({
-          ...colorOptions,
-          protos: rule.protos
-        })
-      )
-      .strokeColorer(StaticColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
-      .tiles(rule.tiling(tile, params.getTilingOptions()).cover)
-      .build()
-      .render();
+    if (this.#renderer === undefined) {
+      this.#renderer = this.#rendererBuilder
+        .canvas(this)
+        .viewport(rectFrom(this.canvasViewPort))
+        .fillColorer(
+          RotationColorer({
+            ...colorOptions,
+            protos: rule.protos
+          })
+        )
+        .strokeColorer(StaticColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
+        .tiles(
+          rule.tiling(
+            rule.tileFromEdge(params.getV(), params.getU()),
+            params.getTilingOptions()
+          ).cover
+        )
+        .build(params.getRenderer());
+
+      this.#renderer.render();
+    }
   }
 }
 
