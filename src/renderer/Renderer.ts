@@ -1,6 +1,5 @@
-import { ViewPort } from "../lib/browser/ViewPort";
 import {
-    canvasPathFromPolygon, Polygon, rectFrom, svgPointsFromPolygon
+    canvasPathFromPolygon, Polygon, Rect, rectFrom, svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { isCallable } from "../lib/util";
 import { Tile } from "../tiles/Tile";
@@ -62,7 +61,7 @@ export class Renderer {
 class _RendererBuilder {
   #canvas: CanvasRenderingContext2D | undefined;
   #svg: SVGSVGElement | undefined;
-  #viewPort: ViewPort | undefined;
+  #viewPort: Rect | undefined;
   #tiles: ((vp: Polygon) => Iterable<Tile>) | undefined;
   #fillColorer: Colorer | undefined;
   #strokeColorer: Colorer | undefined;
@@ -95,7 +94,7 @@ class _RendererBuilder {
     return this;
   }
 
-  viewport(vp: ViewPort): this {
+  viewport(vp: Rect): this {
     this.#viewPort = vp;
     return this;
   }
@@ -160,6 +159,7 @@ function drawCanvas(
 ): void {
   ctx.fillStyle = fillColor;
   ctx.strokeStyle = strokeColor;
+  ctx.lineJoin = "round";
   const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
