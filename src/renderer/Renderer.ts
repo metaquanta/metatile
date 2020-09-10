@@ -145,6 +145,7 @@ class _RendererBuilder {
   }
 
   build(mode: "canvas" | "webgl" | "svg") {
+    console.debug(`Renderer.build("${mode}")`);
     const vp =
       this.#viewPort ?? (this.#svg ? rectFrom(this.#svg.viewBox) : undefined);
     if (vp === undefined) throw new Error();
