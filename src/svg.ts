@@ -22,5 +22,5 @@ RendererBuilder()
   )
   .strokeColorer(SolidRgbColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
   .tiles(rule.tiling(tile, params.getTilingOptions()).cover)
-  .build()
+  .build("svg")
   .render();
