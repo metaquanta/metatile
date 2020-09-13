@@ -24,13 +24,11 @@ export function range(n: number): number[] {
 }
 
 export function isCallable<T, V>(f: ((p: V) => T) | T): f is (p: V) => T {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return (f as (p: V) => T).call !== undefined;
+  return (f as { call?: unknown }).call !== undefined;
 }
 
 export function isArray<T, V>(a: V | T[]): a is T[] {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return (a as T[]).entries !== undefined;
+  return (a as { entries?: unknown }).entries !== undefined;
 }
 
 export function isDone<T>(

@@ -13,6 +13,7 @@ export interface PrototileBuilder<T extends Polygon> {
   readonly tile: (f: (l: V, p: V) => T) => this;
   readonly build: (creators: ((p: Polygon) => Tile)[]) => Prototile;
 }
+
 export type Substitution<T extends Polygon> = (
   c: T,
   ...consumers: ((p: Polygon) => Tile)[]
