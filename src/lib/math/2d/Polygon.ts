@@ -16,8 +16,7 @@ export interface Polygon {
 }
 
 export function isPolygon<T>(p: Polygon | T): p is Polygon {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return (p as Polygon).vertices !== undefined;
+  return (p as { vertices?: unknown }).vertices !== undefined;
 }
 
 export type Triangle = Polygon & {
@@ -46,9 +45,8 @@ export type Rect = Polygon & {
   bottom: number;
 };
 
-export function isRect<T>(p: Rect | T): p is Rect {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return (p as Rect).bottom !== undefined;
+export function isRect(p: Polygon): p is Rect {
+  return (p as { bottom?: unknown }).bottom !== undefined;
 }
 
 export function Polygon(vertices: V[]): Polygon {
@@ -145,6 +143,7 @@ class _Triangle extends _Polygon {
   translate(v: V): Triangle {
     return new _Triangle(this.a.add(v), this.b.add(v), this.c.add(v));
   }
+
   toString() {
     return `⟮${this.a}▽${this.b}▼${this.c}⟯`;
   }
@@ -163,6 +162,7 @@ class _Tetragon extends _Polygon {
       this.d.add(v)
     );
   }
+
   toString() {
     return `⟮${this.a}▱${this.b}▰${this.c}▱${this.d}⟯`;
   }
@@ -206,20 +206,20 @@ export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
 export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
   new _Rect(x0, y0, xf, yf);
 
-export function rectFrom(obj: DOMRect | SVGAnimatedRect | SVGRect): Rect {
+export function rectFrom(
+  obj: SVGAnimatedRect | { x: number; y: number; width: number; height: number }
+): Rect {
+  if ((obj as { animVal: unknown }).animVal) {
+    return rectFrom((obj as SVGAnimatedRect).animVal);
+  }
   if (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    (obj as DOMRect | SVGRect).x !== undefined &&
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    (obj as DOMRect | SVGRect).height !== undefined
+    (obj as { x?: unknown }).x !== undefined &&
+    (obj as { height?: unknown }).height !== undefined
   ) {
     const rect = obj as DOMRect | SVGRect;
     return Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
   }
-  //if ((obj as SVGAnimatedRect).animVal) {
-  return rectFrom((obj as SVGAnimatedRect).animVal);
-  //}
-  //throw new Error(`can't cast ${obj} to Polygon`);
+  throw new Error(`Bad cast! unreachable!!!`);
 }
 
 function contains(p: Polygon, q: Polygon | V): boolean {

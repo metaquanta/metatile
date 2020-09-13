@@ -59,8 +59,8 @@ export function* coverWith(
       `Tiling:cover:ascend(Tile, ${d}) ${tile.proto} [${tile.polygon().area()}]`
     );*/
     if (d > opts.maxStackDepth) {
-      console.trace(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
-      throw new Error(`!!!maximum depth/height exceeded!!! d: ${d} [${tile}]`);
+      console.trace(`!!!maximum depth/height exceeded!!! d: ${d}`);
+      throw new Error(`!!!maximum depth/height exceeded!!! d: ${d}`);
     }
     const parent = tile.parent();
     for (const t of parent.children()) {
@@ -90,10 +90,11 @@ export function* coverWith(
     yield* ascend(tile, 0);
   } else {
     let d;
-    for (d = 0; !tile.contains(mask); d++) {
-      tile = tile.parent();
+    let root = tile;
+    for (d = 0; !root.contains(mask); d++) {
+      root = root.parent();
     }
     //todo: NVH
-    yield* descend(tile, d);
+    yield* descend(root, d);
   }
 }

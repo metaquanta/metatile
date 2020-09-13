@@ -7,7 +7,7 @@ import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
 import { WebGlCanvas } from "./WebGlCanvas";
 
-export type Renderer = { render: () => void };
+export type Renderer = { readonly render: () => void };
 
 function Renderer(
   draw: (p: Polygon, s: Color, f: Color) => void,

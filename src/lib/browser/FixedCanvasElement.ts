@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const CANVAS_MAX_SIZE = 5000;
 
 const style = `<style>
@@ -104,8 +102,9 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     | null {
     if (contextId === "2d") {
       if (this.#context !== undefined) return this.#context;
-      this.#context = (this.#canvas.getContext("2d", options) ??
-        undefined) as CanvasRenderingContext2D;
+      this.#context = (this.#canvas.getContext("2d", options) ?? undefined) as
+        | CanvasRenderingContext2D
+        | undefined;
       if (this.#context === undefined) return null;
       this.#context.scale(window.devicePixelRatio, window.devicePixelRatio);
       console.debug(
@@ -117,10 +116,10 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     return this.#canvas.getContext(contextId, options);
   }
 
-  toBlob(callback: BlobCallback, type?: string, quality?: any): void {
+  toBlob(callback: BlobCallback, type?: string, quality?: unknown): void {
     return this.#canvas.toBlob(callback, type, quality);
   }
-  toDataURL(type?: string, quality?: any): string {
+  toDataURL(type?: string, quality?: unknown): string {
     return this.#canvas.toDataURL(type, quality);
   }
   transferControlToOffscreen(): OffscreenCanvas {
