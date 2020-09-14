@@ -68,9 +68,6 @@ export function RotationColorer({
       Math.abs(protos.indexOf(t.proto)) * 2 + (t.reflected() ? 1 : 0);
     const hueRyb = (angleHueVar + colors[variant]) % 360;
     const hueRgb = rybToRgb(hueRyb);
-    /*console.debug(
-      `colorer: ${numParts}, ${slotSize}, ${hueVariation}, ${th}, ${variant}, `
-    );*/
     return new _Color(hueRgb, s * 100, (l - angleLightVar) * 100, alpha);
   };
 }

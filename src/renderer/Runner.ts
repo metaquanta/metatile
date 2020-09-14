@@ -37,7 +37,7 @@ export default function Runner(): {
           tasksPerFrame = Math.round(
             Math.max(
               (msPerFrameTarget * tasksPerFrame) / (ms - timestamp),
-              10 // It can get stuck too low and become /really/ slow
+              100 // It can get stuck too low and become /really/ slow
             )
           );
           block();
