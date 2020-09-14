@@ -44,61 +44,53 @@ function Renderer(
 }
 
 function WebGlRenderer(
-  gl: WebGLRenderingContext,
-  strokeColorer: Colorer,
+  gl: WebGL2RenderingContext,
   fillColorer: Colorer,
   tiles: Iterable<Tile>
 ) {
   const glc = WebGlCanvas(gl);
-  glc.clear();
   return {
     render: () => {
       let i = 0;
-      // ~ 12MiB
-      const vertices = new Float32Array(2 ** 21);
-      const colors = new Float32Array(2 ** 22);
-      const polygons = Array.from(tiles);
-      for (const t of polygons) {
-        const color = fillColorer(t);
-        for (const v of t
-          .polygon()
-          .triangles()
-          .flatMap((t) => t.vertices())) {
-          vertices[2 * i] = v.x;
-          vertices[2 * i + 1] = v.y;
-          colors[4 * i] = color.h;
-          colors[4 * i + 1] = color.s;
-          colors[4 * i + 2] = color.v;
-          colors[4 * i + 3] = color.a;
-          i = i + 1;
+      let j = 0;
+      // ~14MiB
+      // triangle: 3 fill, 6 stroke vertices
+      // rhomb: 6 fill, 8 stroke vertices
+      let fillverts: Float32Array;
+      let strokeverts: Float32Array;
+      let colors: Uint8Array;
+      function loadArrays() {
+        fillverts = new Float32Array(2 ** 20);
+        strokeverts = new Float32Array(2 ** 21);
+        colors = new Uint8Array(2 ** 21);
+        for (const t of tiles) {
+          const color = fillColorer(t);
+          for (const v of t
+            .polygon()
+            .triangles()
+            .flatMap((t) => t.vertices())) {
+            fillverts[2 * i] = v.x;
+            fillverts[2 * i + 1] = v.y;
+            colors[3 * i] = Math.round((color.h / 360) * 255);
+            colors[3 * i + 1] = Math.round((color.s / 100) * 255);
+            colors[3 * i + 2] = Math.round((color.v / 100) * 255);
+            i = i + 1;
+          }
+          for (const v of t
+            .polygon()
+            .edges()
+            .flatMap((e) => [e[0], e[1]])) {
+            strokeverts[2 * j] = v.x;
+            strokeverts[2 * j + 1] = v.y;
+            j = j + 1;
+          }
         }
+        window.requestAnimationFrame(() => draw());
       }
-      glc.colors(colors).vertices(vertices).render(gl.TRIANGLES);
-      i = 0;
-      for (const t of polygons) {
-        const color = strokeColorer(t);
-        for (const v of t
-          .polygon()
-          .edges()
-          .flatMap((e) => [e[0], e[1]])) {
-          vertices[2 * i] = v.x;
-          vertices[2 * i + 1] = v.y;
-          colors[4 * i] = color.h;
-          colors[4 * i + 1] = color.s;
-          colors[4 * i + 2] = color.v;
-          // webgl lines are too thick/dark
-          colors[4 * i + 3] = color.a * 0.3;
-          i = i + 1;
-        }
+      function draw() {
+        glc.colors(colors).triangles(fillverts).edges(strokeverts).render();
       }
-      glc
-        .colors(colors.slice(0, 12800))
-        .vertices(vertices.slice(0, 6400))
-        .render(gl.LINES);
-      glc
-        .colors(colors.slice(12800))
-        .vertices(vertices.slice(6400))
-        .render(gl.LINES);
+      window.requestAnimationFrame(() => loadArrays());
     }
   };
 }
@@ -156,9 +148,9 @@ class _RendererBuilder {
 
     if (this.#canvas) {
       if (mode === "webgl") {
-        const gl = this.#canvas.getContext("webgl");
+        const gl = this.#canvas.getContext("webgl2");
         if (gl) {
-          return WebGlRenderer(gl, stroke, fill, tileIterator);
+          return WebGlRenderer(gl, fill, tileIterator);
         }
       }
       if (mode === "canvas") {
