@@ -5,7 +5,7 @@ import { isCallable, isDone } from "../lib/util";
 import { Tile } from "../tiles/Tile";
 import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
-import { WebGlCanvas } from "./WebGlCanvas";
+import { WebGlRenderer } from "./WebGlRenderer.js";
 
 export type Renderer = { readonly render: () => void };
 
@@ -39,58 +39,6 @@ function Renderer(
       };
 
       runner.start(rendertile, () => undefined, clear);
-    }
-  };
-}
-
-function WebGlRenderer(
-  gl: WebGL2RenderingContext,
-  fillColorer: Colorer,
-  tiles: Iterable<Tile>
-) {
-  const glc = WebGlCanvas(gl);
-  return {
-    render: () => {
-      let i = 0;
-      let j = 0;
-      // ~14MiB
-      // triangle: 3 fill, 6 stroke vertices
-      // rhomb: 6 fill, 8 stroke vertices
-      let fillverts: Float32Array;
-      let strokeverts: Float32Array;
-      let colors: Uint8Array;
-      function loadArrays() {
-        fillverts = new Float32Array(2 ** 20);
-        strokeverts = new Float32Array(2 ** 21);
-        colors = new Uint8Array(2 ** 21);
-        for (const t of tiles) {
-          const color = fillColorer(t);
-          for (const v of t
-            .polygon()
-            .triangles()
-            .flatMap((t) => t.vertices())) {
-            fillverts[2 * i] = v.x;
-            fillverts[2 * i + 1] = v.y;
-            colors[3 * i] = Math.round((color.h / 360) * 255);
-            colors[3 * i + 1] = Math.round((color.s / 100) * 255);
-            colors[3 * i + 2] = Math.round((color.v / 100) * 255);
-            i = i + 1;
-          }
-          for (const v of t
-            .polygon()
-            .edges()
-            .flatMap((e) => [e[0], e[1]])) {
-            strokeverts[2 * j] = v.x;
-            strokeverts[2 * j + 1] = v.y;
-            j = j + 1;
-          }
-        }
-        window.requestAnimationFrame(() => draw());
-      }
-      function draw() {
-        glc.colors(colors).triangles(fillverts).edges(strokeverts).render();
-      }
-      window.requestAnimationFrame(() => loadArrays());
     }
   };
 }
