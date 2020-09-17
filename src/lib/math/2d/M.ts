@@ -3,6 +3,8 @@ import { V } from "./V";
 export interface M {
   multiply: (v: V) => V;
   compose: (m: M) => M;
+  elements: () => number[];
+  toString: () => string;
 }
 
 export const M = (
@@ -51,7 +53,25 @@ class _M {
     );
   }
 
+  elements() {
+    return this.#m;
+  }
+
   compose(m: M): M {
+    console.log(
+      `${this} ∙ ${m} =
+      ${new _M(
+        dot(this.row(0), (m as _M).col(0)),
+        dot(this.row(0), (m as _M).col(1)),
+        dot(this.row(0), (m as _M).col(2)),
+        dot(this.row(1), (m as _M).col(0)),
+        dot(this.row(1), (m as _M).col(1)),
+        dot(this.row(1), (m as _M).col(2)),
+        dot(this.row(2), (m as _M).col(0)),
+        dot(this.row(2), (m as _M).col(1)),
+        dot(this.row(2), (m as _M).col(2))
+      )}`
+    );
     return new _M(
       dot(this.row(0), (m as _M).col(0)),
       dot(this.row(0), (m as _M).col(1)),
@@ -62,6 +82,15 @@ class _M {
       dot(this.row(2), (m as _M).col(0)),
       dot(this.row(2), (m as _M).col(1)),
       dot(this.row(2), (m as _M).col(2))
+    );
+  }
+
+  toString(): string {
+    return (
+      "\n" +
+      `⎡ ${this.#m[0]} ${this.#m[1]} ${this.#m[2]} ⎤\n` +
+      `⎢ ${this.#m[3]} ${this.#m[4]} ${this.#m[5]} ⎥\n` +
+      `⎣ ${this.#m[6]} ${this.#m[7]} ${this.#m[8]} ⎦\n`
     );
   }
 }
@@ -81,5 +110,5 @@ export const scalingM = (a: number): M => {
 };
 
 export const translationM = (v: V): M => {
-  return M(0, 0, v.x, 0, 0, v.y, 0, 0, 1);
+  return M(1, 0, v.x, 0, 1, v.y, 0, 0, 1);
 };
