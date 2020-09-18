@@ -1,6 +1,6 @@
 import { Polygon } from "./lib/math/2d/Polygon";
 import { getUrlParameters } from "./params";
-import { RotationColorer, StaticColorer } from "./renderer/Colorer";
+import { RotationColorer } from "./renderer/Colorer";
 import { RendererBuilder } from "./renderer/Renderer";
 
 const params = getUrlParameters();
@@ -22,7 +22,7 @@ if (svg) {
         protos: rule.protos
       })
     )
-    .strokeColorer(StaticColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
+    .stroke(colorOptions.strokeAlpha ?? 1)
     .tiles((mask: Polygon) =>
       rule.tiling(tile, params.getTilingOptions()).cover(mask)
     )

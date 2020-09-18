@@ -14,9 +14,9 @@ import { WebGlRenderer } from "./WebGlRenderer.js";
 export type Renderer = { render(): void };
 
 function Renderer(
-  draw: (p: Polygon, s: Color, f: Color) => void,
+  draw: (p: Polygon, s: number, f: Color) => void,
   clear: () => void,
-  strokeColorer: Colorer,
+  stroke: number,
   fillColorer: Colorer,
   tiles: Iterator<Tile>
 ) {
@@ -27,11 +27,7 @@ function Renderer(
       const rendertile = () => {
         const result = tiles.next();
         if (!isDone(result)) {
-          draw(
-            result.value.polygon(),
-            strokeColorer(result.value),
-            fillColorer(result.value)
-          );
+          draw(result.value.polygon(), stroke, fillColorer(result.value));
           return true;
         }
         if (isDone(result)) {
@@ -53,7 +49,7 @@ class _RendererBuilder {
   #viewPort: Rect | undefined;
   #tiles: ((vp: Polygon) => Iterable<Tile>) | undefined;
   #fillColorer: Colorer | undefined;
-  #strokeColorer: Colorer | undefined;
+  #stroke: number | undefined;
 
   tiles(tiles: ((vp: Polygon) => Iterable<Tile>) | Iterable<Tile>): this {
     if (!isCallable(tiles)) {
@@ -68,8 +64,9 @@ class _RendererBuilder {
     this.#fillColorer = c;
     return this;
   }
-  strokeColorer(c: Colorer): this {
-    this.#strokeColorer = c;
+
+  stroke(a: number): this {
+    this.#stroke = a;
     return this;
   }
 
@@ -96,7 +93,6 @@ class _RendererBuilder {
     const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(vp);
 
     const fill = this.#fillColorer ?? StaticColorer(0, 0, 50, 1);
-    const stroke = this.#strokeColorer ?? StaticColorer(0, 0, 0, 1);
 
     if (this.#canvas) {
       if (mode === "webgl") {
@@ -111,7 +107,7 @@ class _RendererBuilder {
           const renderer = Renderer(
             (p, s, f) => drawCanvas(p, s, f, ctx),
             () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
-            stroke,
+            this.#stroke ?? 1,
             fill,
             tileIterator[Symbol.iterator]()
           );
@@ -127,7 +123,7 @@ class _RendererBuilder {
         () => {
           (this.#svg as SVGSVGElement).innerHTML = "";
         },
-        stroke,
+        this.#stroke ?? 1,
         fill,
         tileIterator[Symbol.iterator]()
       );
@@ -144,12 +140,12 @@ export function RendererBuilder(): RendererBuilder {
 
 function drawCanvas(
   tile: Polygon,
-  strokeColor: Color,
+  stroke: number,
   fillColor: Color,
   ctx: CanvasRenderingContext2D
 ): void {
   ctx.fillStyle = fillColor.toString();
-  ctx.strokeStyle = strokeColor.toString();
+  ctx.strokeStyle = StaticColorer(0, 0, 0, stroke).toString();
   ctx.lineJoin = "round";
   const p = canvasPathFromPolygon(tile, new Path2D());
   ctx.stroke(p);
@@ -159,7 +155,7 @@ function drawCanvas(
 const svgNs = "http://www.w3.org/2000/svg";
 function drawSvg(
   tile: Polygon,
-  strokeColor: Color,
+  stroke: number,
   fillColor: Color,
   svg: SVGElement
 ): void {
@@ -167,7 +163,7 @@ function drawSvg(
   // For some reason ns MUST be null below.
   p.setAttributeNS(null, "points", svgPointsFromPolygon(tile));
   p.setAttributeNS(null, "fill", fillColor.toString());
-  p.setAttributeNS(null, "stroke", strokeColor.toString());
+  p.setAttributeNS(null, "stroke", `rgba(0, 0, 0, ${stroke})`);
   p.setAttributeNS(null, "stroke-width", "0.5");
   p.setAttributeNS(null, "stroke-linejoin", "round");
   svg.appendChild(p);
