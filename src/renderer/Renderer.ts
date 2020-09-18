@@ -1,5 +1,9 @@
 import {
-    canvasPathFromPolygon, Polygon, Rect, rectFrom, svgPointsFromPolygon
+  canvasPathFromPolygon,
+  Polygon,
+  Rect,
+  rectFrom,
+  svgPointsFromPolygon
 } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import { Tile } from "../tiles/Tile";
@@ -7,7 +11,7 @@ import { Color, Colorer, StaticColorer } from "./Colorer";
 import Runner from "./Runner";
 import { WebGlRenderer } from "./WebGlRenderer.js";
 
-export type Renderer = { readonly render: () => void };
+export type Renderer = { render(): void };
 
 function Renderer(
   draw: (p: Polygon, s: Color, f: Color) => void,

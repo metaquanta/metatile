@@ -1,3 +1,5 @@
+import { isArray } from "../util";
+
 export type GlProgramShader = (gl: WebGL2RenderingContext) => WebGLShader;
 
 export function vert(
@@ -19,6 +21,12 @@ export function frag(x: TemplateStringsArray): GlProgramShader {
 
 export type GlProgram = {
   setAttrib(attrib: string, arr: TypedArray, size: number): void;
+  setUniformInt(attrib: string, ...values: number[]): void;
+  setUniformFloat(
+    attrib: string,
+    ...values: (number | [number, number])[]
+  ): void;
+  setUniformMat(attrib: string, values: (Mat2 | Mat3 | Mat4)[]): void;
   draw(
     mode:
       | WebGLRenderingContextBase["TRIANGLES"]
@@ -34,21 +42,57 @@ export type TypedArray =
   | Int16Array
   | Uint16Array;
 
+export type Mat2 = [number, number, number, number];
+export type Mat3 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
+];
+export type Mat4 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
+];
+
 export function GlProgram(
   gl: WebGL2RenderingContext,
   vertexShader: GlProgramShader,
   fragmentShader: GlProgramShader
 ): GlProgram {
   const program = gl.createProgram();
-  if (program === null) throw new Error();
-
+  if (program === null) throw new Error(`WebGL error:${gl.getError()}`);
   gl.attachShader(program, vertexShader(gl));
   gl.attachShader(program, fragmentShader(gl));
   gl.linkProgram(program);
   gl.validateProgram(program);
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-    throw new Error(gl.getProgramInfoLog(program) ?? undefined);
+    throw new Error(
+      `WebGL ProgramInfoLog:${
+        gl.getProgramInfoLog(program) ?? undefined
+      }\nWebGL error:${gl.getError()}`
+    );
+
+  if (gl.getError() !== 0) throw new Error(`WebGL error:${gl.getError()}`);
 
   const buffers: {
     attrib: number;
@@ -57,7 +101,10 @@ export function GlProgram(
     type: BufferType;
   }[] = [];
 
-  const uniforms: (() => void)[] = [];
+  const uniforms: [
+    (loc: WebGLUniformLocation) => void,
+    WebGLUniformLocation
+  ][] = [];
 
   let length: number | undefined;
 
@@ -70,18 +117,77 @@ export function GlProgram(
         size,
         type: typedArrayBufferType(arr)
       });
+      if (gl.getError() !== 0) throw new Error(`WebGL error:${gl.getError()}`);
     },
+
+    setUniformInt(attrib: string, ...values: number[]) {
+      const loc = gl.getUniformLocation(program, attrib);
+      if (loc === null) throw new Error();
+      switch (values.length) {
+        case 1:
+          uniforms.push([(loc) => gl.uniform1i(loc, values[0]), loc]);
+          if (gl.getError() !== 0)
+            throw new Error(`WebGL error:${gl.getError()}`);
+          return;
+      }
+      throw new Error("Not supported yet!");
+    },
+
+    setUniformFloat(attrib: string, ...values: (number | [number, number])[]) {
+      const loc = gl.getUniformLocation(program, attrib);
+      if (loc === null) throw new Error();
+      if (values.length === 0) throw new Error();
+      if (isArray(values[0])) {
+        uniforms.push([
+          (loc) =>
+            gl.uniform2fv(
+              loc,
+              values.flatMap((v) => v)
+            ),
+          loc
+        ]);
+        if (gl.getError() !== 0)
+          throw new Error(`WebGL error:${gl.getError()}`);
+      } else {
+        throw new Error("Not supported yet!");
+      }
+    },
+
+    setUniformMat(attrib: string, values: number[][]) {
+      const loc = gl.getUniformLocation(program, attrib);
+      if (loc === null) throw new Error();
+      if (values.length === 0) throw new Error();
+      if (values[0].length === 9) {
+        uniforms.push([
+          (loc) =>
+            gl.uniformMatrix3fv(
+              loc,
+              false,
+              values.flatMap((v) => v)
+            ),
+          loc
+        ]);
+        if (gl.getError() !== 0)
+          throw new Error(`WebGL error:${gl.getError()}`);
+      } else {
+        throw new Error("Not supported yet!");
+      }
+    },
+
     draw(
       mode:
         | WebGLRenderingContextBase["TRIANGLES"]
         | WebGLRenderingContextBase["LINES"],
       count = 0
     ) {
-      buffers.forEach((b) =>
-        bindBuffer(gl, b.buffer, b.attrib, b.size, b.type)
+      buffers.forEach(({ buffer, attrib, size, type }) =>
+        bindBuffer(gl, buffer, attrib, size, type)
       );
-      uniforms.forEach((u) => u());
+
       gl.useProgram(program);
+
+      uniforms.forEach(([f, loc]) => f(loc));
+
       gl.drawArrays(mode, 0, length ?? count);
     }
   };
@@ -94,7 +200,7 @@ function shader(
     | WebGLRenderingContextBase["FRAGMENT_SHADER"],
   source: string
 ) {
-  console.debug(`compiling: ${source}`);
+  //console.debug(`compiling: ${source}`);
   const shader = gl.createShader(type);
   if (shader === null) throw new Error();
   gl.shaderSource(shader, source);

@@ -3,20 +3,20 @@ const EPS = 1e-10;
 export interface V {
   readonly x: number;
   readonly y: number;
-  readonly add: (u: V) => V;
-  readonly invert: () => V;
-  readonly subtract: (u: V) => V;
-  readonly scale: (a: number) => V;
-  readonly perp: () => V;
-  readonly dot: (u: V) => number;
-  readonly norm: () => number;
-  readonly equals: (u: V) => boolean;
-  readonly toString: () => string;
+  add(u: V): V;
+  invert(): V;
+  subtract(u: V): V;
+  scale(a: number): V;
+  perp(): V;
+  dot(u: V): number;
+  norm(): number;
+  equals(u: V): boolean;
+  toString(): string;
 }
 
 class _V implements V {
   constructor(readonly x: number, readonly y: number) {}
-  add(u: V): V {
+  add(u: V) {
     return new _V(this.x + u.x, this.y + u.y);
   }
   invert() {
@@ -59,4 +59,8 @@ export function midpoint(u: V, v: V): V {
     .subtract(u)
     .scale(1 / 2)
     .add(u);
+}
+
+export function isV(v: unknown): v is V {
+  return (v as { norm?: unknown }).norm !== undefined;
 }

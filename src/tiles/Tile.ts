@@ -3,13 +3,13 @@ import { Prototile } from "./Prototile";
 
 export interface Tile {
   readonly proto: Prototile;
-  readonly parent: () => Tile;
-  readonly children: () => Tile[];
-  readonly intersects: (p: Readonly<Polygon>, depth?: number) => boolean;
-  readonly contains: (p: Readonly<Polygon>, depth?: number) => boolean;
-  readonly polygon: () => Polygon;
-  readonly equals: (t: this) => boolean;
-  readonly reflected: () => boolean;
+  parent(): Tile;
+  children(): Tile[];
+  intersects(p: Readonly<Polygon>, depth?: number): boolean;
+  contains(p: Readonly<Polygon>, depth?: number): boolean;
+  polygon(): Polygon;
+  equals(t: this): boolean;
+  reflected(): boolean;
 }
 
 export function Tile(

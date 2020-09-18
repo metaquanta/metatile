@@ -1,9 +1,7 @@
 import { Polygon } from "./lib/math/2d/Polygon";
+import { Prototile } from "./tiles/Prototile";
 import { Rule } from "./tiles/Rule";
 import { Tile } from "./tiles/Tile";
-import { theta } from "./lib/math/2d/V";
-import { Prototile } from "./tiles/Prototile";
-import { M, rotationM, scalingM, translationM } from "./lib/math/2d/M";
 
 export function similarChildren(parent: Tile): Tile[] {
   const memoedProtos: Prototile[] = [];
@@ -40,20 +38,6 @@ export function inflationFactor(parent: Tile, child: Tile): number {
   const p = parent.polygon().translate(parent.polygon().vertices()[0].invert());
   const q = child.polygon().translate(child.polygon().vertices()[0].invert());
   return p.vertices()[1].norm() / q.vertices()[1].norm();
-}
-
-export function childTransform(parent: Tile, child: Tile): M {
-  const p = parent.polygon();
-  const q = child.polygon();
-  const l = p.vertices()[1].subtract(p.vertices()[0]);
-  const k = q.vertices()[1].subtract(q.vertices()[0]);
-
-  const a = inflationFactor(parent, child);
-  const th = theta(l) - theta(k);
-
-  return scalingM(a)
-    .compose(rotationM(th))
-    .compose(translationM(q.vertices()[0].subtract(p.vertices()[0])));
 }
 
 export function canCoverArbitraryVp(r: Rule): boolean {

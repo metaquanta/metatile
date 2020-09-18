@@ -1,5 +1,5 @@
 import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
-import { rectFrom } from "./lib/math/2d/Polygon";
+import { Polygon, rectFrom } from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
 import { RotationColorer, StaticColorer } from "./renderer/Colorer.js";
 import { Renderer, RendererBuilder } from "./renderer/Renderer";
@@ -104,11 +104,13 @@ class TilingElement extends FixedCanvasElement {
           })
         )
         .strokeColorer(StaticColorer(0, 0, 0, colorOptions.strokeAlpha ?? 1))
-        .tiles(
-          rule.tiling(
-            rule.tileFromEdge(params.getV(), params.getU()),
-            params.getTilingOptions()
-          ).cover
+        .tiles((mask: Polygon) =>
+          rule
+            .tiling(
+              rule.tileFromEdge(params.getV(), params.getU()),
+              params.getTilingOptions()
+            )
+            .cover(mask)
         )
         .build(params.getRenderer());
 
