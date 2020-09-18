@@ -2,7 +2,7 @@
 
 import { Rhomb } from "../lib/math/2d/Polygon";
 import { V } from "../lib/math/2d/V";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const SIN15 = Math.sin(Math.PI / 5);
@@ -17,7 +17,7 @@ const rotate = (u: V) => V(M[0].dot(u), M[1].dot(u));
 
 export default RuleBuilder()
   .protoTile(
-    PrototileBuilder<Rhomb>({
+    Prototile.Builder<Rhomb>({
       name: "rhomb",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
@@ -53,7 +53,7 @@ export default RuleBuilder()
       })
   )
   .protoTile(
-    PrototileBuilder<Rhomb>({
+    Prototile.Builder<Rhomb>({
       name: "kite",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,

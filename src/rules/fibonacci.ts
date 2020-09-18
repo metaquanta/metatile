@@ -1,6 +1,6 @@
 import { Polygon, Tetragon } from "../lib/math/2d/Polygon";
 import { V } from "../lib/math/2d/V";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const PHI = (1 + 5 ** (1 / 2)) / 2;
@@ -9,14 +9,14 @@ const CHI = 1 / (PHI - 1) + 1;
 
 export default RuleBuilder()
   .protoTile(
-    PrototileBuilder({
+    Prototile.Builder({
       name: "square1",
       rotationalSymmetryOrder: 4,
       reflectionSymmetry: true
     }).substitution((t: Polygon, sq1, sq2) => sq2(t))
   )
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "square2",
       rotationalSymmetryOrder: 4,
       reflectionSymmetry: true
@@ -34,7 +34,7 @@ export default RuleBuilder()
     })
   )
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "rectangle",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true

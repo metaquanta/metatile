@@ -1,12 +1,12 @@
 import { Polygon } from "../lib/math/2d/Polygon";
 import { RotationColorerOptions } from "../renderer/Colorer";
 import { Prototile } from "./Prototile";
-import { PrototileBuilder } from "./PrototileBuilder";
+import * as PrototileBuilder from "./PrototileBuilder";
 import { Rule } from "./Rule";
 import { Tile } from "./Tile";
 
 export interface RuleBuilder {
-  protoTile<T extends Polygon>(p: PrototileBuilder<T>): this;
+  protoTile<T extends Polygon>(p: PrototileBuilder.Builder<T>): this;
   build(): Rule;
 }
 
@@ -25,7 +25,7 @@ class _RuleBuilder implements RuleBuilder {
     this.#protos = [];
   }
 
-  protoTile<T extends Polygon>(p: PrototileBuilder<T>): this {
+  protoTile<T extends Polygon>(p: PrototileBuilder.Builder<T>): this {
     this.#protos.push(p);
     return this;
   }

@@ -3,7 +3,7 @@ import { V } from "../lib/math/2d/V";
 import { Prototile } from "./Prototile";
 import { Tile } from "./Tile";
 
-export interface PrototileBuilder<T extends Polygon> {
+export interface Builder<T extends Polygon> {
   substitution(f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void): this;
   parent(f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void): this;
   tile(f: (l: V, p: V) => T): this;
@@ -15,14 +15,14 @@ export type Substitution<T extends Polygon> = (
   ...consumers: ((p: Polygon) => Tile)[]
 ) => void;
 
-const defaultPrototileParams = {
+const defaultOptions = {
   name: "tile",
   rotationalSymmetryOrder: 1,
   reflectionSymmetry: false,
   volumeHierarchic: true
 };
 
-export function PrototileBuilder<T extends Polygon>(params: {
+export function Builder<T extends Polygon>(params: {
   name?: string;
   rotationalSymmetryOrder?: number;
   reflectionSymmetry?: boolean;
@@ -37,11 +37,11 @@ export function PrototileBuilder<T extends Polygon>(params: {
   // the min.levels above t that covers all of t's leaves.
   // If t intersects the viewport, t', t'', ...t^n are assumed to also.
   intersectingGenerations?: number;
-}): PrototileBuilder<T> {
-  return new _PrototileBuilder<T>({ ...defaultPrototileParams, ...params });
+}): Builder<T> {
+  return new _Builder<T>({ ...defaultOptions, ...params });
 }
 
-class _PrototileBuilder<T extends Polygon> implements PrototileBuilder<T> {
+class _Builder<T extends Polygon> implements Builder<T> {
   #substitution: Substitution<T> | undefined;
   #parent: Substitution<T> | undefined;
   #tile: ((l: V, p: V) => T) | undefined;
