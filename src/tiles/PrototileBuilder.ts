@@ -4,14 +4,10 @@ import { Prototile } from "./Prototile";
 import { Tile } from "./Tile";
 
 export interface PrototileBuilder<T extends Polygon> {
-  readonly substitution: (
-    f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void
-  ) => this;
-  readonly parent: (
-    f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void
-  ) => this;
-  readonly tile: (f: (l: V, p: V) => T) => this;
-  readonly build: (creators: ((p: Polygon) => Tile)[]) => Prototile;
+  substitution(f: (p: T, ...consumers: ((p: Polygon) => Tile)[]) => void): this;
+  parent(f: (c: T, ...consumers: ((p: Polygon) => Tile)[]) => void): this;
+  tile(f: (l: V, p: V) => T): this;
+  build(creators: ((p: Polygon) => Tile)[]): Prototile;
 }
 
 export type Substitution<T extends Polygon> = (

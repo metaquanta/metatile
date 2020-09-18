@@ -8,7 +8,7 @@ export function Tiling(tile: Tile, options?: TilingOptions): Tiling {
 }
 
 export interface Tiling {
-  readonly cover: (mask: Polygon) => Generator<Tile>;
+  cover(mask: Polygon): Generator<Tile>;
 }
 
 export interface TilingOptions {

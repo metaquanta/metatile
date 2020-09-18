@@ -1,18 +1,18 @@
+import { V } from "../lib/math/2d/V";
+import { first } from "../lib/util";
+import { RotationColorerOptions } from "../renderer/Colorer";
+import { Prototile } from "./Prototile";
 import { Tile } from "./Tile";
 import { Tiling, TilingOptions } from "./Tiling";
-import { V } from "../lib/math/2d/V";
-import { RotationColorerOptions } from "../renderer/Colorer";
-import { first } from "../lib/util";
-import { Prototile } from "./Prototile";
 
 const s = V(31, 17);
 const t = V(97, 109);
 
 export interface Rule {
   readonly protos: Prototile[];
-  readonly tile: () => Tile;
-  readonly tileFromEdge: (edge: V, pos?: V) => Tile;
-  readonly tiling: (tile: Tile, options: TilingOptions) => Tiling;
+  tile(): Tile;
+  tileFromEdge(edge: V, pos?: V): Tile;
+  tiling(tile: Tile, options: TilingOptions): Tiling;
   readonly colorOptions?: RotationColorerOptions;
 }
 

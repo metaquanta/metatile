@@ -23,13 +23,13 @@ export type ParameterStrings = {
 };
 
 export type Parameters = ParameterStrings & {
-  getRule: () => Rule;
-  getV: () => V;
-  getU: () => V;
-  getColorOptions: () => ColorOptions;
-  getTilingOptions: () => TilingOptions;
-  setAttributes: (tag: TilingElement) => void;
-  getRenderer: () => "canvas" | "webgl" | "svg";
+  getRule(): Rule;
+  getV(): V;
+  getU(): V;
+  getColorOptions(): ColorOptions;
+  getTilingOptions(): TilingOptions;
+  setAttributes(tag: TilingElement): void;
+  getRenderer(): "canvas" | "webgl" | "svg";
 };
 
 export type ColorOptions = RotationColorerOptions & { strokeAlpha?: number };

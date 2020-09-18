@@ -6,8 +6,8 @@ import { Rule } from "./Rule";
 import { Tile } from "./Tile";
 
 export interface RuleBuilder {
-  readonly protoTile: <T extends Polygon>(p: PrototileBuilder<T>) => this;
-  readonly build: () => Rule;
+  protoTile<T extends Polygon>(p: PrototileBuilder<T>): this;
+  build(): Rule;
 }
 
 export function RuleBuilder(params?: {

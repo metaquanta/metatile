@@ -7,17 +7,17 @@ export interface Prototile {
   readonly reflectionSymmetry: boolean;
   readonly coveringGenerations?: number; // See N.V.H. below
   readonly parent?: (t: Tile) => Tile;
-  readonly children: (t: Tile) => Tile[];
+  children(t: Tile): Tile[];
   readonly tile?: (v: V, p: V) => Tile;
-  readonly create: (polygon: Polygon, parent?: Tile) => Tile;
+  create(polygon: Polygon, parent?: Tile): Tile;
   readonly name?: string;
-  readonly toString: () => string;
+  toString(): string;
 }
 
 export type PrototileParameters<P extends Polygon> = {
-  parent?: (t: P) => Tile;
-  children: (t: P) => Tile[];
-  tile?: (v: V, p: V) => Polygon;
+  readonly parent?: (t: P) => Tile;
+  children(t: P): Tile[];
+  readonly tile?: (v: V, p: V) => Polygon;
   rotationalSymmetryOrder: number;
   reflectionSymmetry: boolean;
   name: string;

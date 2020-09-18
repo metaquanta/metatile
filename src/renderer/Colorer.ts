@@ -6,8 +6,8 @@ import { Prototile } from "../tiles/Prototile";
 // These produce a string appropriate for CSS or Canvas styles.
 export type Colorer = (t: {
   readonly proto: Prototile;
-  readonly polygon: () => Polygon;
-  readonly reflected: () => boolean;
+  polygon(): Polygon;
+  reflected(): boolean;
 }) => Color;
 
 export type RotationColorerOptions = {
@@ -24,7 +24,7 @@ export type Color = {
   readonly s: number; // 1-100
   readonly v: number; // 1-100
   readonly a: number; // 0.00-1.00
-  readonly toString: () => string;
+  toString(): string;
 };
 
 class _Color implements Color {
