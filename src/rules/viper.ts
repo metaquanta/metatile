@@ -2,14 +2,14 @@
 
 import { Triangle } from "../lib/math/2d/Polygon";
 import { V } from "../lib/math/2d/V";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const ISQRT15 = 15 ** (-1 / 2);
 
 export default RuleBuilder()
   .protoTile(
-    PrototileBuilder<Triangle>({
+    Prototile.Builder<Triangle>({
       name: "triangle",
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: false

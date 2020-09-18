@@ -2,14 +2,14 @@
 
 import { Rhomb, Tetragon } from "../lib/math/2d/Polygon";
 import { V } from "../lib/math/2d/V";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const SQRT2 = 2 ** (1 / 2);
 
 export default RuleBuilder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "square",
       rotationalSymmetryOrder: 4,
       reflectionSymmetry: true,
@@ -71,7 +71,7 @@ export default RuleBuilder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       )
   )
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "rhomb",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,

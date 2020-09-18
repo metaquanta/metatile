@@ -1,12 +1,12 @@
 // Reference: https://arxiv.org/abs/math/9712263
 
 import { Triangle } from "../lib/math/2d/Polygon";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
 import { V } from "../lib/math/2d/V";
-import { gcd } from "../lib/math/util";
 import { invertFunction } from "../lib/math/numerical";
-import { RuleBuilder } from "../tiles/RuleBuilder";
+import { gcd } from "../lib/math/util";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { Rule } from "../tiles/Rule";
+import { RuleBuilder } from "../tiles/RuleBuilder";
 
 const z = (theta: number) =>
   Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2);
@@ -99,9 +99,9 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
   for (let i = 0; i < n; i++) {
     builder.protoTile(
       // This IIF is to call .tail() only on the last builder
-      ((proto: PrototileBuilder<Triangle>) =>
+      ((proto: Prototile.Builder<Triangle>) =>
         i + 1 === n ? proto.tile(tile) : proto)(
-        PrototileBuilder<Triangle>({
+        Prototile.Builder<Triangle>({
           name: `tile_${i}`,
           rotationalSymmetryOrder: 1,
           reflectionSymmetry: false

@@ -1,13 +1,13 @@
 // https://tilings.math.uni-bielefeld.de/substitution/minitangram/
 
 import { Tetragon, Triangle } from "../lib/math/2d/Polygon";
-import { PrototileBuilder } from "../tiles/PrototileBuilder";
-import { V, midpoint } from "../lib/math/2d/V";
+import { midpoint, V } from "../lib/math/2d/V";
+import * as Prototile from "../tiles/PrototileBuilder";
 import { RuleBuilder } from "../tiles/RuleBuilder";
 
 export default RuleBuilder()
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "square",
       rotationalSymmetryOrder: 4,
       reflectionSymmetry: true
@@ -31,7 +31,7 @@ export default RuleBuilder()
     )
   )
   .protoTile(
-    PrototileBuilder<Triangle>({
+    Prototile.Builder<Triangle>({
       name: "triangle",
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: true
@@ -49,7 +49,7 @@ export default RuleBuilder()
     })
   )
   .protoTile(
-    PrototileBuilder<Tetragon>({
+    Prototile.Builder<Tetragon>({
       name: "parallelogram",
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: false
