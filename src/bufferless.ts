@@ -53,9 +53,9 @@ void main() {
 `;
 
 const gl = (document.getElementsByTagName("div")[0]
-  .lastElementChild as HTMLCanvasElement).getContext(
-  "webgl2"
-) as WebGL2RenderingContext;
+  .lastElementChild as HTMLCanvasElement).getContext("webgl2", {
+  premultipliedAlpha: false
+}) as WebGL2RenderingContext;
 const canvas = gl.canvas;
 canvas.width = window.screen.width;
 canvas.height = window.screen.height;

@@ -116,10 +116,10 @@ export namespace GlProgram {
       type: BufferType;
     }[] = [];
 
-    const uniforms: [
-      (loc: WebGLUniformLocation) => void,
-      WebGLUniformLocation
-    ][] = [];
+    const uniforms = new Map<
+      WebGLUniformLocation,
+      (loc: WebGLUniformLocation) => void
+    >();
 
     let length: number | undefined;
 
@@ -141,7 +141,7 @@ export namespace GlProgram {
         if (loc === null) throw new Error();
         switch (values.length) {
           case 1:
-            uniforms.push([(loc) => gl.uniform1i(loc, values[0]), loc]);
+            uniforms.set(loc, (loc) => gl.uniform1i(loc, values[0]));
             if (gl.getError() !== 0)
               throw new Error(`WebGL error:${gl.getError()}`);
             return;
@@ -157,15 +157,11 @@ export namespace GlProgram {
         if (loc === null) throw new Error();
         if (values.length === 0) throw new Error();
         if (isArray(values[0])) {
-          uniforms.push([
-            (loc) => _setUniformfv(gl, loc, values as number[][]),
-            loc
-          ]);
+          uniforms.set(loc, (loc) =>
+            _setUniformfv(gl, loc, values as number[][])
+          );
         } else {
-          uniforms.push([
-            (loc) => _setUniformf(gl, loc, values as number[]),
-            loc
-          ]);
+          uniforms.set(loc, (loc) => _setUniformf(gl, loc, values as number[]));
         }
         if (gl.getError() !== 0)
           throw new Error(`WebGL error:${gl.getError()}`);
@@ -176,15 +172,13 @@ export namespace GlProgram {
         if (loc === null) throw new Error();
         if (values.length === 0) throw new Error();
         if (values[0].length === 9) {
-          uniforms.push([
-            (loc) =>
-              gl.uniformMatrix3fv(
-                loc,
-                false,
-                values.flatMap((v) => v)
-              ),
-            loc
-          ]);
+          uniforms.set(loc, (loc) =>
+            gl.uniformMatrix3fv(
+              loc,
+              false,
+              values.flatMap((v) => v)
+            )
+          );
           if (gl.getError() !== 0)
             throw new Error(`WebGL error:${gl.getError()}`);
         } else {
@@ -204,7 +198,7 @@ export namespace GlProgram {
 
         gl.useProgram(program);
 
-        uniforms.forEach(([f, loc]) => f(loc));
+        uniforms.forEach((f, l) => f(l));
 
         gl.drawArrays(mode, 0, count ?? length ?? 0);
       },
@@ -214,7 +208,7 @@ export namespace GlProgram {
           | WebGLRenderingContextBase["LINES"],
         count?
       ) {
-        uniforms.forEach(([f, loc]) => f(loc));
+        uniforms.forEach((f, l) => f(l));
 
         gl.drawArrays(mode, 0, count ?? length ?? 0);
       }
