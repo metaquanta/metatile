@@ -3,8 +3,8 @@ import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";
 import Colorer from "./Colorer";
-import createRunner from "./Runner";
-import WebGlRenderer from "./WebGlRenderer.js";
+import createRunner from "./runner";
+import WebGlRenderer from "./webGlRenderer.js";
 
 export type Renderer = { render(): void };
 
