@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 const EPS = 1e-10;
 
 export interface V {
