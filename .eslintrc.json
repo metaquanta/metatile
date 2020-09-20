@@ -30,6 +30,7 @@
             "argsIgnorePattern": "^_"
           }
         ],
+        "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/unbound-method": "error",
         "@typescript-eslint/no-unused-expressions": "error",
         "@typescript-eslint/no-base-to-string": "warn",
