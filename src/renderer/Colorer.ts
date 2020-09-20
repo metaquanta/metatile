@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import Polygon from "../lib/math/2d/Polygon";
 import V from "../lib/math/2d/V";
 import { range } from "../lib/util";

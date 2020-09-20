@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";

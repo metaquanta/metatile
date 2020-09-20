@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import V from "./V";
 
 export interface Polygon {
