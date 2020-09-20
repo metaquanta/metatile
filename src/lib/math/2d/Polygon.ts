@@ -1,4 +1,5 @@
-import { V } from "./V";
+/* eslint-disable @typescript-eslint/no-namespace */
+import V from "./V";
 
 export interface Polygon {
   readonly vertices: () => V[];
@@ -15,8 +16,61 @@ export interface Polygon {
   readonly toString: () => string;
 }
 
-export function isPolygon<T>(p: Polygon | T): p is Polygon {
-  return (p as { vertices?: unknown }).vertices !== undefined;
+export namespace Polygon {
+  export function isInstance<T>(p: Polygon | T): p is Polygon {
+    return (p as { vertices?: unknown }).vertices !== undefined;
+  }
+
+  export function create(vertices: V[]): Polygon {
+    return new _Polygon(vertices);
+  }
+
+  export function chirality(p: Polygon): boolean {
+    // Yup, I realized my area alg can determine chirality.
+    return (
+      p
+        .edges()
+        .map(([u, v]) => ((u.y + v.y) / 2) * (v.x - u.x))
+        .reduce((l, r) => l + r) > 0
+    );
+  }
+
+  export function getCanvasPath<
+    T extends {
+      moveTo: (x: number, y: number) => void;
+      lineTo: (x: number, y: number) => void;
+      closePath: () => void;
+    }
+  >(poly: Polygon, path: T): T {
+    path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
+    poly
+      .vertices()
+      .slice(1)
+      .forEach((v) => path.lineTo(v.x, v.y));
+    path.closePath();
+    return path;
+  }
+
+  // For SVG Path element.
+  export function getSvgPathFrom(poly: Polygon): string {
+    return (
+      `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
+      poly
+        .vertices()
+        .slice(1)
+        .map((v) => `L ${v.x},${v.y}`)
+        .join(" \n") +
+      " z"
+    );
+  }
+
+  // For SVG Polygon's points attribute.
+  export function getSvgPoints(p: Polygon): string {
+    return p
+      .vertices()
+      .map((v) => `${v.x},${v.y}`)
+      .join(" ");
+  }
 }
 
 export type Triangle = Polygon & {
@@ -25,6 +79,10 @@ export type Triangle = Polygon & {
   c: V;
   translate: (v: V) => Triangle;
 };
+
+export namespace Triangle {
+  export const create = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
+}
 
 // Looks nicer than "Quadrilateral".
 export type Tetragon = Polygon & {
@@ -35,22 +93,55 @@ export type Tetragon = Polygon & {
   translate: (v: V) => Tetragon;
 };
 
+export namespace Tetragon {
+  export const create = (a: V, b: V, c: V, d: V): Tetragon =>
+    new _Tetragon(a, b, c, d);
+}
+
 // We gotta have a "Rhomb" for Penrose.
 export type Rhomb = Tetragon;
 
-export type Rect = Polygon & {
+export namespace Rhomb {
+  export const create = (a: V, b: V, c: V, d: V): Tetragon =>
+    Tetragon.create(a, b, c, d);
+}
+
+export interface Rect extends Polygon {
   left: number;
   right: number;
   top: number;
   bottom: number;
-};
-
-export function isRect(p: Polygon): p is Rect {
-  return (p as { bottom?: unknown }).bottom !== undefined;
 }
 
-export function Polygon(vertices: V[]): Polygon {
-  return new _Polygon(vertices);
+export namespace Rect {
+  export const create = (
+    x0: number,
+    y0: number,
+    xf: number,
+    yf: number
+  ): Rect => new _Rect(x0, y0, xf, yf);
+
+  export function from(
+    obj:
+      | SVGAnimatedRect
+      | { x: number; y: number; width: number; height: number }
+  ): Rect {
+    if ((obj as { animVal: unknown }).animVal) {
+      return from((obj as SVGAnimatedRect).animVal);
+    }
+    if (
+      (obj as { x?: unknown }).x !== undefined &&
+      (obj as { height?: unknown }).height !== undefined
+    ) {
+      const rect = obj as DOMRect | SVGRect;
+      return create(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+    }
+    throw new Error(`Bad cast! unreachable!!!`);
+  }
+
+  export function isInstance(p: Polygon): p is Rect {
+    return (p as { bottom?: unknown }).bottom !== undefined;
+  }
 }
 
 // These don't implement the interfaces here to trick the polymorphic this
@@ -67,7 +158,7 @@ class _Polygon {
     return this.#vertices
       .slice(2)
       .map((_, i) =>
-        Triangle(
+        Triangle.create(
           this.#vertices[0],
           this.#vertices[i + 1],
           this.#vertices[i + 2]
@@ -109,7 +200,7 @@ class _Polygon {
   }
 
   translate(v: V): Polygon {
-    return Polygon(this.#vertices.map((u) => u.add(v)));
+    return new _Polygon(this.#vertices.map((u) => u.add(v)));
   }
 
   equals(p: Polygon): boolean {
@@ -177,7 +268,12 @@ class _Rect extends _Polygon {
     readonly right: number,
     readonly top: number
   ) {
-    super([V(left, bottom), V(right, bottom), V(right, top), V(left, top)]);
+    super([
+      V.create(left, bottom),
+      V.create(right, bottom),
+      V.create(right, top),
+      V.create(left, top)
+    ]);
   }
 
   pad(n: number) {
@@ -189,6 +285,14 @@ class _Rect extends _Polygon {
     );
   }
 
+  translate(v: V): Rect {
+    return new _Rect(
+      this.left + v.x,
+      this.bottom + v.y,
+      this.right + v.x,
+      this.top + v.y
+    );
+  }
   toString() {
     // note: bottom and top are really top and bottom by computer graphics
     // convention
@@ -196,34 +300,8 @@ class _Rect extends _Polygon {
   }
 }
 
-export const Triangle = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
-
-export const Tetragon = (a: V, b: V, c: V, d: V): Tetragon =>
-  new _Tetragon(a, b, c, d);
-
-export const Rhomb = (a: V, b: V, c: V, d: V): Tetragon => Tetragon(a, b, c, d);
-
-export const Rect = (x0: number, y0: number, xf: number, yf: number): Rect =>
-  new _Rect(x0, y0, xf, yf);
-
-export function rectFrom(
-  obj: SVGAnimatedRect | { x: number; y: number; width: number; height: number }
-): Rect {
-  if ((obj as { animVal: unknown }).animVal) {
-    return rectFrom((obj as SVGAnimatedRect).animVal);
-  }
-  if (
-    (obj as { x?: unknown }).x !== undefined &&
-    (obj as { height?: unknown }).height !== undefined
-  ) {
-    const rect = obj as DOMRect | SVGRect;
-    return Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
-  }
-  throw new Error(`Bad cast! unreachable!!!`);
-}
-
 function contains(p: Polygon, q: Polygon | V): boolean {
-  if (isPolygon(q)) {
+  if (Polygon.isInstance(q)) {
     return q.vertices().every((v) => contains(p, v));
   }
   return p.triangles().some((t) => triangleContains(t, q));
@@ -257,18 +335,8 @@ function area(p: Polygon): number {
   );
 }
 
-export function chirality(p: Polygon): boolean {
-  // Yup, I realized my area alg can determine chirality.
-  return (
-    p
-      .edges()
-      .map(([u, v]) => ((u.y + v.y) / 2) * (v.x - u.x))
-      .reduce((l, r) => l + r) > 0
-  );
-}
-
 function boundingBox(p: Polygon): Rect {
-  return Rect(
+  return Rect.create(
     Math.min(...p.vertices().map((p) => p.x)),
     Math.min(...p.vertices().map((p) => p.y)),
     Math.max(...p.vertices().map((p) => p.x)),
@@ -300,39 +368,4 @@ function equals(p: Polygon, q: Polygon) {
     .every((v, i) => v.equals(pv[i]));
 }
 
-export function canvasPathFromPolygon<
-  T extends {
-    moveTo: (x: number, y: number) => void;
-    lineTo: (x: number, y: number) => void;
-    closePath: () => void;
-  }
->(poly: Polygon, path: T): T {
-  path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
-  poly
-    .vertices()
-    .slice(1)
-    .forEach((v) => path.lineTo(v.x, v.y));
-  path.closePath();
-  return path;
-}
-
-// For SVG Path element.
-export function svgPathFromPolygon(poly: Polygon): string {
-  return (
-    `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
-    poly
-      .vertices()
-      .slice(1)
-      .map((v) => `L ${v.x},${v.y}`)
-      .join(" \n") +
-    " z"
-  );
-}
-
-// For SVG Polygon's points attribute.
-export function svgPointsFromPolygon(p: Polygon): string {
-  return p
-    .vertices()
-    .map((v) => `${v.x},${v.y}`)
-    .join(" ");
-}
+export default Polygon;

@@ -1,8 +1,8 @@
 import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
-import { Polygon, rectFrom } from "./lib/math/2d/Polygon";
+import Polygon, { Rect } from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
-import { RotationColorer } from "./renderer/Colorer.js";
-import { Renderer, RendererBuilder } from "./renderer/Renderer";
+import Colorer from "./renderer/Colorer.js";
+import Renderer from "./renderer/Renderer";
 
 function _attribute(
   comp: TilingElement,
@@ -33,7 +33,7 @@ const observedAttributes = [
 ];
 
 class TilingElement extends FixedCanvasElement {
-  readonly #rendererBuilder: RendererBuilder = RendererBuilder();
+  readonly #rendererBuilder: Renderer.Builder = Renderer.builder();
   #renderer: Renderer | undefined = undefined;
 
   static get observedAttributes(): string[] {
@@ -96,9 +96,9 @@ class TilingElement extends FixedCanvasElement {
     if (this.#renderer === undefined) {
       this.#renderer = this.#rendererBuilder
         .canvas(this)
-        .viewport(rectFrom(this.canvasViewPort))
+        .viewport(Rect.from(this.canvasViewPort))
         .fillColorer(
-          RotationColorer({
+          Colorer.rotation({
             ...colorOptions,
             protos: rule.protos
           })

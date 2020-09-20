@@ -1,7 +1,7 @@
-import { Polygon } from "./lib/math/2d/Polygon";
-import { Prototile } from "./tiles/Prototile";
-import { Rule } from "./tiles/Rule";
-import { Tile } from "./tiles/Tile";
+import Polygon from "./lib/math/2d/Polygon";
+import Prototile from "./tiles/Prototile";
+import Rule from "./tiles/Rule";
+import Tile from "./tiles/Tile";
 
 export function similarChildren(parent: Tile): Tile[] {
   const memoedProtos: Prototile[] = [];

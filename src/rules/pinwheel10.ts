@@ -1,13 +1,13 @@
 // Reference: https://tilings.math.uni-bielefeld.de/substitution/pinwheel-variant-10-tiles/
 
 import { Triangle } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
-import * as Prototile from "../tiles/PrototileBuilder";
-import { RuleBuilder } from "../tiles/RuleBuilder";
+import V from "../lib/math/2d/V";
+import Prototile from "../tiles/Prototile";
+import Rule from "../tiles/Rule";
 
-export default RuleBuilder()
+export default Rule.builder()
   .protoTile(
-    Prototile.Builder<Triangle>({
+    Prototile.builder<Triangle>({
       name: "tile",
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: false
@@ -17,7 +17,7 @@ export default RuleBuilder()
         const m = t.c.subtract(t.b);
         const s = t.b.subtract(t.a);
         tileConsumer(
-          Triangle(
+          Triangle.create(
             t.a.add(m.scale(1 / 3).invert()),
             t.b.add(s.scale(2)),
             t.a.add(m.scale(3))
@@ -30,16 +30,16 @@ export default RuleBuilder()
         // 2m 3 4 5 6
         //       1m
         const l = t.c.subtract(t.a).scale(1 / 10);
-        const c1 = Triangle(t.a, t.a.add(l), t.b);
+        const c1 = Triangle.create(t.a, t.a.add(l), t.b);
 
         const c5b = c1.c
           .subtract(c1.b)
           .scale(1 / 3)
           .add(c1.b);
-        const c5 = Triangle(c1.b, c5b, c5b.add(l.scale(3)));
+        const c5 = Triangle.create(c1.b, c5b, c5b.add(l.scale(3)));
         const c3 = c5.translate(c5.b.subtract(c5.a));
-        const c2 = Triangle(c3.b.subtract(c3.a).add(c3.b), c3.b, c3.c);
-        const c4 = Triangle(c2.c, c5.c, c3.a);
+        const c2 = Triangle.create(c3.b.subtract(c3.a).add(c3.b), c3.b, c3.c);
+        const c4 = Triangle.create(c2.c, c5.c, c3.a);
         const c6 = c4.translate(c4.b.subtract(c4.a));
         const c7 = c2.translate(c2.c.subtract(c2.a));
 
@@ -56,7 +56,7 @@ export default RuleBuilder()
       })
       .tile(
         (l: V): Triangle =>
-          Triangle(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp())
+          Triangle.create(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp())
       )
   )
   .build();

@@ -1,5 +1,5 @@
 import { Rect } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
+import V from "../lib/math/2d/V";
 import {
   canCoverArbitraryVp,
   inflationFactor,
@@ -8,13 +8,13 @@ import {
 import viper from "./viper";
 
 test("viper children intersect", () => {
-  const rect = Rect(2000, 1000, 2500, 2000);
-  const t = viper.tileFromEdge(V(700, 51), V(905, 1212));
+  const rect = Rect.create(2000, 1000, 2500, 2000);
+  const t = viper.tileFromEdge(V.create(700, 51), V.create(905, 1212));
   t.parent()
     .children()
     .slice(7, 9)
     .forEach((t) => expect(t.intersects(rect)).toBeTruthy());
-  const rect2 = Rect(200, 1000, 2500, 2000);
+  const rect2 = Rect.create(200, 1000, 2500, 2000);
   expect(
     t.parent().parent().parent().children()[2].intersects(rect2)
   ).toBeTruthy();
@@ -31,13 +31,13 @@ test("viper children intersect", () => {
       .parent()
       .children()[4]
       .children()[2]
-      .intersects(Rect(200, 1000, 2500, 2000))
+      .intersects(Rect.create(200, 1000, 2500, 2000))
   ).toBeTruthy();
 });
 
 test("viper cover", () => {
-  const rect = Rect(2000, 1000, 2500, 2000);
-  const t = viper.tileFromEdge(V(700, 51), V(905, 1212));
+  const rect = Rect.create(2000, 1000, 2500, 2000);
+  const t = viper.tileFromEdge(V.create(700, 51), V.create(905, 1212));
   expect(t.parent().parent().contains(rect)).toBeFalsy();
   expect(t.parent().parent().parent().contains(rect)).toBeTruthy();
 });

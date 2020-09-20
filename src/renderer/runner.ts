@@ -1,4 +1,4 @@
-export default function Runner(): {
+export default function createRunner(): {
   start: (r: () => boolean, b: () => void, c: () => void) => void;
   stop: () => Promise<unknown>;
 } {

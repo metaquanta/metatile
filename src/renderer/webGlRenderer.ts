@@ -1,9 +1,9 @@
-import { frag, GlProgram, vert } from "../lib/browser/GlProgram";
-import { Tile } from "../tiles/Tile";
-import { Colorer } from "./Colorer";
-import { Renderer } from "./Renderer";
+import GlProgram from "../lib/browser/GlProgram";
+import Tile from "../tiles/Tile";
+import Colorer from "./Colorer";
+import Renderer from "./Renderer";
 
-export function WebGlRenderer(
+export default function createWebGlRenderer(
   gl: WebGL2RenderingContext,
   fillColorer: Colorer,
   tiles: Iterable<Tile>
@@ -11,9 +11,9 @@ export function WebGlRenderer(
   const canvas = gl.canvas as HTMLCanvasElement;
   clear(gl);
 
-  const fillProgram = GlProgram(
+  const fillProgram = GlProgram.create(
     gl,
-    vert`#version 300 es
+    GlProgram.vert`#version 300 es
       in vec2 position;
       in vec3 color;
       out vec4 vColor;
@@ -35,7 +35,7 @@ export function WebGlRenderer(
         gl_Position = vec4((position)/scale-vec2(1.0,-1.0), 0.0, 1.0);
       }
     `,
-    frag`#version 300 es
+    GlProgram.frag`#version 300 es
       precision mediump float;
       in vec4 vColor;
       out vec4 color;
@@ -46,9 +46,9 @@ export function WebGlRenderer(
     `
   );
 
-  const strokeProgram = GlProgram(
+  const strokeProgram = GlProgram.create(
     gl,
-    vert`#version 300 es
+    GlProgram.vert`#version 300 es
       in vec2 position;
       
       void main() {
@@ -59,7 +59,7 @@ export function WebGlRenderer(
         gl_Position = vec4((position)/scale-vec2(1, -1), 0.0, 1.0);
       }
     `,
-    frag`#version 300 es
+    GlProgram.frag`#version 300 es
       precision mediump float;
       out vec4 color;
 

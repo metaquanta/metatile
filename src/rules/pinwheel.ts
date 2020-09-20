@@ -1,12 +1,11 @@
 // Reference: https://arxiv.org/abs/math/9712263
 
 import { Triangle } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
+import V from "../lib/math/2d/V";
 import { invertFunction } from "../lib/math/numerical";
 import { gcd } from "../lib/math/util";
-import * as Prototile from "../tiles/PrototileBuilder";
-import { Rule } from "../tiles/Rule";
-import { RuleBuilder } from "../tiles/RuleBuilder";
+import Prototile from "../tiles/Prototile";
+import Rule from "../tiles/Rule";
 
 const z = (theta: number) =>
   Math.log(Math.sin(theta)) / Math.log(Math.cos(theta) / 2);
@@ -15,7 +14,7 @@ const zInv = invertFunction(z, [0, Math.PI / 2]);
 
 // Produce one of the countably infinite family of Pinwheel tilings, T(p/q)
 // described by Sadun in arxiv:math/9712263.
-function generatePinwheel(p: number, q: number): RuleBuilder {
+function generatePinwheel(p: number, q: number): Rule.Builder {
   if (!(Number.isInteger(p) && Number.isInteger(q))) {
     throw new Error("pinwheel::generatePinwheel(p, q) - p and q must be in ℤ");
   }
@@ -32,7 +31,11 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
   const n = Math.max(p, q);
 
   const tile = (l: V, u: V): Triangle =>
-    Triangle(l.scale(opp), V(0, 0), l.perp().scale(adj)).translate(u);
+    Triangle.create(
+      l.scale(opp),
+      V.create(0, 0),
+      l.perp().scale(adj)
+    ).translate(u);
 
   // The n protos are named tile_0, tile_1, ⋯ The substitution scheme
   // has tile_0 → tile_1 → ⋯ → tile_(n-1) → (4tile_0 + tile_(q-p)) when
@@ -56,11 +59,11 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
       .add(t.c);
     const int = mmid.subtract(hp1).add(hp2);
 
-    tileConsumer[Math.max(q - p, 0)](Triangle(t.a, hp2, t.b));
-    tileConsumer[Math.max(p - q, 0)](Triangle(t.b, int, mmid));
-    tileConsumer[Math.max(p - q, 0)](Triangle(hp2, int, mmid));
-    tileConsumer[Math.max(p - q, 0)](Triangle(mmid, hp1, hp2));
-    tileConsumer[Math.max(p - q, 0)](Triangle(mmid, hp1, t.c));
+    tileConsumer[Math.max(q - p, 0)](Triangle.create(t.a, hp2, t.b));
+    tileConsumer[Math.max(p - q, 0)](Triangle.create(t.b, int, mmid));
+    tileConsumer[Math.max(p - q, 0)](Triangle.create(hp2, int, mmid));
+    tileConsumer[Math.max(p - q, 0)](Triangle.create(mmid, hp1, hp2));
+    tileConsumer[Math.max(p - q, 0)](Triangle.create(mmid, hp1, t.c));
   };
 
   // This leaves the tile unchanged but now labeled relatively larger.
@@ -81,7 +84,7 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
       .scale(opp / adj)
       .invert()
       .add(b);
-    tileConsumer[n - 1](Triangle(a, b, c));
+    tileConsumer[n - 1](Triangle.create(a, b, c));
   };
 
   // This is the inverse of inflate().
@@ -94,14 +97,14 @@ function generatePinwheel(p: number, q: number): RuleBuilder {
     tileConsumers[i - 1](t);
   };
 
-  const builder = RuleBuilder();
+  const builder = Rule.builder();
 
   for (let i = 0; i < n; i++) {
     builder.protoTile(
       // This IIF is to call .tail() only on the last builder
       ((proto: Prototile.Builder<Triangle>) =>
         i + 1 === n ? proto.tile(tile) : proto)(
-        Prototile.Builder<Triangle>({
+        Prototile.builder<Triangle>({
           name: `tile_${i}`,
           rotationalSymmetryOrder: 1,
           reflectionSymmetry: false

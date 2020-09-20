@@ -1,9 +1,9 @@
-import { V } from "./lib/math/2d/V";
-import { RotationColorerOptions } from "./renderer/Colorer";
+import V from "./lib/math/2d/V";
+import Colorer from "./renderer/Colorer";
 import { PinwheelPQ } from "./rules/pinwheel";
 import rules, { RuleOptions } from "./rules/rules";
-import { Rule } from "./tiles/Rule";
-import { TilingOptions } from "./tiles/Tiling";
+import Rule from "./tiles/Rule";
+import Tiling from "./tiles/Tiling";
 import TilingElement from "./TilingElement";
 
 export type ParameterStrings = {
@@ -27,12 +27,12 @@ export type Parameters = ParameterStrings & {
   getV(): V;
   getU(): V;
   getColorOptions(): ColorOptions;
-  getTilingOptions(): TilingOptions;
+  getTilingOptions(): Tiling.Options;
   setAttributes(tag: TilingElement): void;
   getRenderer(): "canvas" | "webgl" | "svg";
 };
 
-export type ColorOptions = RotationColorerOptions & { strokeAlpha?: number };
+export type ColorOptions = Colorer.RotationOptions & { strokeAlpha?: number };
 
 export function getUrlParameters(): Parameters {
   const params = new URLSearchParams(window.location.search);
@@ -111,7 +111,7 @@ function colorOptions(params: ParameterStrings): ColorOptions {
   return p;
 }
 
-function tilingOptions(params: ParameterStrings): TilingOptions {
+function tilingOptions(params: ParameterStrings): Tiling.Options {
   return {
     includeAncestors: parseBool(params.tilingIncludeAncestors)
   };
@@ -150,8 +150,8 @@ function parameters(paramStrings: ParameterStrings): Parameters {
       }
       return ruleForString(paramStrings.rule);
     },
-    getV: () => parseVector(paramStrings.v, V(11, 17)),
-    getU: () => parseVector(paramStrings.u, V(1500, 1500)),
+    getV: () => parseVector(paramStrings.v, V.create(11, 17)),
+    getU: () => parseVector(paramStrings.u, V.create(1500, 1500)),
     getColorOptions: () => colorOptions(paramStrings),
     getTilingOptions: () => tilingOptions(paramStrings),
     setAttributes: (tag) =>
@@ -237,7 +237,7 @@ function parseVector(vs: string | undefined | null, def: V): V {
   if (vs === undefined || vs === null) return def;
   const components = vs.split(",").map((s) => Number.parseFloat(s));
   if (components.length === 2) {
-    return V(components[0], components[1]);
+    return V.create(components[0], components[1]);
   }
   console.debug(
     `TilingComponent:parseVectorString(${vs}) failed. Using default.`

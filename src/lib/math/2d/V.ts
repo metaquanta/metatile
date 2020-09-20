@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 const EPS = 1e-10;
 
 export interface V {
@@ -12,6 +13,30 @@ export interface V {
   norm(): number;
   equals(u: V): boolean;
   toString(): string;
+}
+
+export namespace V {
+  export function create(x: number, y: number): V {
+    return new _V(x, y);
+  }
+
+  export function theta(a: V): number {
+    return (
+      (Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0) + Math.PI * 2) %
+      (Math.PI * 2)
+    );
+  }
+
+  export function midpoint(u: V, v: V): V {
+    return v
+      .subtract(u)
+      .scale(1 / 2)
+      .add(u);
+  }
+
+  export function isInstance(v: unknown): v is V {
+    return (v as { norm?: unknown }).norm !== undefined;
+  }
 }
 
 class _V implements V {
@@ -45,22 +70,4 @@ class _V implements V {
   }
 }
 
-export const V = (x: number, y: number): V => new _V(x, y);
-
-export function theta(a: V): number {
-  return (
-    (Math.atan(a.y / a.x) + (a.x > 0 ? Math.PI : 0) + Math.PI * 2) %
-    (Math.PI * 2)
-  );
-}
-
-export function midpoint(u: V, v: V): V {
-  return v
-    .subtract(u)
-    .scale(1 / 2)
-    .add(u);
-}
-
-export function isV(v: unknown): v is V {
-  return (v as { norm?: unknown }).norm !== undefined;
-}
+export default V;
