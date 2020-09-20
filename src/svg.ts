@@ -1,7 +1,7 @@
-import { Polygon } from "./lib/math/2d/Polygon";
+import Polygon from "./lib/math/2d/Polygon";
 import { getUrlParameters } from "./params";
-import { RotationColorer } from "./renderer/Colorer";
-import { RendererBuilder } from "./renderer/Renderer";
+import Colorer from "./renderer/Colorer";
+import Renderer from "./renderer/Renderer";
 
 const params = getUrlParameters();
 
@@ -14,10 +14,10 @@ const tile = rule.tileFromEdge(params.getV(), params.getU());
 const colorOptions = params.getColorOptions();
 
 if (svg) {
-  RendererBuilder()
+  Renderer.builder()
     .svg(svg)
     .fillColorer(
-      RotationColorer({
+      Colorer.rotation({
         ...colorOptions,
         protos: rule.protos
       })

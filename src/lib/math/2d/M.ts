@@ -1,4 +1,5 @@
-import { isV, V } from "./V";
+/* eslint-disable @typescript-eslint/no-namespace */
+import V from "./V";
 
 export interface M {
   dot(v: V): V;
@@ -10,44 +11,51 @@ export interface M {
   toString(): string;
 }
 
-export function M2x2(m11: number, m21: number, m12: number, m22: number): M {
-  return new _M2(m11, m21, m12, m22);
-}
+export namespace M {
+  export function create2x2(
+    m11: number,
+    m21: number,
+    m12: number,
+    m22: number
+  ): M {
+    return new _M2(m11, m21, m12, m22);
+  }
 
-export function M3x3(
-  m11: number,
-  m21: number,
-  m31: number,
-  m12: number,
-  m22: number,
-  m32: number,
-  m13: number,
-  m23: number,
-  m33: number
-): M {
-  return new _M3(m11, m21, m31, m12, m22, m32, m13, m23, m33);
-}
+  export function create3x3(
+    m11: number,
+    m21: number,
+    m31: number,
+    m12: number,
+    m22: number,
+    m32: number,
+    m13: number,
+    m23: number,
+    m33: number
+  ): M {
+    return new _M3(m11, m21, m31, m12, m22, m32, m13, m23, m33);
+  }
 
-export function of(v: V, u: V): M {
-  return M2x2(v.x, u.x, v.y, u.y);
-}
+  export function of(v: V, u: V): M {
+    return create2x2(v.x, u.x, v.y, u.y);
+  }
 
-export function Rotation(theta: number): M {
-  const cos = Math.cos(theta);
-  const sin = Math.sin(theta);
-  return M2x2(cos, -1 * sin, sin, cos);
-}
+  export function rotation(theta: number): M {
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    return create2x2(cos, -1 * sin, sin, cos);
+  }
 
-export function Scaling(a: number): M {
-  return M2x2(a, 0, 0, a);
-}
+  export function scaling(a: number): M {
+    return create2x2(a, 0, 0, a);
+  }
 
-export function Translation(v: V): M {
-  return M3x3(1, 0, v.x, 0, 1, v.y, 0, 0, 1);
-}
+  export function translation(v: V): M {
+    return create3x3(1, 0, v.x, 0, 1, v.y, 0, 0, 1);
+  }
 
-export function isM(m: unknown): m is M {
-  return (m as { transpose?: unknown }).transpose !== undefined;
+  export function isInstance(m: unknown): m is M {
+    return (m as { transpose?: unknown }).transpose !== undefined;
+  }
 }
 
 class _M2 implements M {
@@ -81,10 +89,10 @@ class _M2 implements M {
     if (typeof p === "number") {
       return this.scale(p);
     }
-    if (isV(p)) {
+    if (V.isInstance(p)) {
       return this.composeV(p);
     }
-    if (isM(p)) {
+    if (M.isInstance(p)) {
       return this.composeM(p);
     }
     throw new Error("unsupported");
@@ -123,7 +131,10 @@ class _M2 implements M {
   }
 
   composeV(v: V): V {
-    return V(this.m11 * v.x + this.m21 * v.y, this.m12 * v.x + this.m22 * v.y);
+    return V.create(
+      this.m11 * v.x + this.m21 * v.y,
+      this.m12 * v.x + this.m22 * v.y
+    );
   }
 
   toArray(): [number, number, number, number] {
@@ -163,10 +174,10 @@ class _M3 {
     if (typeof p === "number") {
       return this.scale(p);
     }
-    if (isV(p)) {
+    if (V.isInstance(p)) {
       return this.composeV(p);
     }
-    if (isM(p)) {
+    if (M.isInstance(p)) {
       return this.composeM(p);
     }
     throw new Error("unsupported");
@@ -233,7 +244,7 @@ class _M3 {
 
   composeV(v: V): V {
     // v.z is assumed to be 1
-    return V(
+    return V.create(
       this.m11 * v.x + this.m21 * v.y + this.m31,
       this.m12 * v.x + this.m22 * v.y + this.m32
     );
@@ -282,3 +293,5 @@ function dot(a: [number, number], b: [number, number]): number;
 function dot(a: number[], b: number[]): number {
   return a[0] * b[0] + a[1] * b[1] + (a.length === 3 ? a[2] * b[2] : 0);
 }
+
+export default M;

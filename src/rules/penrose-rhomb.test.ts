@@ -1,5 +1,5 @@
-import { chirality, Rhomb } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
+import Polygon, { Rhomb } from "../lib/math/2d/Polygon";
+import V from "../lib/math/2d/V";
 import {
   canCoverArbitraryVp,
   inflationFactor,
@@ -9,15 +9,15 @@ import {
 import penrose from "./penrose-rhomb";
 
 test("penrose parent inverts children", () => {
-  const u = V(400, 0);
-  const v = V(900, 200);
+  const u = V.create(400, 0);
+  const v = V.create(900, 200);
   const r = penrose.tileFromEdge(u, v);
   const [s] = r.parent().children();
   expect(r.equals(s)).toBeTruthy();
 });
 
 test("penrose romb1 children", () => {
-  const r = penrose.tileFromEdge(V(400, 0), V(900, 200));
+  const r = penrose.tileFromEdge(V.create(400, 0), V.create(900, 200));
   const p = r.polygon() as Rhomb;
   const c = r.children().map((c) => c.polygon() as Rhomb);
   expect(p.c.equals(c[0].a)).toBeTruthy();
@@ -27,7 +27,9 @@ test("penrose romb1 children", () => {
 });
 
 test("penrose romb2 children", () => {
-  const [, , r] = penrose.tileFromEdge(V(400, 0), V(900, 200)).children();
+  const [, , r] = penrose
+    .tileFromEdge(V.create(400, 0), V.create(900, 200))
+    .children();
   const p = r.polygon() as Rhomb;
   const c = r.children().map((c) => c.polygon() as Rhomb);
   expect(p.a.equals(c[0].c)).toBeTruthy();
@@ -59,6 +61,6 @@ test("penrose romb chirality", () => {
       .children()
       .flatMap((c) => c.children())
       .flatMap((c) => c.children())
-      .every((c) => !chirality(c.polygon()))
+      .every((c) => !Polygon.chirality(c.polygon()))
   ).toBeTruthy();
 });

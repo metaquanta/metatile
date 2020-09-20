@@ -1,7 +1,7 @@
 import { Tetragon } from "../lib/math/2d/Polygon";
-import { V } from "../lib/math/2d/V";
-import * as Prototile from "../tiles/PrototileBuilder";
-import { RuleBuilder } from "../tiles/RuleBuilder";
+import V from "../lib/math/2d/V";
+import Prototile from "../tiles/Prototile";
+import Rule from "../tiles/Rule";
 
 const SIN36 = (5 / 8 - 5 ** (1 / 2) / 8) ** (1 / 2);
 const COS36 = (1 / 4) * (1 + 5 ** (1 / 2));
@@ -9,9 +9,9 @@ const COS36 = (1 / 4) * (1 + 5 ** (1 / 2));
 const PHI = (1 + 5 ** (1 / 2)) / 2;
 const CONJPHI = (5 ** (1 / 2) - 1) / 2;
 
-export default RuleBuilder()
+export default Rule.builder()
   .protoTile(
-    Prototile.Builder<Tetragon>({
+    Prototile.builder<Tetragon>({
       name: "kite",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
@@ -23,7 +23,12 @@ export default RuleBuilder()
         (l: V, p: V): Tetragon => {
           const t = l.scale(COS36);
           const u = l.perp().scale(SIN36);
-          return Tetragon(V(0, 0), t.subtract(u), l, t.add(u)).translate(p);
+          return Tetragon.create(
+            V.create(0, 0),
+            t.subtract(u),
+            l,
+            t.add(u)
+          ).translate(p);
         }
       )
       .parent((k: Tetragon, kite) => {
@@ -32,7 +37,7 @@ export default RuleBuilder()
           .subtract(k.b)
           .scale(PHI + 1)
           .add(a);
-        kite(Tetragon(a, b, k.d, k.a));
+        kite(Tetragon.create(a, b, k.d, k.a));
       })
       .substitution((k: Tetragon, kite, dart) => {
         const db = k.a.add(k.c.subtract(k.d));
@@ -40,14 +45,14 @@ export default RuleBuilder()
         const dd = k.c.subtract(k.a).scale(CONJPHI).add(k.a);
         const dc = k.a.subtract(k.b).scale(CONJPHI).add(k.b);
         const ec = k.a.subtract(k.d).scale(CONJPHI).add(k.d);
-        dart(Tetragon(k.a, db, dc, dd));
+        dart(Tetragon.create(k.a, db, dc, dd));
         //createDart(Tetragon(k.a, dd, ec, ed)),
-        kite(Tetragon(k.b, k.c, dd, dc));
-        kite(Tetragon(k.d, ec, dd, k.c));
+        kite(Tetragon.create(k.b, k.c, dd, dc));
+        kite(Tetragon.create(k.d, ec, dd, k.c));
       })
   )
   .protoTile(
-    Prototile.Builder<Tetragon>({
+    Prototile.builder<Tetragon>({
       name: "dart",
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
@@ -60,8 +65,8 @@ export default RuleBuilder()
       const dc = d.b.subtract(d.a).scale(CONJPHI).add(d.a);
       const ec = d.d.subtract(d.a).scale(CONJPHI).add(d.a);
       //createDart(Tetragon(d.b, d.c, dc, dd)),
-      dart(Tetragon(d.d, eb, ec, d.c));
-      kite(Tetragon(d.a, dc, d.c, ec));
+      dart(Tetragon.create(d.d, eb, ec, d.c));
+      kite(Tetragon.create(d.a, dc, d.c, ec));
     })
   )
   .build();

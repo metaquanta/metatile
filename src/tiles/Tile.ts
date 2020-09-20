@@ -1,5 +1,6 @@
-import { chirality, Polygon } from "../lib/math/2d/Polygon";
-import { Prototile } from "./Prototile";
+/* eslint-disable @typescript-eslint/no-namespace */
+import Polygon from "../lib/math/2d/Polygon";
+import Prototile from "./Prototile";
 
 export interface Tile {
   readonly proto: Prototile;
@@ -12,14 +13,16 @@ export interface Tile {
   reflected(): boolean;
 }
 
-export function Tile(
-  polygon: Readonly<Polygon>,
-  proto: Prototile,
-  volumeHierarchic: boolean,
-  intersectingGenerations?: number
-): Tile {
-  if (volumeHierarchic) return new _Tile(polygon, proto);
-  else return new _NvhTile(polygon, proto, intersectingGenerations ?? 4);
+export namespace Tile {
+  export function create(
+    polygon: Readonly<Polygon>,
+    proto: Prototile,
+    volumeHierarchic: boolean,
+    intersectingGenerations?: number
+  ): Tile {
+    if (volumeHierarchic) return new _Tile(polygon, proto);
+    else return new _NvhTile(polygon, proto, intersectingGenerations ?? 4);
+  }
 }
 
 class _Tile implements Tile {
@@ -36,7 +39,7 @@ class _Tile implements Tile {
   }
 
   reflected() {
-    return !this.proto.reflectionSymmetry && chirality(this.polygon());
+    return !this.proto.reflectionSymmetry && Polygon.chirality(this.polygon());
   }
 
   children() {
@@ -97,3 +100,5 @@ class _NvhTile extends _Tile {
 function hasElement<T>(arr: T[], i: number): boolean {
   return arr[i] !== undefined;
 }
+
+export default Tile;

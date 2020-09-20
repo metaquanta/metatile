@@ -1,32 +1,29 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { Polygon } from "../lib/math/2d/Polygon";
 import { Tile } from "./Tile";
-
-export function Tiling(tile: Tile, options?: TilingOptions): Tiling {
-  return {
-    cover: (mask) => coverWith(tile, mask, options)
-  };
-}
 
 export interface Tiling {
   cover(mask: Polygon): Generator<Tile>;
 }
 
-export interface TilingOptions {
-  includeAncestors?: boolean;
-  maxStackDepth?: number;
-  progressive?: boolean;
+export namespace Tiling {
+  export interface Options {
+    includeAncestors?: boolean;
+    maxStackDepth?: number;
+    progressive?: boolean;
+  }
+
+  export function create(tile: Tile, options?: Options): Tiling {
+    return {
+      cover: (mask) => coverWith(tile, mask, options)
+    };
+  }
 }
 
-const defaultOptions = {
-  includeAncestors: false,
-  maxStackDepth: 500,
-  progressive: true
-};
-
-export function* coverWith(
+function* coverWith(
   tile: Tile,
   mask: Polygon,
-  options?: TilingOptions
+  options?: Tiling.Options
 ): Generator<Tile> {
   const opts = { ...defaultOptions, ...options };
   console.debug(`Tiling:coverWith(${mask})`);
@@ -98,3 +95,11 @@ export function* coverWith(
     yield* descend(root, d);
   }
 }
+
+const defaultOptions = {
+  includeAncestors: false,
+  maxStackDepth: 500,
+  progressive: true
+};
+
+export default Tiling;
