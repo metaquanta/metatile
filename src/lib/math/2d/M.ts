@@ -187,11 +187,11 @@ class _M3 {
     // This is only valid for augmented 2x2 matrices.
     const a = 1 / (this.m11 * this.m22 - this.m21 * this.m12);
     return new _M3(
-      this.m22 / a,
-      (this.m21 / a) * -1,
+      this.m22 * a,
+      -(this.m21 * a),
       -this.m31,
-      (this.m12 / a) * -1,
-      this.m11 / a,
+      -(this.m12 * a),
+      this.m11 * a,
       -this.m32,
       0,
       0,

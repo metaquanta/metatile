@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import { isArray } from "../util";
 
 export type GlProgram = {
@@ -6,7 +5,7 @@ export type GlProgram = {
   setUniformInt(attrib: string, ...values: number[]): void;
   setUniformFloat(
     attrib: string,
-    ...values: (number | [number, number])[]
+    ...values: (number | [number, number] | [number, number, number])[]
   ): void;
   setUniformMat(
     attrib: string,
@@ -24,20 +23,21 @@ export namespace GlProgram {
   export type Shader = (gl: WebGL2RenderingContext) => WebGLShader;
 
   export function vert(
-    s: TemplateStringsArray,
+    a: TemplateStringsArray,
     ...p: (number | string | { toString: () => string })[]
   ): Shader {
-    return (gl: WebGL2RenderingContext) =>
-      shader(
+    return (gl: WebGL2RenderingContext) => {
+      return shader(
         gl,
         gl.VERTEX_SHADER,
-        p.map((p, i) => `${s[i]}${p}`).join() + s[s.length - 1]
+        p.map((p, i) => `${a[i]}${p}`).join("") + a[a.length - 1]
       );
+    };
   }
 
   export function frag(x: TemplateStringsArray): Shader {
     return (gl: WebGL2RenderingContext) =>
-      shader(gl, gl.FRAGMENT_SHADER, x.join());
+      shader(gl, gl.FRAGMENT_SHADER, x.join(""));
   }
 
   export type TypedArray =
@@ -143,18 +143,14 @@ export namespace GlProgram {
 
       setUniformFloat(
         attrib: string,
-        ...values: (number | [number, number])[]
+        ...values: (number | [number, number] | [number, number, number])[]
       ) {
         const loc = gl.getUniformLocation(program, attrib);
         if (loc === null) throw new Error();
         if (values.length === 0) throw new Error();
         if (isArray(values[0])) {
           uniforms.push([
-            (loc) =>
-              gl.uniform2fv(
-                loc,
-                values.flatMap((v) => v)
-              ),
+            (loc) => _setUniformfv(gl, loc, values as number[][]),
             loc
           ]);
           if (gl.getError() !== 0)
@@ -267,6 +263,25 @@ function typedArrayBufferType(arr: GlProgram.TypedArray): number {
       return WebGL2RenderingContext.UNSIGNED_SHORT;
   }
   throw new Error("Unsupported Type");
+}
+
+function _setUniformfv(
+  gl: WebGL2RenderingContext,
+  loc: WebGLUniformLocation,
+  values: number[][]
+) {
+  const a = values.flat();
+  switch (values[0].length) {
+    case 1:
+      return gl.uniform1fv(loc, a);
+    case 2:
+      return gl.uniform2fv(loc, a);
+    case 3:
+      return gl.uniform3fv(loc, a);
+    case 4:
+      return gl.uniform4fv(loc, a);
+  }
+  throw new Error(`unsupported vector size! [${values[0].length}]`);
 }
 
 export default GlProgram;
