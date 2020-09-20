@@ -17,6 +17,12 @@ export type GlProgram = {
       | WebGLRenderingContextBase["LINES"],
     count?: number
   ): void;
+  drawAgain(
+    mode:
+      | WebGLRenderingContextBase["TRIANGLES"]
+      | WebGLRenderingContextBase["LINES"],
+    count?: number
+  ): void;
 };
 
 export namespace GlProgram {
@@ -85,6 +91,8 @@ export namespace GlProgram {
     vertexShader: Shader,
     fragmentShader: Shader
   ): GlProgram {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     const program = gl.createProgram();
     if (program === null) throw new Error(`WebGL error:${gl.getError()}`);
     gl.attachShader(program, vertexShader(gl));
@@ -153,11 +161,14 @@ export namespace GlProgram {
             (loc) => _setUniformfv(gl, loc, values as number[][]),
             loc
           ]);
-          if (gl.getError() !== 0)
-            throw new Error(`WebGL error:${gl.getError()}`);
         } else {
-          throw new Error("Not supported yet!");
+          uniforms.push([
+            (loc) => _setUniformf(gl, loc, values as number[]),
+            loc
+          ]);
         }
+        if (gl.getError() !== 0)
+          throw new Error(`WebGL error:${gl.getError()}`);
       },
 
       setUniformMat(attrib: string, values: number[][]) {
@@ -185,7 +196,7 @@ export namespace GlProgram {
         mode:
           | WebGLRenderingContextBase["TRIANGLES"]
           | WebGLRenderingContextBase["LINES"],
-        count = 0
+        count?
       ) {
         buffers.forEach(({ buffer, attrib, size, type }) =>
           bindBuffer(gl, buffer, attrib, size, type)
@@ -195,7 +206,17 @@ export namespace GlProgram {
 
         uniforms.forEach(([f, loc]) => f(loc));
 
-        gl.drawArrays(mode, 0, length ?? count);
+        gl.drawArrays(mode, 0, count ?? length ?? 0);
+      },
+      drawAgain(
+        mode:
+          | WebGLRenderingContextBase["TRIANGLES"]
+          | WebGLRenderingContextBase["LINES"],
+        count?
+      ) {
+        uniforms.forEach(([f, loc]) => f(loc));
+
+        gl.drawArrays(mode, 0, count ?? length ?? 0);
       }
     };
   }
@@ -263,6 +284,24 @@ function typedArrayBufferType(arr: GlProgram.TypedArray): number {
       return WebGL2RenderingContext.UNSIGNED_SHORT;
   }
   throw new Error("Unsupported Type");
+}
+
+function _setUniformf(
+  gl: WebGL2RenderingContext,
+  loc: WebGLUniformLocation,
+  values: number[]
+) {
+  switch (values.length) {
+    case 1:
+      return gl.uniform1f(loc, values[0]);
+    case 2:
+      return gl.uniform2f(loc, values[0], values[1]);
+    case 3:
+      return gl.uniform3f(loc, values[0], values[1], values[2]);
+    case 4:
+      return gl.uniform4f(loc, values[0], values[1], values[2], values[3]);
+  }
+  throw new Error(`unsupported vector size! [${values.length}]`);
 }
 
 function _setUniformfv(
