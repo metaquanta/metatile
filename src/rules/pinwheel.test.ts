@@ -9,14 +9,14 @@ test("pinwheel", () => {
   const children = t.children();
   const p = t.polygon() as Triangle;
   const pm = getMatrix(t).invert() as M;
-  console.log(`parent: ${p}, m^-1: ${pm}`);
+  //console.log(`parent: ${p}, m^-1: ${pm}`);
   for (const child of children) {
     const m = getMatrix(child).dot(pm);
     const cp = child.polygon() as Triangle;
     const a = m.dot(p.a);
     const b = m.dot(p.b);
     const c = m.dot(p.c);
-    console.log(`child: ${child}, m: ${m} --> ${a}, ${b}, ${c}`);
+    //console.log(`child: ${child}, m: ${m} --> ${a}, ${b}, ${c}`);
     expect(a.equals(cp.a)).toBeTruthy();
     expect(b.equals(cp.b)).toBeTruthy();
     expect(c.equals(cp.c)).toBeTruthy();
@@ -25,5 +25,5 @@ test("pinwheel", () => {
 
 function getMatrix(c: Tile) {
   const p = c.polygon() as Triangle;
-  return M.of(p.a.subtract(p.b), p.c.subtract(p.b)).dot(M.translation(p.b));
+  return M.of(p.a.subtract(p.b), p.c.subtract(p.b), p.b);
 }
