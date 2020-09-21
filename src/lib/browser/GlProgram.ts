@@ -1,14 +1,23 @@
 import { isArray } from "../util";
 
 export type GlProgram = {
-  setAttrib(attrib: string, arr: GlProgram.TypedArray, size: number): void;
-  setUniformInt(attrib: string, ...values: number[]): void;
+  setAttrib(loc: string, arr: GlProgram.TypedArray, size: number): void;
+  setUniformInt(loc: string, val1: number): void;
+  setUniformInt(loc: string, val1: number, val2: number): void;
+  setUniformInt(loc: string, val1: number, val2: number, val3: number): void;
+  setUniformInt(
+    l: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number
+  ): void;
   setUniformFloat(
-    attrib: string,
+    loc: string,
     ...values: (number | [number, number] | [number, number, number])[]
   ): void;
   setUniformMat(
-    attrib: string,
+    loc: string,
     values: (GlProgram.Mat2 | GlProgram.Mat3 | GlProgram.Mat4)[]
   ): void;
   draw(

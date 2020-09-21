@@ -11,14 +11,10 @@ const mat = getMatrix(tile).invert();
 
 function getMatrix(c: Tile) {
   const p = c.polygon() as Triangle;
-  return M.of(p.a.subtract(p.b), p.c.subtract(p.b)).dot(M.translation(p.b));
+  return M.of(p.a.subtract(p.b), p.c.subtract(p.b), p.b);
 }
 
-const children = tile.children().map((c) =>
-  getMatrix(c)
-    .dot(mat as M)
-    .transpose()
-);
+const children = tile.children().map((c) => getMatrix(c).dot(mat as M));
 
 const vs = GlProgram.vert`#version 300 es
 uniform vec3 tile[3];
@@ -80,7 +76,7 @@ program.draw(gl.TRIANGLES, children.length ** 2 * 3);
 function draw() {
   const t = Date.now() - t0;
   const d = (2 + Math.floor(t / int)) % 9;
-  const alpha = (t % int) / int;
+  const alpha = ((t % int) / int) ** 2;
 
   program.setUniformInt("totalTiles", children.length ** d);
   program.setUniformInt("d", d - 1);
