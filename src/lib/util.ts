@@ -58,7 +58,7 @@ export function isDone<T>(
   return result.done != undefined && result.done;
 }
 
-export function isCallable<T, V>(f: unknown): f is (p: V) => T {
+export function isCallable<T, V>(f: T | ((p: V) => T)): f is (p: V) => T {
   return (f as { call?: unknown }).call !== undefined;
 }
 

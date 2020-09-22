@@ -113,7 +113,8 @@ function colorOptions(params: ParameterStrings): ColorOptions {
 
 function tilingOptions(params: ParameterStrings): Tiling.Options {
   return {
-    includeAncestors: parseBool(params.tilingIncludeAncestors)
+    includeAncestors: parseBool(params.tilingIncludeAncestors),
+    progressive: true
   };
 }
 
