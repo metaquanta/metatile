@@ -1,4 +1,3 @@
-import Polygon from "./lib/math/2d/Polygon";
 import Prototile from "./tiles/Prototile";
 import Rule from "./tiles/Rule";
 import Tile from "./tiles/Tile";
@@ -17,21 +16,6 @@ export function similarChildren(parent: Tile): Tile[] {
       .flatMap((c) => f(c, proto));
   };
   return f(parent, parent.proto);
-}
-
-export function permutedVertices(p: Polygon, q: Polygon): Map<number, number> {
-  const map = new Map<number, number>();
-  for (let i = 0; i < p.vertices().length; i++) {
-    const v = p.vertices()[i];
-    for (let j = 0; j < q.vertices().length; j++) {
-      const u = q.vertices()[j];
-      if (u.equals(v)) {
-        console.debug(`p${i + 1} => q${j + 1}`);
-        map.set(i, j);
-      }
-    }
-  }
-  return map;
 }
 
 export function inflationFactor(parent: Tile, child: Tile): number {

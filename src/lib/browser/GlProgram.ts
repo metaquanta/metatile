@@ -24,7 +24,7 @@ export type GlProgram = {
     mode:
       | WebGLRenderingContextBase["TRIANGLES"]
       | WebGLRenderingContextBase["LINES"],
-    count?: number
+    count: number
   ): void;
   drawAgain(
     mode:
@@ -130,11 +130,10 @@ export namespace GlProgram {
       (loc: WebGLUniformLocation) => void
     >();
 
-    let length: number | undefined;
+    let numVertices = 0;
 
     return {
       setAttrib(attrib: string, arr: TypedArray, size: number) {
-        length = arr.length / size;
         buffers.push({
           attrib: gl.getAttribLocation(program, attrib),
           buffer: loadBuffer(gl, arr),
@@ -199,27 +198,29 @@ export namespace GlProgram {
         mode:
           | WebGLRenderingContextBase["TRIANGLES"]
           | WebGLRenderingContextBase["LINES"],
-        count?
+        count
       ) {
         buffers.forEach(({ buffer, attrib, size, type }) =>
           bindBuffer(gl, buffer, attrib, size, type)
         );
 
+        numVertices = count;
+
         gl.useProgram(program);
 
         uniforms.forEach((f, l) => f(l));
-
-        gl.drawArrays(mode, 0, count ?? length ?? 0);
+        console.debug(`GlProgram.draw() - drawing ${count} vertices.`);
+        gl.drawArrays(mode, 0, count);
       },
       drawAgain(
         mode:
           | WebGLRenderingContextBase["TRIANGLES"]
           | WebGLRenderingContextBase["LINES"],
-        count?
+        count
       ) {
         uniforms.forEach((f, l) => f(l));
 
-        gl.drawArrays(mode, 0, count ?? length ?? 0);
+        gl.drawArrays(mode, 0, count ?? numVertices);
       }
     };
   }

@@ -51,13 +51,13 @@ export default Rule.builder()
         sq2(Tetragon.create(r.a, r.b, e, f));
       })
       .tile(
-        (l: V, u: V): Tetragon =>
+        (i: V, j: V, p: V): Tetragon =>
           Tetragon.create(
-            V.create(0, 0),
-            l,
-            l.perp().scale(PHI).add(l),
-            l.perp().scale(PHI)
-          ).translate(u)
+            V.origin,
+            i,
+            j.scale(PHI).add(i),
+            j.scale(PHI)
+          ).translate(p)
       )
   )
   .build();

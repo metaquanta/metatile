@@ -55,8 +55,8 @@ export default Rule.builder()
         tileConsumer(c7.translate(c7.c.subtract(c7.a)));
       })
       .tile(
-        (l: V): Triangle =>
-          Triangle.create(l.perp().scale(-1 / 9), l.scale(1 / 3), l.perp())
+        (l: V, j: V, p: V): Triangle =>
+          Triangle.create(j.scale(-1 / 9), l.scale(1 / 3), j).translate(p)
       )
   )
   .build();

@@ -20,11 +20,11 @@ export default Rule.builder()
       intersectingGenerations: 3
     })
       .tile(
-        (l: V, p: V): Tetragon => {
+        (l: V, j: V, p: V): Tetragon => {
           const t = l.scale(COS36);
-          const u = l.perp().scale(SIN36);
+          const u = j.scale(SIN36);
           return Tetragon.create(
-            V.create(0, 0),
+            V.origin,
             t.subtract(u),
             l,
             t.add(u)

@@ -14,8 +14,8 @@ export default Rule.builder()
       rotationalSymmetryOrder: 1,
       reflectionSymmetry: false
     })
-      .tile((l: V, u: V) => {
-        const r = l.perp().scale(ISQRT15);
+      .tile((l: V, j: V, u: V) => {
+        const r = j.scale(ISQRT15);
         return Triangle.create(r, l, r.invert()).translate(u);
       })
       .parent((t: Triangle, consumer) => {

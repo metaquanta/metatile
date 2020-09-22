@@ -30,12 +30,8 @@ function generatePinwheel(p: number, q: number): Rule.Builder {
   // proto.
   const n = Math.max(p, q);
 
-  const tile = (l: V, u: V): Triangle =>
-    Triangle.create(
-      l.scale(opp),
-      V.create(0, 0),
-      l.perp().scale(adj)
-    ).translate(u);
+  const tile = (l: V, j: V, u: V): Triangle =>
+    Triangle.create(l.scale(opp), V.create(0, 0), j.scale(adj)).translate(u);
 
   // The n protos are named tile_0, tile_1, ⋯ The substitution scheme
   // has tile_0 → tile_1 → ⋯ → tile_(n-1) → (4tile_0 + tile_(q-p)) when
