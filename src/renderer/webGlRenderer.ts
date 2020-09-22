@@ -29,7 +29,7 @@ export default function createWebGlRenderer(
           1.0
         );        
         vec2 scale = vec2(
-          ${canvas.clientWidth / window.devicePixelRatio}
+          ${canvas.clientWidth / window.devicePixelRatio},
           ${(-1 * canvas.clientHeight) / window.devicePixelRatio}
         );
         gl_Position = vec4((position)/scale-vec2(1.0,-1.0), 0.0, 1.0);
@@ -53,7 +53,7 @@ export default function createWebGlRenderer(
       
       void main() {
         vec2 scale = vec2(
-          ${canvas.clientWidth / window.devicePixelRatio}
+          ${canvas.clientWidth / window.devicePixelRatio},
           ${(-1 * canvas.clientHeight) / window.devicePixelRatio}
         );
         gl_Position = vec4((position)/scale-vec2(1, -1), 0.0, 1.0);
@@ -71,18 +71,15 @@ export default function createWebGlRenderer(
 
   return {
     render: () => {
-      let i = 0;
-      let j = 0;
-      // ~14MiB
-      // triangle: 3 fill, 6 stroke vertices
-      // rhomb: 6 fill, 8 stroke vertices
-      let fillverts: Float32Array;
-      let strokeverts: Float32Array;
-      let colors: Uint8Array;
-      function loadArrays() {
-        fillverts = new Float32Array(2 ** 20);
-        strokeverts = new Float32Array(2 ** 21);
-        colors = new Uint8Array(2 ** 21);
+      window.requestAnimationFrame(() => {
+        let i = 0;
+        let j = 0;
+        // ~14MiB
+        // triangle: 3 fill, 6 stroke vertices
+        // rhomb: 6 fill, 8 stroke vertices
+        const fillverts = new Float32Array(2 ** 20);
+        const strokeverts = new Float32Array(2 ** 21);
+        const colors = new Uint8Array(2 ** 21);
         for (const t of tiles) {
           const color = fillColorer(t);
           for (const v of t
@@ -105,16 +102,14 @@ export default function createWebGlRenderer(
             j = j + 1;
           }
         }
-        window.requestAnimationFrame(() => draw());
-      }
-      function draw() {
-        fillProgram.setAttrib("position", fillverts, 2);
-        strokeProgram.setAttrib("position", strokeverts, 2);
-        fillProgram.setAttrib("color", colors, 3);
-        fillProgram.draw(gl.TRIANGLES);
-        strokeProgram.draw(gl.LINES);
-      }
-      window.requestAnimationFrame(() => loadArrays());
+        window.requestAnimationFrame(() => {
+          fillProgram.setAttrib("position", fillverts, 2);
+          fillProgram.setAttrib("color", colors, 3);
+          fillProgram.draw(gl.TRIANGLES, i);
+          strokeProgram.setAttrib("position", strokeverts, 2);
+          strokeProgram.draw(gl.LINES, j);
+        });
+      });
     }
   };
 }

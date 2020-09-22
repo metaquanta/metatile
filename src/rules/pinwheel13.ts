@@ -65,8 +65,8 @@ export default Rule.builder()
         tileConsumer(Triangle.create(t.a, c10.b, c10.c));
       })
       .tile(
-        (l: V, u: V): Triangle =>
-          Triangle.create(l.perp().scale(2 / 3), V.create(0, 0), l).translate(u)
+        (l: V, j: V, u: V): Triangle =>
+          Triangle.create(j.scale(2 / 3), V.create(0, 0), l).translate(u)
       )
   )
   .build();

@@ -1,6 +1,5 @@
 import Polygon from "../lib/math/2d/Polygon";
 import V from "../lib/math/2d/V";
-import { first } from "../lib/util";
 import Colorer from "../renderer/Colorer";
 import Prototile from "./Prototile";
 import Tile from "./Tile";
@@ -30,16 +29,18 @@ export namespace Rule {
     prototiles: Prototile[],
     colorOptions?: Colorer.RotationOptions
   ): Rule {
-    const seed = first(prototiles, (p) => p.tile !== undefined);
-    if (seed === undefined)
-      throw new Error("No Prototile has a seed tile method.");
-
+    const numDescendants = new Map<Prototile, number[]>();
+    prototiles.forEach((proto) => numDescendants.set(proto, [1]));
     return {
       protos: prototiles,
       tile: () =>
-        (seed.tile as (v: V, p: V) => Tile)(V.create(100, 0), V.create(0, 0)),
+        (prototiles[0].tile as (i: V, j: V, p: V) => Tile)(
+          V.create(100, 0),
+          V.create(0, 100),
+          V.create(0, 0)
+        ),
       tileFromEdge: (u: V, v: V = V.create(0, 0)) =>
-        (seed.tile as (v: V, p: V) => Tile)(u, v),
+        (prototiles[0].tile as (i: V, j: V, p: V) => Tile)(u.perp(), u, v),
       tiling: (tile, options) => Tiling.create(tile, options),
       colorOptions
     };

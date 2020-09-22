@@ -66,9 +66,8 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
         );
       })
       .tile(
-        (p: V, r: V): Rhomb => {
-          const q = p.perp();
-          return Rhomb.create(V.create(0, 0), p, q.add(p), q).translate(r);
+        (i: V, j: V, p: V): Rhomb => {
+          return Rhomb.create(V.origin, i, j.add(i), j).translate(p);
         }
       )
   )
@@ -80,31 +79,38 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       volumeHierarchic: false,
       coveringGenerations: 5,
       intersectingGenerations: 2
-    }).substitution((rh: Rhomb, squareConsumer, rhombConsumer) => {
-      const r = rh.translate(rh.a.invert());
-      const u = r.b.scale(1 / (1 + SQRT2));
-      const v = r.d.scale(1 / (1 + SQRT2));
-      const rh1 = Rhomb.create(r.a, u, u.add(v), v).translate(rh.a);
-      const rh2 = Rhomb.create(
-        r.c,
-        r.c.subtract(u),
-        r.c.subtract(u.add(v)),
-        r.c.subtract(v)
-      ).translate(rh.a);
-      const rh3 = Rhomb.create(rh.b, rh2.c, rh.d, rh1.c);
-
-      //Rhomb.create(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
-      //Rhomb.create(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)
-
-      squareConsumer(
-        Rhomb.create(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b))
-      );
-      squareConsumer(
-        Rhomb.create(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))
-      );
-      rhombConsumer(rh1);
-      rhombConsumer(rh2);
-      rhombConsumer(rh3);
     })
+      .substitution((rh: Rhomb, squareConsumer, rhombConsumer) => {
+        const r = rh.translate(rh.a.invert());
+        const u = r.b.scale(1 / (1 + SQRT2));
+        const v = r.d.scale(1 / (1 + SQRT2));
+        const rh1 = Rhomb.create(r.a, u, u.add(v), v).translate(rh.a);
+        const rh2 = Rhomb.create(
+          r.c,
+          r.c.subtract(u),
+          r.c.subtract(u.add(v)),
+          r.c.subtract(v)
+        ).translate(rh.a);
+        const rh3 = Rhomb.create(rh.b, rh2.c, rh.d, rh1.c);
+
+        //Rhomb.create(rh.d, rh1.d.subtract(rh1.c).add(rh.d), rh1.d, rh1.c),
+        //Rhomb.create(rh.b, rh.b.subtract(rh2.c).add(rh2.d), rh2.d, rh2.c)
+
+        squareConsumer(
+          Rhomb.create(rh.b, rh1.c, rh1.b, rh.b.subtract(rh1.c).add(rh1.b))
+        );
+        squareConsumer(
+          Rhomb.create(rh.d, rh2.c, rh2.b, rh2.b.subtract(rh2.c).add(rh.d))
+        );
+        rhombConsumer(rh1);
+        rhombConsumer(rh2);
+        rhombConsumer(rh3);
+      })
+      .tile(
+        (i: V, j: V, p: V): Rhomb => {
+          const d = i.scale(1 / SQRT2).add(j.scale(1 / SQRT2));
+          return Rhomb.create(V.origin, i, i.add(d), d).translate(p);
+        }
+      )
   )
   .build();
