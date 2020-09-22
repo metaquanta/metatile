@@ -37,7 +37,7 @@ export namespace V {
     return (v as { norm?: unknown }).norm !== undefined;
   }
 
-  export const origin = V.create(0, 0);
+  export const origin = (): V => V.create(0, 0);
 }
 
 class _V implements V {

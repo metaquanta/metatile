@@ -67,7 +67,7 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       })
       .tile(
         (i: V, j: V, p: V): Rhomb => {
-          return Rhomb.create(V.origin, i, j.add(i), j).translate(p);
+          return Rhomb.create(V.origin(), i, j.add(i), j).translate(p);
         }
       )
   )
@@ -109,7 +109,7 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       .tile(
         (i: V, j: V, p: V): Rhomb => {
           const d = i.scale(1 / SQRT2).add(j.scale(1 / SQRT2));
-          return Rhomb.create(V.origin, i, i.add(d), d).translate(p);
+          return Rhomb.create(V.origin(), i, i.add(d), d).translate(p);
         }
       )
   )

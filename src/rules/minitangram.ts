@@ -87,7 +87,7 @@ export default Rule.builder()
       })
       .tile((l: V, k: V, p: V) => {
         return Tetragon.create(
-          V.origin,
+          V.origin(),
           l,
           l.scale(2).add(k),
           l.add(k)

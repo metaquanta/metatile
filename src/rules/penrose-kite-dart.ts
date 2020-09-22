@@ -24,7 +24,7 @@ export default Rule.builder()
           const t = l.scale(COS36);
           const u = j.scale(SIN36);
           return Tetragon.create(
-            V.origin,
+            V.origin(),
             t.subtract(u),
             l,
             t.add(u)

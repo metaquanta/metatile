@@ -53,7 +53,7 @@ export default Rule.builder()
       .tile(
         (i: V, j: V, p: V): Tetragon =>
           Tetragon.create(
-            V.origin,
+            V.origin(),
             i,
             j.scale(PHI).add(i),
             j.scale(PHI)
