@@ -17,14 +17,14 @@ export function range(n: number): number[] {
   return [...Array(n).keys()];
 }
 
-export function* breadthFirst<L>(
+/*export function* breadthFirst<L>(
   root: L,
   f: ((l: L) => Iterator<L>) | ((l: L) => Iterable<L>)
 ): Generator<L> {
   const arr = Array.from(iterableFrom(f(root)));
   arr.forEach((l) => yield l);
   arr.forEach((l) => yield* breadthFirst(l, f));
-}
+}*/
 
 export function* depthFirst<L>(
   root: L,
