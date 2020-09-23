@@ -101,58 +101,44 @@ class Builder<T extends Polygon> implements Prototile.Builder<T> {
   build(creators: ((p: Polygon) => Tile)[]): Prototile {
     if (this.#substitution === undefined)
       throw new Error(`Prototiles must have a substitution!!`);
-    const params = {
-      children: (p: Polygon) =>
-        childTiles(
-          this.#substitution as Prototile.Substitution<T>,
-          p,
-          creators
-        ),
-      parent:
-        this.#parent === undefined
-          ? undefined
-          : (p: Polygon) =>
-              parentTile(
-                this.#parent as Prototile.Substitution<T>,
-                p as T,
-                creators
-              ),
-      tile: this.#tile,
+    const proto = {
       rotationalSymmetryOrder: this.rotationalSymmetryOrder,
       reflectionSymmetry: this.reflectionSymmetry,
-      name: this.name,
-      volumeHierarchic: this.volumeHierarchic,
       coveringGenerations: this.coveringGenerations,
-      intersectingGenerations: this.intersectingGenerations
-    };
-    return {
-      rotationalSymmetryOrder: params.rotationalSymmetryOrder,
-      reflectionSymmetry: params.reflectionSymmetry,
-      name: params.name,
-      tile(i, j, p) {
-        return this.create(
-          (params.tile as (i: V, j: V, p: V) => Polygon)(i, j, p)
+      name: this.name,
+      tile:
+        this.#tile !== undefined
+          ? (i: V, j: V, p: V) => {
+              return proto.create(
+                (this.#tile as (i: V, j: V, p: V) => Polygon)(i, j, p)
+              );
+            }
+          : undefined,
+      parent: (t: Tile) => {
+        if (this.#parent !== undefined)
+          return parentTile(this.#parent, t.polygon() as T, creators);
+        throw new Error(`Prototile.parent() - unsupported by ${proto}!!`);
+      },
+      children: (t: Tile) => {
+        return childTiles(
+          this.#substitution as Prototile.Substitution<T>,
+          t.polygon(),
+          creators
         );
       },
-      parent(t) {
-        if (params.parent) return params.parent(t.polygon() as T);
-        throw new Error(`Prototile.parent() - unsupported by ${this}!!`);
-      },
-      children(t) {
-        return params.children(t.polygon() as T);
-      },
-      create(p): Tile {
+      create: (p: Polygon) => {
         return Tile.create(
           p,
-          this,
-          params.volumeHierarchic,
-          params.intersectingGenerations
+          proto,
+          this.volumeHierarchic,
+          this.intersectingGenerations
         );
       },
       toString() {
         return `Prototile(□,□,${this.rotationalSymmetryOrder},${this.reflectionSymmetry},${this.name})`;
       }
     };
+    return proto;
   }
 }
 
