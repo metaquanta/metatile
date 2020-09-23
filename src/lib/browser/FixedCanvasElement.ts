@@ -106,7 +106,10 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
         | CanvasRenderingContext2D
         | undefined;
       if (this.#context === undefined) return null;
-      this.#context.scale(window.devicePixelRatio, window.devicePixelRatio);
+      this.#context.scale(
+        window.devicePixelRatio / 2,
+        window.devicePixelRatio / 2
+      );
       console.debug(
         `FixedCanvas.getContext() (${window.devicePixelRatio}) ⭬ ` +
           `${this.#context.getTransform()}`

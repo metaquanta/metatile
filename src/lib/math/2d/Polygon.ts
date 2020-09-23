@@ -41,11 +41,11 @@ export namespace Polygon {
       closePath: () => void;
     }
   >(poly: Polygon, path: T): T {
-    path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
+    path.moveTo(poly.vertices()[0].x * 2, poly.vertices()[0].y * 2);
     poly
       .vertices()
       .slice(1)
-      .forEach((v) => path.lineTo(v.x, v.y));
+      .forEach((v) => path.lineTo(v.x * 2, v.y * 2));
     path.closePath();
     return path;
   }

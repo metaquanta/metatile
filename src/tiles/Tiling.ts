@@ -25,7 +25,7 @@ function* coverWith(
   options?: Tiling.Options
 ): Generator<Tile> {
   const opts = { ...defaultOptions, ...options };
-  console.debug(`Tiling:coverWith(${mask})`);
+  console.debug(`Tiling:coverWith(${mask}, ${options?.progressive})`);
   function* descend(tile: Tile, d: number): Generator<Tile> {
     /*console.debug(
       `Tiling:cover:descend(Tile, ${d}) ${
@@ -51,9 +51,11 @@ function* coverWith(
   }
 
   function* ascend(tile: Tile, d: number, nvhExtra?: number): Generator<Tile> {
-    /*console.debug(
-      `Tiling:cover:ascend(Tile, ${d}) ${tile.proto} [${tile.polygon().area()}]`
-    );*/
+    console.debug(
+      `Tiling:cover:ascend(Tile, ${d}, ${nvhExtra}) ${
+        tile.proto
+      } [${tile.polygon().area()}]`
+    );
     if (d > opts.maxStackDepth) {
       console.trace(`!!!maximum depth/height exceeded!!! d: ${d}`);
       throw new Error(`!!!maximum depth/height exceeded!!! d: ${d}`);
@@ -83,7 +85,7 @@ function* coverWith(
 
   if (options?.progressive) {
     yield tile;
-    yield* ascend(tile, 0);
+    yield* ascend(tile, 0, tile.proto.coveringGenerations);
   } else {
     let d;
     let root = tile;
