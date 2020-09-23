@@ -2,7 +2,7 @@ import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";
 import Colorer from "./Colorer";
-import createRunner from "./runner";
+import run from "./runner";
 import WebGlRenderer from "./webGlRenderer.js";
 
 export type Renderer = { render(): void };
@@ -24,23 +24,15 @@ function create(
 ) {
   return {
     render() {
-      const runner = createRunner();
-
-      const rendertile = () => {
+      run(() => {
         const result = tiles.next();
-        if (!isDone(result)) {
-          draw(result.value.polygon(), stroke, fillColorer(result.value));
-          return true;
-        }
         if (isDone(result)) {
           console.debug(`Renderer.renderNext() - DONE!`);
-          runner.stop();
           return false;
         }
-        return false;
-      };
-
-      runner.start(rendertile, () => undefined, clear);
+        draw(result.value.polygon(), stroke, fillColorer(result.value));
+        return true;
+      });
     }
   };
 }

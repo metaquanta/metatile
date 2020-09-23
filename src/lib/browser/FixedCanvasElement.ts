@@ -6,6 +6,7 @@ const style = `<style>
         contain: content;
       }
       :host, div, canvas {
+        overflow: hidden;
         margin: 0;
         width: 100%;
         height: 100%;
@@ -30,6 +31,10 @@ function rectToString(r: {
 }
 
 class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
+  static get observedAttributes(): string[] {
+    return ["canvas-pixel-ratio"];
+  }
+
   readonly #canvas: HTMLCanvasElement = document.createElement("canvas");
   readonly #viewPort: HTMLDivElement = document.createElement("div");
   readonly #wrapper: HTMLDivElement = document.createElement("div");
@@ -45,22 +50,37 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     return this.#wrapper.clientHeight;
   }
 
+  get canvasPixelRatio(): number {
+    const defaultScale = parseFloat(
+      this.getAttribute("canvas-pixel-ratio") ?? "1"
+    );
+    return isFinite(defaultScale) ? defaultScale : 1;
+  }
+
   get canvasViewPort(): DOMRect {
+    const scale = this.canvasPixelRatio;
     const w = this.#viewPort.clientWidth;
     const h = this.#viewPort.clientHeight;
-    return new DOMRect((this.width - w) / 2, (this.height - h) / 2, w, h);
+    return new DOMRect(
+      (this.width - w) / scale,
+      (this.height - h) / scale,
+      w,
+      h
+    );
   }
 
   get viewPort(): DOMRect {
+    const scale = this.canvasPixelRatio;
     return new DOMRect(
-      (this.#wrapper.clientWidth - this.#viewPort.clientWidth) / 2,
-      (this.#wrapper.clientHeight - this.#viewPort.clientHeight) / 2,
+      (this.#wrapper.clientWidth - this.#viewPort.clientWidth) / scale,
+      (this.#wrapper.clientHeight - this.#viewPort.clientHeight) / scale,
       this.#viewPort.clientWidth,
       this.#viewPort.clientHeight
     );
   }
 
   updateGeometry(): void {
+    if (!this.isConnected) return;
     // Center the canvas element in the viewport.
     this.#wrapper.style.left = `${-this.viewPort.left}px`;
     this.#wrapper.style.top = `${-this.viewPort.top}px`;
@@ -106,9 +126,10 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
         | CanvasRenderingContext2D
         | undefined;
       if (this.#context === undefined) return null;
+      const scale = this.canvasPixelRatio;
       this.#context.scale(
-        window.devicePixelRatio / 2,
-        window.devicePixelRatio / 2
+        window.devicePixelRatio / scale,
+        window.devicePixelRatio / scale
       );
       console.debug(
         `FixedCanvas.getContext() (${window.devicePixelRatio}) ⭬ ` +
@@ -129,19 +150,25 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     return this.#canvas.transferControlToOffscreen();
   }
 
+  adoptedCallback(): void {
+    this.updateGeometry();
+  }
+
+  attributeChangedCallback(): void {
+    this.updateGeometry();
+  }
+
   connectedCallback(): void {
     // TODO: Does some of this belong in the constructor?
     // Set up DOM nodes.
-    /*const shadowRoot = this.attachShadow({
+    const shadowRoot = this.attachShadow({
       mode: "open"
-    });*/
-    //shadowRoot.innerHTML = style;
-    this.innerHTML = style;
+    });
+    shadowRoot.innerHTML = style;
     this.#wrapper.style.position = "fixed";
     this.#wrapper.appendChild(this.#canvas);
     this.#viewPort.appendChild(this.#wrapper);
-    //shadowRoot.appendChild(this.#viewPort);
-    this.appendChild(this.#viewPort);
+    shadowRoot.appendChild(this.#viewPort);
     // The height==width of the canvas' wrapper div. This will also be the
     // width/height of the canvas element and the maximum size the FixedCanvas
     // can be resized to.
