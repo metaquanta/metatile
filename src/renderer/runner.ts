@@ -1,62 +1,54 @@
-export default function createRunner(): {
-  start: (r: () => boolean, b: () => void, c: () => void) => void;
-  stop: () => Promise<unknown>;
-} {
-  // Apparently, Chrome calls a requestAnimationFrame() over 50ms a
-  // "violation". (sometimes). Fuck 'em.
-  const msPerFrameTarget = 75;
+export default function run(f: () => boolean): void {
+  if (queue === undefined) {
+    queue = start(f);
+  } else {
+    queue = queue.then(() => start(f));
+  }
+}
 
-  let stopped = true;
-  let finish: (() => void) | undefined;
-  let tasksPerFrame = 500;
-  let timestamp = Date.now();
-  let onFrame: (() => void) | undefined;
-  let tasksCompleted = 0;
+// Apparently, Chrome calls a requestAnimationFrame() over 50ms a
+// "violation". (sometimes). Fuck 'em.
+const msPerFrameTarget = 75;
+let tasksPerFrame = 500;
+let totalFrameMs = 0;
+let queue: Promise<void> | undefined;
 
-  return {
-    start(task, block, init) {
-      console.debug(`Renderer:Runner.start() [${tasksCompleted}]`);
-      if (!stopped) {
-        this.stop().then(() => this.start(task, block, init));
-        return;
-      }
-      stopped = false;
-      init();
-      timestamp = Date.now();
-      onFrame = () => {
-        if (stopped) {
-          finish?.();
-        } else {
-          for (let i = 0; i < tasksPerFrame && task(); i++) {
-            tasksCompleted++;
-          }
-          const ms = Date.now();
-          console.debug(
-            `Runner - executed ${tasksPerFrame} tasks in ${ms - timestamp}ms`
+function start(task: () => boolean): Promise<void> {
+  console.log(`runner:start`);
+  return new Promise<void>((finish) => {
+    const startRunMs = Date.now();
+    let tasksCompletedRun = 0;
+    const onFrame = () => {
+      const startFrameMs = Date.now();
+      for (let i = 0; i < tasksPerFrame; i++) {
+        tasksCompletedRun++;
+        if (!task()) {
+          totalFrameMs += Date.now() - startFrameMs;
+          console.log(
+            `runner... ${tasksCompletedRun} tasks in ${totalFrameMs} ms [${(
+              totalFrameMs /
+              (Date.now() - startRunMs)
+            ).toFixed(3)}%]`
           );
-          tasksPerFrame = Math.round(
-            Math.max(
-              (msPerFrameTarget * tasksPerFrame) / (ms - timestamp),
-              100 // It can get stuck too low and become /really/ slow
-            )
-          );
-          block();
-          timestamp = Date.now(); //fixme
-          window.requestAnimationFrame(() => onFrame?.());
+          finish();
+          return;
         }
-      };
-      window.requestAnimationFrame(() => onFrame?.());
-    },
-    stop(): Promise<unknown> {
-      console.debug(`Renderer:Runner.stop() [${tasksCompleted} ${stopped}]`);
-      if (stopped) {
-        return Promise.resolve();
       }
-      const promise = new Promise<void>((resolve) => {
-        finish = resolve;
-      });
-      stopped = true;
-      return promise;
-    }
-  };
+      const frameMs = Date.now() - startFrameMs;
+      console.log(
+        `runner... [${tasksPerFrame} tasks @ ${(
+          frameMs / tasksPerFrame
+        ).toFixed(3)} ms/task]`
+      );
+      tasksPerFrame = Math.round(
+        Math.max(
+          (msPerFrameTarget * tasksPerFrame) / frameMs,
+          100 // It can get stuck too low and become /really/ slow
+        )
+      );
+      totalFrameMs += frameMs;
+      window.requestAnimationFrame(() => onFrame());
+    };
+    window.requestAnimationFrame(() => onFrame());
+  });
 }

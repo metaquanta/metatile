@@ -35,6 +35,16 @@ const observedAttributes = [
 class TilingElement extends FixedCanvasElement {
   readonly #rendererBuilder: Renderer.Builder = Renderer.builder();
   #renderer: Renderer | undefined = undefined;
+  get canvasPixelRatio(): number {
+    return 2;
+  }
+
+  constructor() {
+    super();
+    console.debug(
+      `TilingElement ⭬ created! [${this.isConnected}, ${this.parentElement}]`
+    );
+  }
 
   static get observedAttributes(): string[] {
     return observedAttributes;
@@ -75,18 +85,38 @@ class TilingElement extends FixedCanvasElement {
     _attribute(this, "tilingIncludeAncestors", tilingIncludeAncestors);
   }
   set pinwheelP(p: string) {
+    console.debug(`P: ${p} [pinwheel]`);
     _attribute(this, "pinwheelP", p);
   }
   set pinwheelQ(q: string) {
+    console.debug(`Q: ${q} [pinwheel]`);
     _attribute(this, "pinwheelQ", q);
   }
 
+  adoptedCallback(): void {
+    console.debug(
+      `TilingElement ⭬ adopted! [${this.isConnected}, ${this.parentElement}]`
+    );
+    super.adoptedCallback();
+    this.render();
+  }
+
+  attributeChangedCallback(): void {
+    console.debug("TilingElement ⭬ changed!");
+    super.attributeChangedCallback();
+    this.render();
+  }
+
   connectedCallback(): void {
+    console.debug(
+      `TilingElement ⭬ connected! [${this.isConnected}, ${this.parentElement}]`
+    );
     super.connectedCallback();
     this.render();
   }
 
   render(): void {
+    if (!this.isConnected) return;
     const params = getTagParameters(this);
 
     const rule = params.getRule();
