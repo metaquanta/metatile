@@ -2,7 +2,6 @@
 
 <img align="right" src="https://tilings.metaquanta.com/sample/penrose_cropped.png" width=400 alt="Penrose-Rhomb"/>
 <img align="right" src="https://tilings.metaquanta.com/sample/pinwheel_cropped.png" width=400 alt="Pinwheel"/>
-<img align="right" src="https://tilings.metaquanta.com/sample/fibonacci_cropped.png" width=400 alt="Fibonacci Variant"/>
 <img align="right" src="https://tilings.metaquanta.com/sample/ammann_cropped.png" width=400 alt="Ammann-Beenker"/>
 
 Render substitution tilings live in your browser.
@@ -47,5 +46,4 @@ Pictured right:
 
 - [Penrose Rhombs](https://github.com/metaquanta/metatile/blob/master/src/rules/penrose-rhomb.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/)
 - [Radin's Pinwheel](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/pinwheel/)
-- [Fibonacci Variant](https://github.com/metaquanta/metatile/blob/master/src/rules/fibonacci.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-variant/)
 - [Ammann-Beenker](https://github.com/metaquanta/metatile/blob/master/src/rules/ammann-beenker.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/)
