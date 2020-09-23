@@ -1,20 +1,23 @@
-# Tilings
+# Metatile
 
 <img align="right" src="https://tilings.metaquanta.com/sample/penrose_cropped.png" width=400 alt="Penrose-Rhomb"/>
 <img align="right" src="https://tilings.metaquanta.com/sample/pinwheel_cropped.png" width=400 alt="Pinwheel"/>
 <img align="right" src="https://tilings.metaquanta.com/sample/fibonacci_cropped.png" width=400 alt="Fibonacci Variant"/>
 <img align="right" src="https://tilings.metaquanta.com/sample/ammann_cropped.png" width=400 alt="Ammann-Beenker"/>
 
-Draw substitution tilings in a web-component wrapped canvas.
+Render substitution tilings live in your browser.
 
-Demos:
+Some Demos:
 
-- [Sadun's T(9/20)](https://tilings.metaquanta.com/?rule=Pinwheel&pinwheelP=9&pinwheelQ=20&v=30,0&u=1500,1500&colorSaturation=0.79&colorLightness=0.65&colorHueSpan=0.17&colorHueOffset=0.4)
-- [Fibonacci with ancestors included](https://tilings.metaquanta.com/?rule=Fibonacci&tilingIncludeAncestors=y&colorAlpha=0.2&v=11,3&u=1500,1500&colorSaturation=0.4&colorLightness=0.4&colorHueSpan=0.2&colorHueOffset=0.4)
-- [Penrose Rhomb](https://tilings.metaquanta.com/?rule=Penrose-Rhomb&v=25,35&u=1500,1400&colorSaturation=0.55&colorLightness=0.45&colorHueSpan=0.33&colorHueOffset=0.33)
+- [Sadun's T(9/20)](https://tilings.metaquanta.com/?rule=Pinwheel&pinwheelP=9&pinwheelQ=20&v=30,0&u=1500,1500&colorSaturation=0.79&colorLightness=0.65&colorHueSpan=0.17&colorHueOffset=0.4) [(source)](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts)[*](https://arxiv.org/abs/math/9712263)
+- [Fibonacci with ancestors included](https://tilings.metaquanta.com/?rule=Fibonacci&tilingIncludeAncestors=y&colorAlpha=0.2&v=11,3&u=1500,1500&colorSaturation=0.4&colorLightness=0.4&colorHueSpan=0.2&colorHueOffset=0.4) [(source)](https://github.com/metaquanta/metatile/blob/master/src/rules/fibonacci.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-variant/)
+- [Penrose Rhomb](https://tilings.metaquanta.com/?rule=Penrose-Rhomb&v=25,35&u=1500,1400&colorSaturation=0.55&colorLightness=0.45&colorHueSpan=0.33&colorHueOffset=0.33) [(source)](https://github.com/metaquanta/metatile/blob/master/src/rules/penrose-rhomb.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/)
 - [Random](https://tilings.metaquanta.com/)
 
-As a web-component, knobs are twisted via attributes on the HTML tag.
+For a list of implemented rules, see [src/rules](https://github.com/metaquanta/metatile/tree/master/src/rules). While most files in `rules` are individual substitution rules, [pinwheel.ts](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts) can generate any of the countably infinite family of pinwheel-like tilings [described by Sadun](https://arxiv.org/abs/math/9712263).
+
+[TilingElement.ts](https://github.com/metaquanta/metatile/blob/master/src/TilingElement.ts) is the Web Component interface to **metatile**.
+As a web-component, most knobs are exposed via HTML attributes.
 
 ```
 <mq-tiling
@@ -25,32 +28,17 @@ As a web-component, knobs are twisted via attributes on the HTML tag.
 
 ```
 
-`rule` is pretty straight-forward. (see tilings/rules.ts)
+See [params.ts](https://github.com/metaquanta/metatile/blob/master/src/params.ts) for a complete list.
 
-`v` sets the orientation and size.
+Alternatively, most of the knobs can be adjusted via the GET string of the demo URL.
 
-`u` translates.
+A PNG can be saved via the canvas' context menu in Firefox and Chrome. Instructions for the SVG and WebGL renderers are forthcoming.
 
-There are also a few settings on the `colors` attribute that effect color selection.
+New rules are easy to add and pull requests are welcome.
 
-```
-{
-  saturation: 0.2,
-  lightness: 0.3,
-  alpha: 1.0,
-  hueSpan: 0.15,
-  hueOffset: 0.3
-}
-```
+Pictured right:
 
-(see renderer/Colorer.ts)
-
-Sources for the rules pictured in the images right
-
-https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/
-
-https://tilings.math.uni-bielefeld.de/substitution/pinwheel/
-
-https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-variant/
-
-https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/
+- [Penrose Rhombs](https://github.com/metaquanta/metatile/blob/master/src/rules/penrose-rhomb.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/)
+- [Radin's Pinwheel](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/pinwheel/)
+- [Fibonacci Variant](https://github.com/metaquanta/metatile/blob/master/src/rules/fibonacci.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/fibonacci-times-fibonacci-variant/)
+- [Ammann-Beenker](https://github.com/metaquanta/metatile/blob/master/src/rules/ammann-beenker.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/ammann-beenker/)
