@@ -14,7 +14,7 @@ Some Demos:
 - [Penrose Rhomb](https://tilings.metaquanta.com/?rule=Penrose-Rhomb&v=25,35&u=1500,1400&colorSaturation=0.55&colorLightness=0.45&colorHueSpan=0.33&colorHueOffset=0.33) [(source)](https://github.com/metaquanta/metatile/blob/master/src/rules/penrose-rhomb.ts)[*](https://tilings.math.uni-bielefeld.de/substitution/penrose-rhomb/)
 - [Random](https://tilings.metaquanta.com/)
 
-For a list of implimented rules, see [src/rules](https://github.com/metaquanta/metatile/tree/master/src/rules). While most files in `rules` are individual substitution rules, [pinwheel.ts](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts) can generate any of the countably infinite family of pinwheel-like tilings [described by Sadun](https://arxiv.org/abs/math/9712263).
+For a list of implemented rules, see [src/rules](https://github.com/metaquanta/metatile/tree/master/src/rules). While most files in `rules` are individual substitution rules, [pinwheel.ts](https://github.com/metaquanta/metatile/blob/master/src/rules/pinwheel.ts) can generate any of the countably infinite family of pinwheel-like tilings [described by Sadun](https://arxiv.org/abs/math/9712263).
 
 [TilingElement.ts](https://github.com/metaquanta/metatile/blob/master/src/TilingElement.ts) is the Web Component interface to **metatile**.
 As a web-component, most knobs are exposed via HTML attributes.
