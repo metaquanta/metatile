@@ -58,22 +58,20 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
   }
 
   get canvasViewPort(): DOMRect {
-    const scale = this.canvasPixelRatio;
     const w = this.#viewPort.clientWidth;
     const h = this.#viewPort.clientHeight;
     return new DOMRect(
-      (this.width - w) / scale,
-      (this.height - h) / scale,
+      (this.width - w) / 2,
+      (this.height - h) / 2,
       w,
       h
     );
   }
 
   get viewPort(): DOMRect {
-    const scale = this.canvasPixelRatio;
     return new DOMRect(
-      (this.#wrapper.clientWidth - this.#viewPort.clientWidth) / scale,
-      (this.#wrapper.clientHeight - this.#viewPort.clientHeight) / scale,
+      (this.#wrapper.clientWidth - this.#viewPort.clientWidth) / 2,
+      (this.#wrapper.clientHeight - this.#viewPort.clientHeight) / 2,
       this.#viewPort.clientWidth,
       this.#viewPort.clientHeight
     );
