@@ -1,18 +1,19 @@
 import V from "./V";
 
 export interface Polygon {
-  readonly vertices: () => V[];
-  readonly triangles: () => Triangle[];
-  readonly edges: () => [V, V][];
-  readonly sides: () => number;
-  readonly contains: (p: V | Polygon) => boolean;
-  readonly intersects: (p: Polygon) => boolean;
-  readonly center: () => V;
-  readonly area: () => number;
-  readonly boundingBox: () => Rect;
-  readonly translate: (v: V) => this;
-  readonly equals: (p: Polygon) => boolean;
-  readonly toString: () => string;
+  vertices(): V[];
+  triangles(): Triangle[];
+  edges(): [V, V][];
+  sides(): number;
+  contains(p: V | Polygon): boolean;
+  intersects(p: Polygon): boolean;
+  center(): V;
+  area(): number;
+  boundingBox(): Rect;
+  translate(v: V): this;
+  equals(p: Polygon): boolean;
+  toString(): string;
+  scale(s: number): this;
 }
 
 export namespace Polygon {
@@ -41,11 +42,11 @@ export namespace Polygon {
       closePath: () => void;
     }
   >(poly: Polygon, path: T): T {
-    path.moveTo(poly.vertices()[0].x * 2, poly.vertices()[0].y * 2);
+    path.moveTo(poly.vertices()[0].x, poly.vertices()[0].y);
     poly
       .vertices()
       .slice(1)
-      .forEach((v) => path.lineTo(v.x * 2, v.y * 2));
+      .forEach((v) => path.lineTo(v.x, v.y));
     path.closePath();
     return path;
   }
@@ -72,25 +73,23 @@ export namespace Polygon {
   }
 }
 
-export type Triangle = Polygon & {
+export interface Triangle extends Polygon {
   a: V;
   b: V;
   c: V;
-  translate: (v: V) => Triangle;
-};
+}
 
 export namespace Triangle {
   export const create = (a: V, b: V, c: V): Triangle => new _Triangle(a, b, c);
 }
 
 // Looks nicer than "Quadrilateral".
-export type Tetragon = Polygon & {
+export interface Tetragon extends Polygon {
   a: V;
   b: V;
   c: V;
   d: V;
-  translate: (v: V) => Tetragon;
-};
+}
 
 export namespace Tetragon {
   export const create = (a: V, b: V, c: V, d: V): Tetragon =>
@@ -210,6 +209,10 @@ class _Polygon {
     return boundingBox(this);
   }
 
+  scale(s: number): Polygon {
+    return new _Polygon(this.#vertices.map((v) => v.scale(s)));
+  }
+
   toString() {
     return `⦗${this.#vertices
       .map((v) => v.toString())
@@ -234,6 +237,10 @@ class _Triangle extends _Polygon {
     return new _Triangle(this.a.add(v), this.b.add(v), this.c.add(v));
   }
 
+  scale(s: number): Triangle {
+    return new _Triangle(this.a.scale(s), this.b.scale(s), this.c.scale(s));
+  }
+
   toString() {
     return `⟮${this.a}▽${this.b}▼${this.c}⟯`;
   }
@@ -250,6 +257,15 @@ class _Tetragon extends _Polygon {
       this.b.add(v),
       this.c.add(v),
       this.d.add(v)
+    );
+  }
+
+  scale(s: number): Tetragon {
+    return new _Tetragon(
+      this.a.scale(s),
+      this.b.scale(s),
+      this.c.scale(s),
+      this.d.scale(s)
     );
   }
 
@@ -281,6 +297,15 @@ class _Rect extends _Polygon {
       this.bottom - n,
       this.right + n,
       this.top + n
+    );
+  }
+
+  scale(s: number): Rect {
+    return new _Rect(
+      this.left * s,
+      this.bottom * s,
+      this.right * s,
+      this.top * s
     );
   }
 

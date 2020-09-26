@@ -11,6 +11,9 @@ const style = `<style>
         width: 100%;
         height: 100%;
       }
+      #wrapper {
+        position: fixed;
+      }
     </style>`;
 
 function getMaxSize(viewPort: HTMLDivElement): number {
@@ -31,34 +34,28 @@ function rectToString(r: {
 }
 
 class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
-  static get observedAttributes(): string[] {
-    return ["canvas-pixel-ratio"];
-  }
-
   readonly #canvas: HTMLCanvasElement = document.createElement("canvas");
   readonly #viewPort: HTMLDivElement = document.createElement("div");
   readonly #wrapper: HTMLDivElement = document.createElement("div");
-  #context: CanvasRenderingContext2D | undefined = undefined;
+  #pixelRatio: number = window.devicePixelRatio;
 
-  // Drawable width of the canvas in pixels.
+  // Drawable width of the canvas in CSS "pixels".
   get width(): number {
     return this.#wrapper.clientWidth;
   }
 
-  // Drawable height of the canvas in pixels.
+  // Drawable height of the canvas in CSS "pixels".
   get height(): number {
     return this.#wrapper.clientHeight;
   }
 
-  get canvasPixelRatio(): number {
-    const defaultScale = parseFloat(
-      this.getAttribute("canvas-pixel-ratio") ?? "1"
-    );
-    return isFinite(defaultScale) ? defaultScale : 1;
+  get pixelRatio(): number {
+    return this.#pixelRatio;
   }
 
+  // View port in real physical pixels;
   get canvasViewPort(): DOMRect {
-    const scale = window.devicePixelRatio / this.canvasPixelRatio;
+    const scale = this.#pixelRatio;
     const w = this.#viewPort.clientWidth * scale;
     const h = this.#viewPort.clientHeight * scale;
     return new DOMRect(
@@ -69,15 +66,11 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     );
   }
 
+  // View port in CSS "pixels";
   get viewPort(): DOMRect {
     const w = this.#viewPort.clientWidth;
     const h = this.#viewPort.clientHeight;
-    return new DOMRect(
-      (this.width - w) / 2,
-      (this.height - h) / 2,
-      w,
-      h
-    );
+    return new DOMRect((this.width - w) / 2, (this.height - h) / 2, w, h);
   }
 
   updateGeometry(): void {
@@ -85,10 +78,11 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     // Center the canvas element in the viewport.
     this.#wrapper.style.left = `${-this.viewPort.left}px`;
     this.#wrapper.style.top = `${-this.viewPort.top}px`;
+    this.#pixelRatio = window.devicePixelRatio;
 
     console.debug(
       `FixedCanvas.updateGeometry() ${rectToString(this.viewPort)} @ ${
-        window.devicePixelRatio
+        this.#pixelRatio
       }  ⦗${rectToString(this.canvasViewPort)}⦘`
     );
   }
@@ -121,23 +115,6 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     | WebGLRenderingContext
     | WebGL2RenderingContext
     | null {
-    if (contextId === "2d") {
-      if (this.#context !== undefined) return this.#context;
-      this.#context = (this.#canvas.getContext("2d", options) ?? undefined) as
-        | CanvasRenderingContext2D
-        | undefined;
-      if (this.#context === undefined) return null;
-      const scale = this.canvasPixelRatio;
-      this.#context.scale(
-        window.devicePixelRatio / scale,
-        window.devicePixelRatio / scale
-      );
-      console.debug(
-        `FixedCanvas.getContext() (${window.devicePixelRatio}) ⭬ ` +
-          `${this.#context.getTransform()}`
-      );
-      return this.#context;
-    }
     return this.#canvas.getContext(contextId, options);
   }
 
@@ -166,7 +143,7 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
       mode: "open"
     });
     shadowRoot.innerHTML = style;
-    this.#wrapper.style.position = "fixed";
+    this.#wrapper.id = "wrapper";
     this.#wrapper.appendChild(this.#canvas);
     this.#viewPort.appendChild(this.#wrapper);
     shadowRoot.appendChild(this.#viewPort);
@@ -179,8 +156,8 @@ class FixedCanvasElement extends HTMLElement implements HTMLCanvasElement {
     this.#wrapper.style.width = `${maxSize}px`;
 
     // Set up canvas.
-    this.#canvas.height = this.height * window.devicePixelRatio;
-    this.#canvas.width = this.width * window.devicePixelRatio;
+    this.#canvas.height = this.height * this.#pixelRatio;
+    this.#canvas.width = this.width * this.#pixelRatio;
 
     window.addEventListener("resize", () => this.updateGeometry());
 

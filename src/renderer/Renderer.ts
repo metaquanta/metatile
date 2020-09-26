@@ -1,3 +1,4 @@
+import FixedCanvasElement from "../lib/browser/FixedCanvasElement.js";
 import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";
@@ -97,9 +98,10 @@ class _Builder {
       }
       if (mode === "canvas") {
         const ctx = this.#canvas.getContext("2d");
+        const scale = (this.#canvas as { pixelRatio?: number }).pixelRatio ?? 1;
         if (ctx) {
           const renderer = create(
-            (p, s, f) => drawCanvas(p, s, f, ctx),
+            (p, s, f) => drawCanvas(p, s, f, ctx, scale),
             this.#stroke ?? 1,
             fill,
             tileIterator[Symbol.iterator](),
@@ -129,12 +131,13 @@ function drawCanvas(
   tile: Polygon,
   stroke: number,
   fillColor: Colorer.Color,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  scale: number
 ): void {
   ctx.fillStyle = fillColor.toString();
   ctx.strokeStyle = Colorer.fixed(0, 0, 0, stroke).toString();
   ctx.lineJoin = "round";
-  const p = Polygon.getCanvasPath(tile, new Path2D());
+  const p = Polygon.getCanvasPath(tile.scale(scale), new Path2D());
   ctx.stroke(p);
   ctx.fill(p);
 }
