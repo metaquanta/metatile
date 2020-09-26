@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <path fill="none" d="M0 0h24v24H0z" />
-  <path d="M13 12h3l-4 4-4-4h3V8h2v4zm2-8H5v16h14V8h-4V4zM3 2.992C3 2.444 3.447 2 3.999 2H16l5 5v13.993A1 1 0 0 1 20.007 22H3.993A1 1 0 0 1 3 21.008V2.992z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 20"
+width="18" height="20" version="1.1">
+  <path fill="none" d="M -3,-2 H 21 V 22 H -3 Z" />
+  <path d="m 10,10 h 3 L 9,14 5,10 H 8 V 6 h 2 z M 12,2 H 2 V 18 H 16 V 6 H 12 Z M 0,0.992 C 0,0.444 0.447,0 0.999,0 H 13 l 5,5 V 18.993 A 1,1 0 0 1 17.007,20 H 0.993 A 1,1 0 0 1 0,19.008 Z" />
 </svg>
