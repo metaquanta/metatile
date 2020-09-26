@@ -1,4 +1,3 @@
-import FixedCanvasElement from "../lib/browser/FixedCanvasElement.js";
 import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";

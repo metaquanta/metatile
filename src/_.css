@@ -16,19 +16,41 @@ div,
 .octo {
   position: fixed;
   right: 20px;
-  bottom: 15px;
+  bottom: 5px;
 }
 
 .octo img {
   border-radius: 50%;
   width: 30px;
-  opacity: 50%;
+  opacity: 30%;
+}
+
+.svg {
+  position: fixed;
+  left: 10px;
+  bottom: 5px;
+}
+
+.svg img {
+  width: 20px;
+  opacity: 30%;
+}
+
+.png {
+  position: fixed;
+  left: 40px;
+  bottom: 5px;
+}
+
+.png img {
+  width: 20px;
+  opacity: 30%;
 }
 
 .meta {
   position: fixed;
   font-family: monospace;
-  left: 5px;
+  right: 70px;
   bottom: 5px;
   opacity: 50%;
   color: black;
@@ -36,6 +58,26 @@ div,
 }
 
 .octo img:hover,
+.svg img:hover,
+.png img:hover,
 .meta:hover {
   opacity: 100%;
 }
+
+/* button reset */
+button,
+button img,
+button:active,
+button:hover {
+  background-color: transparent;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+/*button:focus {
+  outline: -webkit-focus-ring-color auto 1px;
+}*/

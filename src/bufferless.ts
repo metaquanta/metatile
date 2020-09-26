@@ -1,4 +1,4 @@
-import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
+//import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
 import GlProgram from "./lib/browser/GlProgram";
 import M from "./lib/math/2d/M";
 import { Triangle } from "./lib/math/2d/Polygon";
@@ -15,8 +15,14 @@ function getMatrix(c: Tile) {
 }
 
 const children = tile.children().map((c) => getMatrix(c).dot(mat as M));
-const tag = new FixedCanvasElement();
+//const tag = new FixedCanvasElement();
+const tag = document.createElement("canvas");
+tag.style.width = "100%";
+tag.style.height = "100%";
 document.getElementsByTagName("div")[0].appendChild(tag);
+//tag.setAttribute("canvas-pixel-ratio", "0.5");
+tag.width = tag.clientWidth * window.devicePixelRatio;
+tag.height = tag.clientHeight * window.devicePixelRatio;
 
 const gl = tag.getContext("webgl2", {
   premultipliedAlpha: false
@@ -72,15 +78,28 @@ program.setUniformMat(
   "children",
   children.map((m: M) => m.toArray()) as GlProgram.Mat3[]
 );
-let vp = tag.canvasViewPort;
+//let vp = tag.canvasViewPort;
+let vp = {
+  width: tag.width,
+  height: tag.height,
+  x: 0,
+  y: 0
+};
 const w = vp.width;
-gl.viewport(vp.x, vp.y, vp.width, vp.height);
 program.setUniformFloat("scale", [1, vp.width / vp.height]);
 const t0 = Date.now();
 const int = 5000; // 5 seconds
 program.draw(gl.TRIANGLES, children.length ** 2 * 3);
+let t1 = 0;
+let frames = 0;
 function draw() {
-  const vp2 = tag.canvasViewPort;
+  //const vp2 = tag.canvasViewPort;
+  const vp2 = {
+    width: tag.width,
+    height: tag.height,
+    x: 0,
+    y: 0
+  };
   if (
     vp2.x !== vp.x ||
     vp2.y !== vp.y ||
@@ -88,13 +107,17 @@ function draw() {
     vp2.height !== vp.height
   ) {
     vp = vp2;
-    gl.viewport(vp.x, vp.y, vp.width, vp.height);
     program.setUniformFloat("scale", [
       w / vp.width,
       ((w / vp.width) * vp.width) / vp.height
     ]);
   }
   const t = Date.now() - t0;
+  if (t - t1 > 1000) {
+    console.debug(`${frames} fps`);
+    t1 = t;
+    frames = 0;
+  }
   const d = (2 + Math.floor(t / int)) % 9;
   const alpha = ((t % int) / int) ** 2;
 
@@ -113,6 +136,8 @@ function draw() {
   program.drawAgain(gl.TRIANGLES, children.length ** (d + 1) * 3);
   program.setUniformInt("mode", 2);
   program.drawAgain(gl.LINES, children.length ** (d + 1) * 6);
+
+  frames++;
 
   requestAnimationFrame(() => draw());
 }

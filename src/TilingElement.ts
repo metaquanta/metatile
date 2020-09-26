@@ -126,7 +126,7 @@ class TilingElement extends FixedCanvasElement {
     if (this.#renderer === undefined) {
       this.#renderer = this.#rendererBuilder
         .canvas(this)
-        .viewport(Rect.from(this.canvasViewPort))
+        .viewport(Rect.from(this.viewPort))
         .fillColorer(
           Colorer.rotation({
             ...colorOptions,
