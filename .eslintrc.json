@@ -42,7 +42,7 @@
         "@typescript-eslint/no-unsafe-assignment": "error",
         "@typescript-eslint/array-type": "warn",
         "@typescript-eslint/no-useless-constructor": "warn",
-        "prefer-destructuring": "warn",
+        "prefer-destructuring": "off",
         "prefer-rest-params": "warn",
         "prefer-spread": "warn"
       }
