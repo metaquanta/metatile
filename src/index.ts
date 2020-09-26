@@ -29,8 +29,11 @@ document.getElementsByTagName("div")[0].appendChild(tag);
 const rule = params.getRule();
 const colorOptions = params.getColorOptions();
 
-const button = document.getElementsByTagName("button")[0];
-button.addEventListener("click", () => downloadSvg());
+const svgButton = document.getElementsByClassName("svg")[0];
+svgButton.addEventListener("click", () => downloadSvg());
+
+const pngButton = document.getElementsByClassName("png")[0];
+pngButton.addEventListener("click", () => downloadPng());
 
 const svg = document.createElementNS(svgNs, "svg");
 svg.setAttributeNS(null, "viewBox", "0 0 1618 1000");
@@ -71,19 +74,26 @@ function downloadSvg() {
     .then((svg) => {
       const anchor = document.createElement("a");
       anchor.href = svg;
-      anchor.setAttribute("download", filename());
+      anchor.setAttribute("download", filename("svg"));
       anchor.click();
     });
 }
 
-function filename() {
+function downloadPng() {
+  const anchor = document.createElement("a");
+  anchor.href = tag.toDataURL();
+  anchor.setAttribute("download", filename("png"));
+  anchor.click();
+}
+
+function filename(ext: string) {
   const s = new URLSearchParams(window.location.search);
   const r = s.get("rule");
   if (r === "Pinwheel")
     return (
       `${r}_` +
       `T${s.get("pinwheelP") ?? 1}-${s.get("pinwheelQ") ?? 1}` +
-      `_${Date.now()}.svg`
+      `_${Date.now()}.${ext}`
     );
-  return `${r}_${Date.now()}.svg`;
+  return `${r}_${Date.now()}.${ext}`;
 }
