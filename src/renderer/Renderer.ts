@@ -5,7 +5,7 @@ import Colorer from "./Colorer";
 import run from "./runner";
 import WebGlRenderer from "./webGlRenderer.js";
 
-export type Renderer = { render(): void };
+export type Renderer = { render(): Promise<HTMLCanvasElement | SVGSVGElement> };
 
 export namespace Renderer {
   export type Builder = _Builder;
@@ -17,14 +17,14 @@ export namespace Renderer {
 
 function create(
   draw: (p: Polygon, s: number, f: Colorer.Color) => void,
-  clear: () => void,
   stroke: number,
   fillColorer: Colorer,
-  tiles: Iterator<Tile>
+  tiles: Iterator<Tile>,
+  canvas: HTMLCanvasElement | SVGSVGElement
 ) {
   return {
-    render() {
-      run(() => {
+    render(): Promise<HTMLCanvasElement | SVGSVGElement> {
+      return run(() => {
         const result = tiles.next();
         if (isDone(result)) {
           console.debug(`Renderer.renderNext() - DONE!`);
@@ -32,7 +32,7 @@ function create(
         }
         draw(result.value.polygon(), stroke, fillColorer(result.value));
         return true;
-      });
+      }).then(() => canvas);
     }
   };
 }
@@ -100,10 +100,10 @@ class _Builder {
         if (ctx) {
           const renderer = create(
             (p, s, f) => drawCanvas(p, s, f, ctx),
-            () => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height),
             this.#stroke ?? 1,
             fill,
-            tileIterator[Symbol.iterator]()
+            tileIterator[Symbol.iterator](),
+            this.#canvas
           );
           this.build = () => renderer;
           return renderer;
@@ -114,12 +114,10 @@ class _Builder {
     if (this.#svg !== undefined && mode === "svg") {
       return create(
         (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
-        () => {
-          (this.#svg as SVGSVGElement).innerHTML = "";
-        },
         this.#stroke ?? 1,
         fill,
-        tileIterator[Symbol.iterator]()
+        tileIterator[Symbol.iterator](),
+        this.#svg
       );
     }
 
@@ -152,9 +150,10 @@ function drawSvg(
   // For some reason ns MUST be null below.
   p.setAttributeNS(null, "points", Polygon.getSvgPoints(tile));
   p.setAttributeNS(null, "fill", fillColor.toString());
-  p.setAttributeNS(null, "stroke", `rgba(0, 0, 0, ${stroke})`);
-  p.setAttributeNS(null, "stroke-width", "0.5");
+  p.setAttributeNS(null, "stroke", `rgb(0, 0, 0)`);
+  p.setAttributeNS(null, "stroke-width", `${stroke / 4}`);
   p.setAttributeNS(null, "stroke-linejoin", "round");
+  //p.setAttributeNS(null, "stroke-opacity", `${stroke}`);
   svg.appendChild(p);
 }
 

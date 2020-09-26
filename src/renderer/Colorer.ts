@@ -75,7 +75,9 @@ class _Color implements Colorer.Color {
     readonly a: number
   ) {}
   toString(): string {
-    return `hsla(${this.h}, ${this.s}%, ${this.v}%, ${this.a})`;
+    if (this.a !== 1.0)
+      return `hsla(${this.h}, ${this.s}%, ${this.v}%, ${this.a})`;
+    else return `hsl(${this.h}, ${this.s}%, ${this.v}%)`;
   }
 }
 

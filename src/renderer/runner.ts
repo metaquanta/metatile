@@ -1,9 +1,10 @@
-export default function run(f: () => boolean): void {
+export default function run(f: () => boolean): Promise<void> {
   if (queue === undefined) {
     queue = start(f);
   } else {
     queue = queue.then(() => start(f));
   }
+  return queue;
 }
 
 // Apparently, Chrome calls a requestAnimationFrame() over 50ms a
