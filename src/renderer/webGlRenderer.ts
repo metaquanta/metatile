@@ -71,43 +71,46 @@ export default function createWebGlRenderer(
 
   return {
     render: () => {
-      window.requestAnimationFrame(() => {
-        let i = 0;
-        let j = 0;
-        // ~14MiB
-        // triangle: 3 fill, 6 stroke vertices
-        // rhomb: 6 fill, 8 stroke vertices
-        const fillverts = new Float32Array(2 ** 20);
-        const strokeverts = new Float32Array(2 ** 21);
-        const colors = new Uint8Array(2 ** 21);
-        for (const t of tiles) {
-          const color = fillColorer(t);
-          for (const v of t
-            .polygon()
-            .triangles()
-            .flatMap((t) => t.vertices())) {
-            fillverts[2 * i] = v.x;
-            fillverts[2 * i + 1] = v.y;
-            colors[3 * i] = Math.round((color.h / 360) * 255);
-            colors[3 * i + 1] = Math.round((color.s / 100) * 255);
-            colors[3 * i + 2] = Math.round((color.v / 100) * 255);
-            i = i + 1;
-          }
-          for (const v of t
-            .polygon()
-            .edges()
-            .flatMap((e) => [e[0], e[1]])) {
-            strokeverts[2 * j] = v.x;
-            strokeverts[2 * j + 1] = v.y;
-            j = j + 1;
-          }
-        }
+      return new Promise((resolve) => {
         window.requestAnimationFrame(() => {
-          fillProgram.setAttrib("position", fillverts, 2);
-          fillProgram.setAttrib("color", colors, 3);
-          fillProgram.draw(gl.TRIANGLES, i);
-          strokeProgram.setAttrib("position", strokeverts, 2);
-          strokeProgram.draw(gl.LINES, j);
+          let i = 0;
+          let j = 0;
+          // ~14MiB
+          // triangle: 3 fill, 6 stroke vertices
+          // rhomb: 6 fill, 8 stroke vertices
+          const fillverts = new Float32Array(2 ** 20);
+          const strokeverts = new Float32Array(2 ** 21);
+          const colors = new Uint8Array(2 ** 21);
+          for (const t of tiles) {
+            const color = fillColorer(t);
+            for (const v of t
+              .polygon()
+              .triangles()
+              .flatMap((t) => t.vertices())) {
+              fillverts[2 * i] = v.x;
+              fillverts[2 * i + 1] = v.y;
+              colors[3 * i] = Math.round((color.h / 360) * 255);
+              colors[3 * i + 1] = Math.round((color.s / 100) * 255);
+              colors[3 * i + 2] = Math.round((color.v / 100) * 255);
+              i = i + 1;
+            }
+            for (const v of t
+              .polygon()
+              .edges()
+              .flatMap((e) => [e[0], e[1]])) {
+              strokeverts[2 * j] = v.x;
+              strokeverts[2 * j + 1] = v.y;
+              j = j + 1;
+            }
+          }
+          window.requestAnimationFrame(() => {
+            fillProgram.setAttrib("position", fillverts, 2);
+            fillProgram.setAttrib("color", colors, 3);
+            fillProgram.draw(gl.TRIANGLES, i);
+            strokeProgram.setAttrib("position", strokeverts, 2);
+            strokeProgram.draw(gl.LINES, j);
+            resolve(canvas);
+          });
         });
       });
     }

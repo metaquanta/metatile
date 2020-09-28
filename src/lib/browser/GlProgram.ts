@@ -26,12 +26,6 @@ export type GlProgram = {
       | WebGLRenderingContextBase["LINES"],
     count: number
   ): void;
-  drawAgain(
-    mode:
-      | WebGLRenderingContextBase["TRIANGLES"]
-      | WebGLRenderingContextBase["LINES"],
-    count?: number
-  ): void;
 };
 
 export namespace GlProgram {
@@ -50,9 +44,16 @@ export namespace GlProgram {
     };
   }
 
-  export function frag(x: TemplateStringsArray): Shader {
+  export function frag(
+    a: TemplateStringsArray,
+    ...p: (number | string | { toString: () => string })[]
+  ): Shader {
     return (gl: WebGL2RenderingContext) =>
-      shader(gl, gl.FRAGMENT_SHADER, x.join(""));
+      shader(
+        gl,
+        gl.FRAGMENT_SHADER,
+        p.map((p, i) => `${a[i]}${p}`).join("") + a[a.length - 1]
+      );
   }
 
   export type TypedArray =
@@ -130,8 +131,6 @@ export namespace GlProgram {
       (loc: WebGLUniformLocation) => void
     >();
 
-    let numVertices = 0;
-
     return {
       setAttrib(attrib: string, arr: TypedArray, size: number) {
         buffers.push({
@@ -200,27 +199,17 @@ export namespace GlProgram {
           | WebGLRenderingContextBase["LINES"],
         count
       ) {
-        buffers.forEach(({ buffer, attrib, size, type }) =>
-          bindBuffer(gl, buffer, attrib, size, type)
-        );
-
-        numVertices = count;
-
-        gl.useProgram(program);
+        if (loadedProgram !== this) {
+          buffers.forEach(({ buffer, attrib, size, type }) =>
+            bindBuffer(gl, buffer, attrib, size, type)
+          );
+          gl.useProgram(program);
+          loadedProgram = this;
+        }
 
         uniforms.forEach((f, l) => f(l));
         console.debug(`GlProgram.draw() - drawing ${count} vertices.`);
         gl.drawArrays(mode, 0, count);
-      },
-      drawAgain(
-        mode:
-          | WebGLRenderingContextBase["TRIANGLES"]
-          | WebGLRenderingContextBase["LINES"],
-        count
-      ) {
-        uniforms.forEach((f, l) => f(l));
-
-        gl.drawArrays(mode, 0, count ?? numVertices);
       }
     };
   }
@@ -233,7 +222,6 @@ function shader(
     | WebGLRenderingContextBase["FRAGMENT_SHADER"],
   source: string
 ) {
-  //console.debug(`compiling: ${source}`);
   const shader = gl.createShader(type);
   if (shader === null) throw new Error();
   gl.shaderSource(shader, source);
@@ -326,5 +314,7 @@ function _setUniformfv(
   }
   throw new Error(`unsupported vector size! [${values[0].length}]`);
 }
+
+let loadedProgram: GlProgram | undefined = undefined;
 
 export default GlProgram;

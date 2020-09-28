@@ -64,7 +64,7 @@ function downloadSvg() {
       URL.createObjectURL(
         new Blob(
           [
-            '<?xml version="1.0" encoding="utf-8" standalone="no"?>',
+            `<?xml version="1.0" encoding="utf-8" standalone="no"?>\n`,
             svg.outerHTML
           ],
           { type: "image/svg+xml" }
@@ -79,9 +79,9 @@ function downloadSvg() {
     });
 }
 
-function downloadPng() {
+async function downloadPng() {
   const anchor = document.createElement("a");
-  anchor.href = tag.toDataURL();
+  anchor.href = await tag.toRenderedDataURL();
   anchor.setAttribute("download", filename("png"));
   anchor.click();
 }

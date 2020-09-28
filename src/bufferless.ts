@@ -89,7 +89,6 @@ const w = vp.width;
 program.setUniformFloat("scale", [1, vp.width / vp.height]);
 const t0 = Date.now();
 const int = 5000; // 5 seconds
-program.draw(gl.TRIANGLES, children.length ** 2 * 3);
 let t1 = 0;
 let frames = 0;
 function draw() {
@@ -125,17 +124,17 @@ function draw() {
   program.setUniformInt("totalTiles", children.length ** d);
   program.setUniformInt("d", d - 1);
   program.setUniformFloat("alpha", 1);
-  program.drawAgain(gl.TRIANGLES, children.length ** d * 3);
+  program.draw(gl.TRIANGLES, children.length ** d * 3);
   program.setUniformInt("mode", 2);
-  program.drawAgain(gl.LINES, children.length ** (d + 1) * 6);
+  program.draw(gl.LINES, children.length ** (d + 1) * 6);
 
   program.setUniformInt("mode", 1);
   program.setUniformInt("totalTiles", children.length ** (d + 1));
   program.setUniformInt("d", d);
   program.setUniformFloat("alpha", alpha);
-  program.drawAgain(gl.TRIANGLES, children.length ** (d + 1) * 3);
+  program.draw(gl.TRIANGLES, children.length ** (d + 1) * 3);
   program.setUniformInt("mode", 2);
-  program.drawAgain(gl.LINES, children.length ** (d + 1) * 6);
+  program.draw(gl.LINES, children.length ** (d + 1) * 6);
 
   frames++;
 

@@ -90,7 +90,9 @@ class _Builder {
 
     if (this.#canvas) {
       if (mode === "webgl") {
-        const gl = this.#canvas.getContext("webgl2");
+        const gl = this.#canvas.getContext("webgl2", {
+          preserveDrawingBuffer: true
+        });
         if (gl) {
           return WebGlRenderer(gl, fill, tileIterator);
         }

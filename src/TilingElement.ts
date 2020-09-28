@@ -34,11 +34,9 @@ const observedAttributes = [
 
 class TilingElement extends FixedCanvasElement {
   readonly #rendererBuilder: Renderer.Builder = Renderer.builder();
-  #renderer: Renderer | undefined = undefined;
-  get canvasPixelRatio(): number {
-    return 2;
-  }
-
+  #renderedCanvas:
+    | Promise<HTMLCanvasElement | SVGSVGElement>
+    | undefined = undefined;
   constructor() {
     super();
     console.debug(
@@ -98,13 +96,11 @@ class TilingElement extends FixedCanvasElement {
       `TilingElement ⭬ adopted! [${this.isConnected}, ${this.parentElement}]`
     );
     super.adoptedCallback();
-    this.render();
   }
 
   attributeChangedCallback(): void {
     console.debug("TilingElement ⭬ changed!");
     super.attributeChangedCallback();
-    this.render();
   }
 
   connectedCallback(): void {
@@ -115,6 +111,11 @@ class TilingElement extends FixedCanvasElement {
     this.render();
   }
 
+  async toRenderedDataURL(): Promise<string> {
+    const c = await (this.#renderedCanvas as Promise<HTMLCanvasElement>);
+    return c.toDataURL();
+  }
+
   render(): void {
     if (!this.isConnected) return;
     const params = getTagParameters(this);
@@ -123,8 +124,8 @@ class TilingElement extends FixedCanvasElement {
 
     const colorOptions = params.getColorOptions();
 
-    if (this.#renderer === undefined) {
-      this.#renderer = this.#rendererBuilder
+    if (this.#renderedCanvas === undefined) {
+      this.#renderedCanvas = this.#rendererBuilder
         .canvas(this)
         .viewport(Rect.from(this.viewPort))
         .fillColorer(
@@ -142,9 +143,8 @@ class TilingElement extends FixedCanvasElement {
             )
             .cover(mask)
         )
-        .build(params.getRenderer());
-
-      this.#renderer.render();
+        .build(params.getRenderer())
+        .render();
     }
   }
 }
