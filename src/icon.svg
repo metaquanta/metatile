@@ -1,174 +1,27 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns="http://www.w3.org/2000/svg"
-   viewBox="5 5 370 370"
-   version="1.1">
-    <polygon
-       points="150,350 0,0 350,-150 500,200 "
-       fill="#6a565e"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="362.13203,844.97475 8.5786438,703.55339 150,350 503.55339,491.42136 "
-       fill="#8c727c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="500,200 853.55339,341.42136 503.55339,491.42136 150,350 "
-       fill="#61725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="141.42136,-353.55339 491.42136,-503.55339 350,-150 0,0 "
-       fill="#66725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="703.55339,-8.5786438 853.55339,341.42136 500,200 350,-150 "
-       fill="#70836b"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1203.5534,191.42136 1344.9747,-162.13203 1698.5281,-20.710678 1557.1068,332.84271 "
-       fill="#8c727c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1003.5534,691.42136 853.55339,341.42136 1203.5534,191.42136 1353.5534,541.42136 "
-       fill="#6a565e"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="844.97475,-362.13203 1194.9747,-512.13203 1344.9747,-162.13203 994.97475,-12.132034 "
-       fill="#6a565e"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1557.1068,332.84271 1707.1068,682.84271 1353.5534,541.42136 1203.5534,191.42136 "
-       fill="#70836b"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1203.5534,191.42136 853.55339,341.42136 994.97475,-12.132034 1344.9747,-162.13203 "
-       fill="#66725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1694.9747,-312.13203 2048.5281,-170.71068 1698.5281,-20.710678 1344.9747,-162.13203 "
-       fill="#61725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1848.5281,329.28932 1707.1068,682.84271 1557.1068,332.84271 1698.5281,-20.710678 "
-       fill="#75846c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="350,-150 491.42136,-503.55339 844.97475,-362.13203 703.55339,-8.5786438 "
-       fill="#8c727c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="994.97475,-12.132034 853.55339,341.42136 703.55339,-8.5786438 844.97475,-362.13203 "
-       fill="#75846c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="862.13203,1044.9747 512.13203,1194.9747 362.13203,844.97475 712.13203,694.97475 "
-       fill="#6a565e"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="503.55339,491.42136 853.55339,341.42136 712.13203,694.97475 362.13203,844.97475 "
-       fill="#66725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="158.57864,1053.5534 8.5786438,703.55339 362.13203,844.97475 512.13203,1194.9747 "
-       fill="#70836b"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1215.6854,1186.3961 862.13203,1044.9747 1003.5534,691.42136 1357.1068,832.84271 "
-       fill="#8c727c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1357.1068,832.84271 1707.1068,682.84271 1565.6854,1036.3961 1215.6854,1186.3961 "
-       fill="#66725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1215.6854,1186.3961 1365.6854,1536.3961 1012.132,1394.9747 862.13203,1044.9747 "
-       fill="#70836b"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="712.13203,694.97475 853.55339,341.42136 1003.5534,691.42136 862.13203,1044.9747 "
-       fill="#75846c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1353.5534,541.42136 1707.1068,682.84271 1357.1068,832.84271 1003.5534,691.42136 "
-       fill="#61725d"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1565.6854,1036.3961 1707.1068,682.84271 1857.1068,1032.8427 1715.6854,1386.3961 "
-       fill="#75846c"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
-    <polygon
-       points="1344.9747,-162.13203 1194.9747,-512.13203 1544.9747,-662.13203 1694.9747,-312.13203 "
-       fill="#6a565e"
-       stroke="#000000"
-       stroke-width="1.0"
-       stroke-linejoin="round"
-       transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 370 370" version="1.1">
+  <polygon points="150,350 0,0 350,-150 500,200" fill="#6a565e" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="362.13203,844.97475 8.5786438,703.55339 150,350 503.55339,491.42136" fill="#8c727c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="500,200 853.55339,341.42136 503.55339,491.42136 150,350" fill="#61725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="141.42136,-353.55339 491.42136,-503.55339 350,-150 0,0" fill="#66725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="703.55339,-8.5786438 853.55339,341.42136 500,200 350,-150" fill="#70836b" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1203.5534,191.42136 1344.9747,-162.13203 1698.5281,-20.710678 1557.1068,332.84271" fill="#8c727c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1003.5534,691.42136 853.55339,341.42136 1203.5534,191.42136 1353.5534,541.42136" fill="#6a565e" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="844.97475,-362.13203 1194.9747,-512.13203 1344.9747,-162.13203 994.97475,-12.132034" fill="#6a565e" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1557.1068,332.84271 1707.1068,682.84271 1353.5534,541.42136 1203.5534,191.42136" fill="#70836b" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1203.5534,191.42136 853.55339,341.42136 994.97475,-12.132034 1344.9747,-162.13203" fill="#66725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1694.9747,-312.13203 2048.5281,-170.71068 1698.5281,-20.710678 1344.9747,-162.13203" fill="#61725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1848.5281,329.28932 1707.1068,682.84271 1557.1068,332.84271 1698.5281,-20.710678" fill="#75846c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="350,-150 491.42136,-503.55339 844.97475,-362.13203 703.55339,-8.5786438" fill="#8c727c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="994.97475,-12.132034 853.55339,341.42136 703.55339,-8.5786438 844.97475,-362.13203" fill="#75846c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="862.13203,1044.9747 512.13203,1194.9747 362.13203,844.97475 712.13203,694.97475" fill="#6a565e" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="503.55339,491.42136 853.55339,341.42136 712.13203,694.97475 362.13203,844.97475" fill="#66725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="158.57864,1053.5534 8.5786438,703.55339 362.13203,844.97475 512.13203,1194.9747" fill="#70836b" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1215.6854,1186.3961 862.13203,1044.9747 1003.5534,691.42136 1357.1068,832.84271" fill="#8c727c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1357.1068,832.84271 1707.1068,682.84271 1565.6854,1036.3961 1215.6854,1186.3961" fill="#66725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1215.6854,1186.3961 1365.6854,1536.3961 1012.132,1394.9747 862.13203,1044.9747" fill="#70836b" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="712.13203,694.97475 853.55339,341.42136 1003.5534,691.42136 862.13203,1044.9747" fill="#75846c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1353.5534,541.42136 1707.1068,682.84271 1357.1068,832.84271 1003.5534,691.42136" fill="#61725d" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1565.6854,1036.3961 1707.1068,682.84271 1857.1068,1032.8427 1715.6854,1386.3961" fill="#75846c" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
+  <polygon points="1344.9747,-162.13203 1194.9747,-512.13203 1544.9747,-662.13203 1694.9747,-312.13203" fill="#6a565e" stroke="#000000" stroke-width="1.0" stroke-linejoin="round" transform="matrix(0.26458333,0,0,0.26458333,-34.918024,99.545309)" />
 </svg>
