@@ -17,10 +17,10 @@ if (
 }
 
 const doc = document.getElementsByTagName("div")[0];
-for (let i = 2; i < 22; i++) {
+for (let i = 2; i < 30; i++) {
   for (let p = 1; p < i; p++) {
     const q = i - p;
-    if (p < 6 && q < 14 && q > p) {
+    if (p < 6 && q < 20 && q > p) {
       params.pinwheelP = p.toString();
       params.pinwheelQ = q.toString();
       const div = document.createElement("div");
