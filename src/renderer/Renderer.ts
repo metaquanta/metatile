@@ -109,7 +109,7 @@ class _Builder {
 
     if (this.#svg !== undefined && mode === "svg") {
       return create(
-        (p, s, f) => drawSvg(p, s, f, this.#svg as SVGSVGElement),
+        (p, _, f) => drawSvg(p, f, this.#svg as SVGSVGElement),
         this.#stroke ?? 1,
         fill,
         tileIterator[Symbol.iterator](),
@@ -139,18 +139,13 @@ function drawCanvas(
 const svgNs = "http://www.w3.org/2000/svg";
 function drawSvg(
   tile: Polygon,
-  stroke: number,
   fillColor: Colorer.Color,
   svg: SVGElement
 ): void {
-  const p = document.createElementNS(svgNs, "polygon");
+  const p = document.createElementNS(svgNs, "path");
   // For some reason ns MUST be null below.
-  p.setAttributeNS(null, "points", Polygon.getSvgPoints(tile));
+  p.setAttributeNS(null, "d", Polygon.toSvgPath(tile));
   p.setAttributeNS(null, "fill", fillColor.toString());
-  p.setAttributeNS(null, "stroke", `rgb(0, 0, 0)`);
-  p.setAttributeNS(null, "stroke-width", `${stroke / 4}`);
-  p.setAttributeNS(null, "stroke-linejoin", "round");
-  //p.setAttributeNS(null, "stroke-opacity", `${stroke}`);
   svg.appendChild(p);
 }
 

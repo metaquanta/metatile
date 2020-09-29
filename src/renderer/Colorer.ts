@@ -76,8 +76,13 @@ class _Color implements Colorer.Color {
   ) {}
   toString(): string {
     if (this.a !== 1.0)
-      return `hsla(${this.h}, ${this.s}%, ${this.v}%, ${this.a})`;
-    else return `hsl(${this.h}, ${this.s}%, ${this.v}%)`;
+      return `hsla(${Math.round(this.h)},${Math.round(this.s)}%,${Math.round(
+        this.v
+      )}%,${this.a.toFixed(3)})`;
+    else
+      return `hsl(${Math.round(this.h)},${Math.round(this.s)}%,${Math.round(
+        this.v
+      )}%)`;
   }
 }
 

@@ -50,6 +50,17 @@ svg.setAttributeNS(null, "width", `${size.x}`);
 svg.setAttributeNS(null, "height", `${size.y}`);
 svg.setAttributeNS(null, "version", "1.1");
 svg.setAttribute("xmlns", svgNs);
+svg.innerHTML = `
+<defs>
+  <style type="text/css"><![CDATA[
+    path {
+      stroke: rgb(0, 0, 0);
+      stroke-width: ${(colorOptions.strokeAlpha ?? 1) / 4};
+      stroke-linejoin: round;
+    }
+  ]]></style>
+</defs>
+`;
 
 function downloadSvg() {
   Renderer.builder()
@@ -60,7 +71,6 @@ function downloadSvg() {
         protos: rule.protos
       })
     )
-    .stroke(colorOptions.strokeAlpha ?? 1)
     .tiles((mask: Polygon) =>
       rule
         .tiling(

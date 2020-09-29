@@ -52,23 +52,25 @@ export namespace Polygon {
   }
 
   // For SVG Path element.
-  export function getSvgPathFrom(poly: Polygon): string {
+  export function toSvgPath(poly: Polygon): string {
     return (
-      `M ${poly.vertices()[0].x},${poly.vertices()[0].y} ` +
+      `M${poly
+        .vertices()[0]
+        .x.toPrecision(6)},${poly.vertices()[0].y.toPrecision(6)}` +
       poly
         .vertices()
         .slice(1)
-        .map((v) => `L ${v.x},${v.y}`)
-        .join(" \n") +
-      " z"
+        .map((v) => `L${v.x.toPrecision(6)},${v.y.toPrecision(6)}`)
+        .join("") +
+      "z"
     );
   }
 
   // For SVG Polygon's points attribute.
-  export function getSvgPoints(p: Polygon): string {
+  export function toSvgPoints(p: Polygon): string {
     return p
       .vertices()
-      .map((v) => `${v.x},${v.y}`)
+      .map((v) => `${v.x.toPrecision(6)},${v.y.toPrecision(6)}`)
       .join(" ");
   }
 }
