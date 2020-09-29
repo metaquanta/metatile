@@ -1,8 +1,9 @@
-import Polygon from "./lib/math/2d/Polygon";
+import Polygon, { Rect } from "./lib/math/2d/Polygon";
 import { getUrlParameters, setRandomParameters } from "./params";
 import TilingElement from "./TilingElement";
 import Colorer from "./renderer/Colorer";
 import Renderer from "./renderer/Renderer";
+import V from "./lib/math/2d/V";
 
 const svgNs = "http://www.w3.org/2000/svg";
 
@@ -35,10 +36,18 @@ svgButton.addEventListener("click", () => downloadSvg());
 const pngButton = document.getElementsByClassName("png")[0];
 pngButton.addEventListener("click", () => downloadPng());
 
+const size = V.create(1618, 1000);
+const origin = Rect.from(tag.viewPort)
+  .centroid()
+  .subtract(size.scale(1 / 2));
 const svg = document.createElementNS(svgNs, "svg");
-svg.setAttributeNS(null, "viewBox", "0 0 1618 1000");
-svg.setAttributeNS(null, "width", "1618");
-svg.setAttributeNS(null, "height", "1000");
+svg.setAttributeNS(
+  null,
+  "viewBox",
+  `${origin.x} ${origin.y} ${size.x} ${size.y}`
+);
+svg.setAttributeNS(null, "width", `${size.x}`);
+svg.setAttributeNS(null, "height", `${size.y}`);
 svg.setAttributeNS(null, "version", "1.1");
 svg.setAttribute("xmlns", svgNs);
 
@@ -64,7 +73,7 @@ function downloadSvg() {
     .render()
     .then((svg) =>
       URL.createObjectURL(
-        new Blob([`<?xml version="1.0" encoding="UTF-8"?>`, svg.outerHTML], {
+        new Blob([`<?xml version="1.0" encoding="utf-8"?>`, svg.outerHTML], {
           type: "image/svg+xml"
         })
       )

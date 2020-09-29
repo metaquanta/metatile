@@ -7,7 +7,7 @@ export interface Polygon {
   sides(): number;
   contains(p: V | Polygon): boolean;
   intersects(p: Polygon): boolean;
-  center(): V;
+  centroid(): V;
   area(): number;
   boundingBox(): Rect;
   translate(v: V): this;
@@ -191,7 +191,7 @@ class _Polygon {
     return intersects(this, p);
   }
 
-  center() {
+  centroid() {
     return this.#vertices
       .reduce((a, b) => a.add(b))
       .scale(1 / this.#vertices.length);

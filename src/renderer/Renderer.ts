@@ -1,5 +1,6 @@
+import FixedCanvasElement from "../lib/browser/FixedCanvasElement.js";
 import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
-import { isCallable, isDone } from "../lib/util";
+import { insist, isCallable, isDone } from "../lib/util";
 import Tile from "../tiles/Tile";
 import Colorer from "./Colorer";
 import run from "./runner";
@@ -38,9 +39,8 @@ function create(
 }
 
 class _Builder {
-  #canvas: HTMLCanvasElement | undefined;
+  #canvas: FixedCanvasElement | undefined;
   #svg: SVGSVGElement | undefined;
-  #viewPort: Rect | undefined;
   #tiles: ((vp: Polygon) => Iterable<Tile>) | undefined;
   #fillColorer: Colorer | undefined;
   #stroke: number | undefined;
@@ -64,7 +64,7 @@ class _Builder {
     return this;
   }
 
-  canvas(c: HTMLCanvasElement): this {
+  canvas(c: FixedCanvasElement): this {
     this.#canvas = c;
     return this;
   }
@@ -74,17 +74,10 @@ class _Builder {
     return this;
   }
 
-  viewport(vp: Rect): this {
-    this.#viewPort = vp;
-    return this;
-  }
-
   build(mode: "canvas" | "webgl" | "svg") {
     console.debug(`Renderer.build("${mode}")`);
-    const vp =
-      this.#viewPort ?? (this.#svg ? Rect.from(this.#svg.viewBox) : undefined);
-    if (vp === undefined) throw new Error();
-    const tileIterator = (this.#tiles as (vp: Polygon) => Iterable<Tile>)(vp);
+    const vp = Rect.from(insist(this.#svg?.viewBox ?? this.#canvas?.viewPort));
+    const tileIterator = (this.#tiles as (vp: Rect) => Iterable<Tile>)(vp);
 
     const fill = this.#fillColorer ?? Colorer.fixed(0, 0, 50, 1);
 

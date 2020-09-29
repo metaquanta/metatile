@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90.000122 134.91953" version="1.1">
   <path fill="none" d="m 15.835255,114.274 h 24 v 24 h -24 z" />
   <path d="m 50,49.999997 h 15 l -20.000001,20 -20,-20 h 15 v -20 H 50 Z M 60,10 H 9.9999995 V 89.999997 H 80 v -60 H 60 Z M 0,4.96 C 0,2.22 2.235,0 4.995,0 H 65 l 25,24.999997 v 69.965 a 5,5 0 0 1 -4.965,5.035 H 4.965 A 5,5 0 0 1 0,95.039997 Z" style="stroke-width:5" />

@@ -1,5 +1,5 @@
 import FixedCanvasElement from "./lib/browser/FixedCanvasElement";
-import Polygon, { Rect } from "./lib/math/2d/Polygon";
+import Polygon from "./lib/math/2d/Polygon";
 import { getTagParameters } from "./params";
 import Colorer from "./renderer/Colorer.js";
 import Renderer from "./renderer/Renderer";
@@ -127,7 +127,6 @@ class TilingElement extends FixedCanvasElement {
     if (this.#renderedCanvas === undefined) {
       this.#renderedCanvas = this.#rendererBuilder
         .canvas(this)
-        .viewport(Rect.from(this.viewPort))
         .fillColorer(
           Colorer.rotation({
             ...colorOptions,
