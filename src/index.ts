@@ -39,6 +39,8 @@ const svg = document.createElementNS(svgNs, "svg");
 svg.setAttributeNS(null, "viewBox", "0 0 1618 1000");
 svg.setAttributeNS(null, "width", "1618");
 svg.setAttributeNS(null, "height", "1000");
+svg.setAttributeNS(null, "version", "1.1");
+svg.setAttribute("xmlns", svgNs);
 
 function downloadSvg() {
   Renderer.builder()
@@ -62,14 +64,9 @@ function downloadSvg() {
     .render()
     .then((svg) =>
       URL.createObjectURL(
-        new Blob(
-          [
-            `<?xml version="1.0" encoding="utf-8" standalone="no"?>\n`,
-            `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n`,
-            svg.outerHTML
-          ],
-          { type: "image/svg+xml" }
-        )
+        new Blob([`<?xml version="1.0" encoding="UTF-8"?>`, svg.outerHTML], {
+          type: "image/svg+xml"
+        })
       )
     )
     .then((svg) => {
