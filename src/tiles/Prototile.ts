@@ -40,10 +40,6 @@ export namespace Prototile {
     // Once a covering tile is found, apply .parent() this many more times.
     // 4 for Penrose Rhombs.
     coveringGenerations?: number;
-    // NVH implies t doesn't cover t's descendents, intersectingGenerations is
-    // the min.levels above t that covers all of t's leaves.
-    // If t intersects the viewport, t', t'', ...t^n are assumed to also.
-    intersectingGenerations?: number;
   }): Builder<T> {
     return new Builder<T>({ ...defaultOptions, ...params });
   }
@@ -65,7 +61,6 @@ class Builder<T extends Polygon> implements Prototile.Builder<T> {
   readonly reflectionSymmetry: boolean;
   readonly volumeHierarchic: boolean;
   readonly coveringGenerations?: number;
-  readonly intersectingGenerations?: number;
 
   constructor(params: {
     name: string;
@@ -73,14 +68,12 @@ class Builder<T extends Polygon> implements Prototile.Builder<T> {
     reflectionSymmetry: boolean;
     volumeHierarchic: boolean;
     coveringGenerations?: number;
-    intersectingGenerations?: number;
   }) {
     this.name = params.name;
     this.rotationalSymmetryOrder = params.rotationalSymmetryOrder;
     this.reflectionSymmetry = params.reflectionSymmetry;
     this.volumeHierarchic = params.volumeHierarchic;
     this.coveringGenerations = params.coveringGenerations;
-    this.intersectingGenerations = params.intersectingGenerations;
   }
 
   substitution(f: Prototile.Substitution<T>) {
@@ -127,12 +120,7 @@ class Builder<T extends Polygon> implements Prototile.Builder<T> {
         );
       },
       create: (p: Polygon) => {
-        return Tile.create(
-          p,
-          proto,
-          this.volumeHierarchic,
-          this.intersectingGenerations
-        );
+        return Tile.create(p, proto, this.volumeHierarchic);
       },
       toString() {
         return `Prototile(□,□,${this.rotationalSymmetryOrder},${this.reflectionSymmetry},${this.name})`;

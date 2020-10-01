@@ -5,8 +5,8 @@ export interface Tile {
   readonly proto: Prototile;
   parent(): Tile;
   children(): Tile[];
-  intersects(p: Readonly<Polygon>, depth?: number): boolean;
-  contains(p: Readonly<Polygon>, depth?: number): boolean;
+  intersects(p: Readonly<Polygon>): boolean;
+  contains(p: Readonly<Polygon>): boolean;
   polygon(): Polygon;
   equals(t: this): boolean;
   reflected(): boolean;
@@ -16,11 +16,10 @@ export namespace Tile {
   export function create(
     polygon: Readonly<Polygon>,
     proto: Prototile,
-    volumeHierarchic: boolean,
-    intersectingGenerations?: number
+    volumeHierarchic: boolean
   ): Tile {
     if (volumeHierarchic) return new _Tile(polygon, proto);
-    else return new _NvhTile(polygon, proto, intersectingGenerations ?? 4);
+    else return new _NvhTile(polygon, proto);
   }
 }
 
@@ -67,37 +66,12 @@ class _Tile implements Tile {
 }
 
 class _NvhTile extends _Tile {
-  readonly #intersectingGenerations: number;
-
-  readonly #intersectsMemo: boolean[];
-
-  readonly #parent?: Tile;
-
-  constructor(p: Polygon, proto: Prototile, intersectingGenerations: number) {
-    super(p, proto);
-    this.#intersectingGenerations = intersectingGenerations;
-    this.#intersectsMemo = [];
+  intersects(p: Polygon): boolean {
+    const bt = this.polygon().scale(3);
+    return bt
+      .translate(this.polygon().centroid().subtract(bt.centroid()))
+      .intersects(p);
   }
-
-  _intersects(p: Polygon, depth: number): boolean {
-    if (depth === 0) return super.intersects(p);
-    if (this.#parent === undefined) return true;
-    return super.intersects(p) || this.#parent.intersects(p, depth - 1);
-  }
-
-  intersects(p: Polygon, depth?: number): boolean {
-    if (depth === undefined)
-      return this.intersects(p, this.#intersectingGenerations);
-    //TODO/fixme - assuming p is always the same/only viewport.
-    if (!hasElement(this.#intersectsMemo, depth)) {
-      this.#intersectsMemo[depth] = this._intersects(p, depth);
-    }
-    return this.#intersectsMemo[depth];
-  }
-}
-
-function hasElement<T>(arr: T[], i: number): boolean {
-  return arr[i] !== undefined;
 }
 
 export default Tile;

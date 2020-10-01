@@ -14,8 +14,7 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       rotationalSymmetryOrder: 4,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 5,
-      intersectingGenerations: 2
+      coveringGenerations: 5
     })
       .substitution((sq: Tetragon, squareConsumer, rhombConsumer) => {
         const r = sq.translate(sq.a.invert());
@@ -77,8 +76,7 @@ export default Rule.builder({ colors: { hueSpan: 0.25, hueOffset: 0.65 } })
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 5,
-      intersectingGenerations: 2
+      coveringGenerations: 5
     })
       .substitution((rh: Rhomb, squareConsumer, rhombConsumer) => {
         const r = rh.translate(rh.a.invert());

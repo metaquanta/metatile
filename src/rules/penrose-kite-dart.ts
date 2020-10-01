@@ -16,8 +16,7 @@ export default Rule.builder()
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 3,
-      intersectingGenerations: 3
+      coveringGenerations: 3
     })
       .tile(
         (l: V, j: V, p: V): Tetragon => {
@@ -57,8 +56,7 @@ export default Rule.builder()
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 3,
-      intersectingGenerations: 3
+      coveringGenerations: 3
     }).substitution((d: Tetragon, kite, dart) => {
       //const dd = d.a.subtract(d.c).add(d.b);
       const eb = d.a.subtract(d.c).add(d.d);

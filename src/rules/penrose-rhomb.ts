@@ -22,8 +22,7 @@ export default Rule.builder()
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 4,
-      intersectingGenerations: 2
+      coveringGenerations: 4
     })
       .tile((u: V, p: V) => {
         const v = rotate(rotate(u));
@@ -61,8 +60,7 @@ export default Rule.builder()
       rotationalSymmetryOrder: 2,
       reflectionSymmetry: true,
       volumeHierarchic: false,
-      coveringGenerations: 4,
-      intersectingGenerations: 2
+      coveringGenerations: 4
     }).substitution((r2: Rhomb, rhombCreate, kiteCreate) => {
       const r = r2.translate(r2.a.invert());
       const u = r.b.scale(DF);

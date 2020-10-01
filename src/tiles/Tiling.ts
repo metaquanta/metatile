@@ -27,11 +27,6 @@ function* coverWith(
   const opts = { ...defaultOptions, ...options };
   console.debug(`Tiling:coverWith(${mask}, ${options?.progressive})`);
   function* descend(tile: Tile, d: number): Generator<Tile> {
-    /*console.debug(
-      `Tiling:cover:descend(Tile, ${d}) ${
-        tile.proto
-      } [${tile.polygon().area()}]`
-    );*/
     if (d < 0) {
       console.trace(`!!!Unreachable reached!!! [d: ${d}]`);
       throw new Error(
@@ -85,7 +80,7 @@ function* coverWith(
 
   if (options?.progressive) {
     yield tile;
-    yield* ascend(tile, 0, tile.proto.coveringGenerations);
+    yield* ascend(tile, 0, 0);
   } else {
     let d;
     let root = tile;
