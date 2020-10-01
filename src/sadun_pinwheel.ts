@@ -24,7 +24,13 @@ for (let i = 2; i < 30; i++) {
       params.pinwheelP = p.toString();
       params.pinwheelQ = q.toString();
       const div = document.createElement("div");
+      const anchor = document.createElement("a");
       doc.appendChild(div);
+      div.appendChild(anchor);
+      anchor.setAttribute(
+        "href",
+        `/?rule=Pinwheel&pinwheelP=${p}&pinwheelQ=${q}`
+      );
       div.style.boxSizing = "border-box";
       div.style.width = "170px";
       div.style.height = "20%";
@@ -38,7 +44,7 @@ for (let i = 2; i < 30; i++) {
       params.setAttributes(cvs);
       cvs.setAttribute("pinwheelP", p.toString());
       cvs.setAttribute("pinwheelQ", q.toString());
-      div.appendChild(cvs);
+      anchor.appendChild(cvs);
       console.debug("attached element");
     }
   }

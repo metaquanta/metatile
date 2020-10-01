@@ -22,7 +22,10 @@ for (let m = 3; m < 13; m++) {
     params.pythiaJ = j.toString();
     params.pythiaM = m.toString();
     const div = document.createElement("div");
+    const anchor = document.createElement("a");
     doc.appendChild(div);
+    div.appendChild(anchor);
+    anchor.setAttribute("href", `/?rule=Pythia&pythiaM=${m}&pythiaJ=${j}`);
     div.style.boxSizing = "border-box";
     div.style.width = "10%";
     div.style.height = "150px";
@@ -36,7 +39,7 @@ for (let m = 3; m < 13; m++) {
     params.setAttributes(cvs);
     cvs.setAttribute("pythiaJ", j.toString());
     cvs.setAttribute("pythiaM", m.toString());
-    div.appendChild(cvs);
+    anchor.appendChild(cvs);
     console.debug("attached element");
   }
 }
