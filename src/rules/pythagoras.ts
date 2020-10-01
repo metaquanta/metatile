@@ -81,7 +81,7 @@ function generatePythagoras(m: number, j: number): Rule.Builder {
         Prototile.builder<Triangle>({
           name: `tile_${i}`,
           rotationalSymmetryOrder: 1,
-          reflectionSymmetry: true
+          reflectionSymmetry: false
         })
           // last proto gets subdivision
           .substitution(i === m - 1 ? subdivision : inflate(i))

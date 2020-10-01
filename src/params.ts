@@ -2,6 +2,7 @@ import V from "./lib/math/2d/V";
 import Colorer from "./renderer/Colorer";
 import { PinwheelPQ } from "./rules/pinwheel";
 import { PythagorasMJ } from "./rules/pythagoras";
+import { PythiaMJ } from "./rules/pythia";
 import rules, { RuleOptions } from "./rules/rules";
 import Rule from "./tiles/Rule";
 import Tiling from "./tiles/Tiling";
@@ -23,6 +24,8 @@ export type ParameterStrings = {
   pinwheelQ?: string;
   pythagorasM?: string;
   pythagorasJ?: string;
+  pythiaM?: string;
+  pythiaJ?: string;
   renderer?: string;
 };
 
@@ -87,6 +90,8 @@ export function setRandomParameters(params: Parameters): void {
     location.searchParams.set("pythagorasJ", params.pythagorasJ);
   if (params.pythagorasM)
     location.searchParams.set("pythagorasM", params.pythagorasM);
+  if (params.pythiaJ) location.searchParams.set("pythiaJ", params.pythiaJ);
+  if (params.pythiaM) location.searchParams.set("pythiaM", params.pythiaM);
   window.history.pushState(
     {},
     window.document.title,
@@ -109,6 +114,14 @@ function ruleOptions(params: ParameterStrings): RuleOptions | undefined {
       pythagoras: {
         m: parseInt(params.pythagorasM),
         j: parseInt(params.pythagorasJ)
+      }
+    };
+  }
+  if (params.pythiaM && params.pythiaJ) {
+    return {
+      pythia: {
+        m: parseInt(params.pythiaM),
+        j: parseInt(params.pythiaJ)
       }
     };
   }
@@ -154,6 +167,8 @@ function parameterStrings(
     pinwheelQ: get("pinwheelQ") ?? undefined,
     pythagorasM: get("pythagorasM") ?? undefined,
     pythagorasJ: get("pythagorasJ") ?? undefined,
+    pythiaM: get("pythiaM") ?? undefined,
+    pythiaJ: get("pythiaJ") ?? undefined,
     renderer: get("renderer") ?? undefined
   };
 }
@@ -173,6 +188,12 @@ function parameters(paramStrings: ParameterStrings): Parameters {
         return PythagorasMJ(
           options.pythagoras?.m as number,
           options.pythagoras?.j as number
+        );
+      }
+      if (paramStrings.rule === "Pythia" && options) {
+        return PythiaMJ(
+          options.pythia?.m as number,
+          options.pythia?.j as number
         );
       }
       return ruleForString(paramStrings.rule);

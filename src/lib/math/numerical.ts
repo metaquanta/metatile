@@ -93,7 +93,7 @@ function bisectionMethod(
     `bisectionMethod(f, ${x0}, ${x1}) = [${y2}, ${x2}] (${Math.abs(y2)}) (${i})`
   );*/
 
-  if (Math.abs(y2) < epsilon) {
+  if (Math.abs(x1 - x2) < epsilon) {
     return x2;
   }
 

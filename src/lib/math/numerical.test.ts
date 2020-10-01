@@ -1,4 +1,4 @@
-import { invertFunction } from "./numerical";
+import { findRoot, invertFunction } from "./numerical";
 import { gcd } from "./util";
 
 test("invert() inverts trivial", () => {
@@ -22,6 +22,17 @@ test("invert() inverts non-trivial", () => {
   // theta ~= 0.674889
   expect(g(1 / 2) - 0.674889).toBeLessThan(0.000001);
   expect(Math.abs(g(1 / 3) - Math.PI / 4)).toBeLessThan(0.00000001);
+});
+
+test("findroot()", () => {
+  const z = (m: number, j: number) => (lambda: number) =>
+    lambda ** (2 * m) - lambda ** (2 * j) - 1;
+  for (let m = 3; m < 10; m++) {
+    for (let j = m - 1; j > 0; j--) {
+      const c = findRoot(z(m, j), [1, 2]);
+      expect(Math.abs(z(m, j)(c))).toBeLessThan(0.000001);
+    }
+  }
 });
 
 test("gcd", () => {

@@ -7,6 +7,7 @@ import pinwheel from "./pinwheel";
 import pinwheel10 from "./pinwheel10";
 import pinwheel13 from "./pinwheel13";
 import pythagoras from "./pythagoras";
+import pythia from "./pythia";
 import viper from "./viper";
 
 export default {
@@ -19,10 +20,12 @@ export default {
   Pinwheel10: pinwheel10,
   Pinwheel13: pinwheel13,
   Pythagoras: pythagoras,
+  Pythia: pythia,
   Viper: viper
 };
 
 export interface RuleOptions {
   pinwheel?: { p: number; q: number };
   pythagoras?: { m: number; j: number };
+  pythia?: { m: number; j: number };
 }

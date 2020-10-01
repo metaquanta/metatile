@@ -32,6 +32,8 @@ const observedAttributes = [
   "pinwheelQ",
   "pythagorasM",
   "pythagorasJ",
+  "pythiaM",
+  "pythiaJ",
   "renderer"
 ];
 
@@ -104,6 +106,15 @@ class TilingElement extends FixedCanvasElement {
   set pythagorasJ(q: string) {
     console.debug(`J: ${q} [pythagoras]`);
     _attribute(this, "pythagorasJ", q);
+  }
+
+  set pythiaM(p: string) {
+    console.debug(`M: ${p} [pythia]`);
+    _attribute(this, "pythiaM", p);
+  }
+  set pythiaJ(q: string) {
+    console.debug(`J: ${q} [pythia]`);
+    _attribute(this, "pythiaJ", q);
   }
 
   adoptedCallback(): void {
