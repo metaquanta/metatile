@@ -67,7 +67,7 @@ class _Tile implements Tile {
 
 class _NvhTile extends _Tile {
   intersects(p: Polygon): boolean {
-    const bt = this.polygon().scale(3);
+    const bt = this.polygon().scale(4);
     return bt
       .translate(this.polygon().centroid().subtract(bt.centroid()))
       .intersects(p);

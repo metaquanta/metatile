@@ -227,7 +227,7 @@ function rU() {
 }
 
 function randomRule(): string {
-  const r = round(random(1000)) % 9;
+  const r = round(random(1000)) % 11;
   switch (r) {
     case 0:
       return "Ammann-Beenker";
@@ -247,6 +247,10 @@ function randomRule(): string {
       return "MiniTangram";
     case 8:
       return "Penrose-Kite-Dart";
+    case 9:
+      return "Pythia";
+    case 10:
+      return "Pythagoras";
   }
   console.error(`randomRule() - UNREACHABLE!!! [${r}]`);
   throw new Error(`!!!Unreachable reached!!!`);

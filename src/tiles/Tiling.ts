@@ -87,8 +87,12 @@ function* coverWith(
     for (d = 0; !root.contains(mask); d++) {
       root = root.parent();
     }
+    for (let i = root.proto.coveringGenerations ?? 0; i > 0; i--) {
+      d++;
+      root = root.parent();
+    }
+
     console.debug(`tiling root d: ${d}, t: ${root.polygon()}`);
-    //todo: NVH
     yield* descend(root, d);
   }
 }
