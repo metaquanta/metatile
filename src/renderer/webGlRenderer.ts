@@ -1,5 +1,6 @@
 import GlProgram from "../lib/browser/GlProgram";
-import Tile from "../tiles/Tile";
+import Polygon from "../lib/math/2d/Polygon";
+import Prototile from "../tiles/Prototile";
 import Colorer from "./Colorer";
 import Renderer from "./Renderer";
 
@@ -122,4 +123,10 @@ function clear(gl: WebGL2RenderingContext): void {
   gl.clearColor(0.5, 0.5, 0.5, 1.0);
   gl.clearDepth(1.0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
+
+interface Tile {
+  readonly proto: Prototile;
+  polygon(): Polygon;
+  reflected(): boolean;
 }

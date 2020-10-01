@@ -20,6 +20,16 @@ export function invertFunction(
   };
 }
 
+export function findRoot(
+  f: (x: number) => number,
+  range: [number, number],
+  epsilon = 1e-15
+): number {
+  const left = isFinite(f(range[0])) ? range[0] : range[0] + epsilon;
+  const right = isFinite(f(range[1])) ? range[1] : range[1] - epsilon;
+  return falsiMethod(f, left, right, epsilon);
+}
+
 function falsiMethod(
   f: (x: number) => number,
   x0: number,

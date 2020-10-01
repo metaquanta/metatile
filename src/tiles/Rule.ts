@@ -38,7 +38,7 @@ export namespace Rule {
     return {
       protos: prototiles,
       tile: () => tile(V.create(100, 0), V.create(0, 100), V.create(0, 0)),
-      tileFromEdge: (u: V, v: V = V.create(0, 0)) => tile(u.perp(), u, v),
+      tileFromEdge: (u: V, v: V = V.create(0, 0)) => tile(u, u.perp(), v),
       tiling: (tile, options) => Tiling.create(tile, options),
       colorOptions
     };

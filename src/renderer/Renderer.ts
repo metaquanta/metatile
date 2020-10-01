@@ -1,7 +1,7 @@
 import FixedCanvasElement from "../lib/browser/FixedCanvasElement.js";
 import Polygon, { Rect } from "../lib/math/2d/Polygon.js";
 import { insist, isCallable, isDone } from "../lib/util";
-import Tile from "../tiles/Tile";
+import Prototile from "../tiles/Prototile.js";
 import Colorer from "./Colorer";
 import run from "./runner";
 import WebGlRenderer from "./webGlRenderer.js";
@@ -119,6 +119,12 @@ class _Builder {
 
     throw new Error("No canvas or svg!");
   }
+}
+
+interface Tile {
+  readonly proto: Prototile;
+  polygon(): Polygon;
+  reflected(): boolean;
 }
 
 function drawCanvas(

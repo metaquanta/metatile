@@ -1,6 +1,7 @@
 import V from "./lib/math/2d/V";
 import Colorer from "./renderer/Colorer";
 import { PinwheelPQ } from "./rules/pinwheel";
+import { PythagorasMJ } from "./rules/pythagoras";
 import rules, { RuleOptions } from "./rules/rules";
 import Rule from "./tiles/Rule";
 import Tiling from "./tiles/Tiling";
@@ -8,6 +9,7 @@ import TilingElement from "./TilingElement";
 
 export type ParameterStrings = {
   rule?: string;
+  test?: string;
   v?: string;
   u?: string;
   colorSaturation?: string;
@@ -19,6 +21,8 @@ export type ParameterStrings = {
   tilingIncludeAncestors?: string;
   pinwheelP?: string;
   pinwheelQ?: string;
+  pythagorasM?: string;
+  pythagorasJ?: string;
   renderer?: string;
 };
 
@@ -65,6 +69,7 @@ export function setRandomParameters(params: Parameters): void {
     "colorHueOffset",
     params.colorHueOffset ?? random.colorHueOffset
   );
+  if (params.test) location.searchParams.set("test", params.test);
   if (params.colorAlpha)
     location.searchParams.set("colorAlpha", params.colorAlpha);
   if (params.colorStrokeAlpha)
@@ -78,6 +83,10 @@ export function setRandomParameters(params: Parameters): void {
     location.searchParams.set("pinwheelP", params.pinwheelP);
   if (params.pinwheelQ)
     location.searchParams.set("pinwheelQ", params.pinwheelQ);
+  if (params.pythagorasJ)
+    location.searchParams.set("pythagorasJ", params.pythagorasJ);
+  if (params.pythagorasM)
+    location.searchParams.set("pythagorasM", params.pythagorasM);
   window.history.pushState(
     {},
     window.document.title,
@@ -92,6 +101,14 @@ function ruleOptions(params: ParameterStrings): RuleOptions | undefined {
       pinwheel: {
         p: parseInt(params.pinwheelP),
         q: parseInt(params.pinwheelQ)
+      }
+    };
+  }
+  if (params.pythagorasM && params.pythagorasJ) {
+    return {
+      pythagoras: {
+        m: parseInt(params.pythagorasM),
+        j: parseInt(params.pythagorasJ)
       }
     };
   }
@@ -114,7 +131,7 @@ function colorOptions(params: ParameterStrings): ColorOptions {
 function tilingOptions(params: ParameterStrings): Tiling.Options {
   return {
     includeAncestors: parseBool(params.tilingIncludeAncestors),
-    progressive: true
+    progressive: false
   };
 }
 
@@ -123,6 +140,7 @@ function parameterStrings(
 ): ParameterStrings {
   return {
     rule: get("rule") ?? undefined,
+    test: get("test") ?? undefined,
     v: get("v") ?? undefined,
     u: get("u") ?? undefined,
     colorSaturation: get("colorSaturation") ?? undefined,
@@ -134,6 +152,8 @@ function parameterStrings(
     tilingIncludeAncestors: get("tilingIncludeAncestors") ?? undefined,
     pinwheelP: get("pinwheelP") ?? undefined,
     pinwheelQ: get("pinwheelQ") ?? undefined,
+    pythagorasM: get("pythagorasM") ?? undefined,
+    pythagorasJ: get("pythagorasJ") ?? undefined,
     renderer: get("renderer") ?? undefined
   };
 }
@@ -147,6 +167,12 @@ function parameters(paramStrings: ParameterStrings): Parameters {
         return PinwheelPQ(
           options.pinwheel?.p as number,
           options.pinwheel?.q as number
+        );
+      }
+      if (paramStrings.rule === "Pythagoras" && options) {
+        return PythagorasMJ(
+          options.pythagoras?.m as number,
+          options.pythagoras?.j as number
         );
       }
       return ruleForString(paramStrings.rule);

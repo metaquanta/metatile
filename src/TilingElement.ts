@@ -18,6 +18,7 @@ function _attribute(
 
 const observedAttributes = [
   "rule",
+  "test",
   "v",
   "u",
   "colorSaturation",
@@ -29,6 +30,8 @@ const observedAttributes = [
   "tilingIncludeAncestors",
   "pinwheelP",
   "pinwheelQ",
+  "pythagorasM",
+  "pythagorasJ",
   "renderer"
 ];
 
@@ -54,6 +57,9 @@ class TilingElement extends FixedCanvasElement {
 
   set rule(rule: string) {
     _attribute(this, "rule", rule);
+  }
+  set test(test: string) {
+    _attribute(this, "test", test);
   }
   set v(v: string) {
     _attribute(this, "v", v);
@@ -91,6 +97,15 @@ class TilingElement extends FixedCanvasElement {
     _attribute(this, "pinwheelQ", q);
   }
 
+  set pythagorasM(p: string) {
+    console.debug(`M: ${p} [pythagoras]`);
+    _attribute(this, "pythagorasM", p);
+  }
+  set pythagorasJ(q: string) {
+    console.debug(`J: ${q} [pythagoras]`);
+    _attribute(this, "pythagorasJ", q);
+  }
+
   adoptedCallback(): void {
     console.debug(
       `TilingElement ⭬ adopted! [${this.isConnected}, ${this.parentElement}]`
@@ -125,25 +140,36 @@ class TilingElement extends FixedCanvasElement {
     const colorOptions = params.getColorOptions();
 
     if (this.#renderedCanvas === undefined) {
-      this.#renderedCanvas = this.#rendererBuilder
-        .canvas(this)
-        .fillColorer(
-          Colorer.rotation({
-            ...colorOptions,
-            protos: rule.protos
-          })
-        )
-        .stroke(colorOptions.strokeAlpha ?? 1)
-        .tiles((mask: Polygon) =>
-          rule
-            .tiling(
-              rule.tileFromEdge(params.getV(), params.getU()),
-              params.getTilingOptions()
-            )
-            .cover(mask)
-        )
-        .build(params.getRenderer())
-        .render();
+      const tile = rule.tileFromEdge(params.getV(), params.getU());
+      if (params.test) {
+        this.#renderedCanvas = this.#rendererBuilder
+          .canvas(this)
+          .fillColorer(
+            Colorer.rotation({
+              ...colorOptions,
+              protos: rule.protos
+            })
+          )
+          .stroke(colorOptions.strokeAlpha ?? 1)
+          .tiles([tile])
+          .build(params.getRenderer())
+          .render();
+      } else {
+        this.#renderedCanvas = this.#rendererBuilder
+          .canvas(this)
+          .fillColorer(
+            Colorer.rotation({
+              ...colorOptions,
+              protos: rule.protos
+            })
+          )
+          .stroke(colorOptions.strokeAlpha ?? 1)
+          .tiles((mask: Polygon) =>
+            rule.tiling(tile, params.getTilingOptions()).cover(mask)
+          )
+          .build(params.getRenderer())
+          .render();
+      }
     }
   }
 }

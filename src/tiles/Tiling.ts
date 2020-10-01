@@ -85,8 +85,10 @@ function* coverWith(
     let d;
     let root = tile;
     for (d = 0; !root.contains(mask); d++) {
+      //yield root;
       root = root.parent();
     }
+    console.debug(`tiling root d: ${d}, t: ${root.polygon()}`);
     //todo: NVH
     yield* descend(root, d);
   }
