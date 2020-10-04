@@ -123,7 +123,9 @@ function getColors(n: number, offset: number): number[] {
       (offset + 210) % 360
     ];
   }
-  return range(n).map((i) => (i * 360) / n);
+  return range(n)
+    .map((i) => (i * 360) / n)
+    .map((i) => (i + offset) % 360);
 }
 
 export default Colorer;
