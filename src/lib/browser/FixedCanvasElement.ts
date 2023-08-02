@@ -18,7 +18,12 @@ const style = `<style>
 
 function getMaxSize(viewPort: HTMLDivElement): number {
   return Math.min(
-    Math.max(window.screen.height, window.screen.width),
+    Math.max(
+      window.screen.height,
+      window.screen.width, // FF lies when pixelRation != 1!
+      viewPort.clientHeight,
+      viewPort.clientWidth
+    ),
     Math.max(viewPort.clientHeight, viewPort.clientWidth) * 3,
     CANVAS_MAX_SIZE / window.devicePixelRatio
   );
